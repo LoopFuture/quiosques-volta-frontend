@@ -6,6 +6,10 @@ import { themes } from './themes'
 export const config = createTamagui({
   ...defaultConfig,
   animations,
+  settings: {
+    ...defaultConfig.settings,
+    fastSchemeChange: false,
+  },
   themes,
 })
 

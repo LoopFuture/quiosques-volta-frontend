@@ -1,0 +1,39 @@
+name: Maestro E2E
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  android_build:
+    name: Build Android E2E artifact
+    type: build
+    params:
+      message: Android E2E build for ${{ github.ref_name || 'manual' }} @ ${{ github.sha }}
+      platform: android
+      profile: e2e-test
+
+  android_maestro:
+    name: Run Android Maestro tests
+    needs: [android_build]
+    type: maestro
+    image: latest
+    params:
+      build_id: ${{ needs.android_build.outputs.build_id }}
+      flow_path: ['.maestro/android']
+
+  ios_build:
+    name: Build iOS E2E artifact
+    type: build
+    params:
+      message: iOS E2E build for ${{ github.ref_name || 'manual' }} @ ${{ github.sha }}
+      platform: ios
+      profile: e2e-test
+
+  ios_maestro:
+    name: Run iOS Maestro tests
+    needs: [ios_build]
+    type: maestro
+    image: latest
+    params:
+      build_id: ${{ needs.ios_build.outputs.build_id }}
+      flow_path: ['.maestro/ios']

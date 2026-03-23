@@ -9,15 +9,23 @@ import {
   greenDark,
 } from '@tamagui/colors'
 
-const brandPrimary = '#0cc3d7'
+export const brandPrimary = '#0cc3d7'
 const brandNeutral = '#e0e0e0'
-const brandWhite = '#ffffff'
-const brandBlack = '#000000'
+export const brandWhite = '#ffffff'
+export const brandBlack = '#000000'
+export const lightTabBarBackground = '#F3F7FC'
+export const darkTabBarBackground = '#0D1B2E'
 
-// Palette values sourced from Volta_Brandbook_23FEV.pdf.
+export function getTabBarBackground(themeName: string) {
+  return themeName.startsWith('dark')
+    ? darkTabBarBackground
+    : lightTabBarBackground
+}
+
+// Palette values
 const darkPalette = [
   '#050505',
-  '#0b0b0b',
+  '#0A1628',
   '#101010',
   '#171717',
   '#202020',
@@ -101,13 +109,4 @@ const builtThemes = createV5Theme({
 
 export type Themes = typeof builtThemes
 
-// the process.env conditional here is optional but saves web client-side bundle
-// size by leaving out themes JS. tamagui automatically hydrates themes from CSS
-// back into JS for you, and the bundler plugins set TAMAGUI_ENVIRONMENT. so
-// long as you are using the Vite, Next, Webpack plugins this should just work,
-// but if not you can just export builtThemes directly as themes:
-export const themes: Themes =
-  process.env.TAMAGUI_ENVIRONMENT === 'client' &&
-  process.env.NODE_ENV === 'production'
-    ? ({} as any)
-    : (builtThemes as any)
+export const themes: Themes = builtThemes

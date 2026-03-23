@@ -1,46 +1,77 @@
-import { Link, Tabs } from 'expo-router'
-import { Button, useTheme } from 'tamagui'
-import { Atom, AudioWaveform } from '@tamagui/lucide-icons'
+import { Tabs, router } from 'expo-router'
+import { YStack, useThemeName } from 'tamagui'
+import { BottomTabBar } from '@/features/app-shell/components/BottomTabBar'
+import {
+  mapTabNavItems,
+  useAppTabDefinitions,
+} from '@/features/app-shell/navigation/tab-nav'
+import { getTabBarBackground } from '@/themes'
 
 export default function TabLayout() {
-  const theme = useTheme()
+  const appTabDefinitions = useAppTabDefinitions()
+  const themeName = useThemeName()
+  const tabBarBackground = getTabBarBackground(themeName)
 
   return (
     <Tabs
+      tabBar={(props) => {
+        const activeRouteName =
+          props.state.routes[props.state.index]?.name ?? 'index'
+        const baseNavItems = mapTabNavItems(appTabDefinitions, activeRouteName)
+        const navItems = appTabDefinitions.map((item) => {
+          const route = props.state.routes.find(
+            (stateRoute) => stateRoute.name === item.routeName,
+          )
+          const isFocused = route?.name === activeRouteName
+
+          return {
+            ...baseNavItems.find((navItem) => navItem.key === item.key)!,
+            accessibilityRole: 'tab' as const,
+            accessibilityState: { selected: isFocused },
+            onLongPress: route
+              ? () => {
+                  props.navigation.emit({
+                    type: 'tabLongPress',
+                    target: route.key,
+                  })
+                }
+              : undefined,
+            onPress: route
+              ? () => {
+                  const event = props.navigation.emit({
+                    type: 'tabPress',
+                    target: route.key,
+                    canPreventDefault: true,
+                  })
+
+                  if (!isFocused && !event.defaultPrevented) {
+                    router.navigate(item.href)
+                  }
+                }
+              : undefined,
+            testID: `tab-${item.routeName}`,
+          }
+        })
+
+        return (
+          <YStack bg={tabBarBackground} pb={Math.max(props.insets.bottom, 12)}>
+            <BottomTabBar items={navItems} />
+          </YStack>
+        )
+      }}
       screenOptions={{
-        tabBarActiveTintColor: theme.accent10.val,
-        tabBarStyle: {
-          backgroundColor: theme.background.val,
-          borderTopColor: theme.borderColor.val,
-        },
-        headerStyle: {
-          backgroundColor: theme.background.val,
-          borderBottomColor: theme.borderColor.val,
-        },
-        headerTintColor: theme.color.val,
+        headerShown: false,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <Atom color={color as any} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Button theme="accent" mr="$4" size="$2.5">
-                Hello!
-              </Button>
-            </Link>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <AudioWaveform color={color as any} />,
-        }}
-      />
+      {appTabDefinitions.map((item) => (
+        <Tabs.Screen
+          key={item.routeName}
+          name={item.routeName}
+          options={{
+            title: item.label,
+          }}
+        />
+      ))}
     </Tabs>
   )
 }

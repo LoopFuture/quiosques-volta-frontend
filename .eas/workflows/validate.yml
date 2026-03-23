@@ -1,0 +1,23 @@
+name: Validate
+
+defaults:
+  tools:
+    node: '22'
+    corepack: true
+    pnpm: '10.32.1'
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ['dev', 'staging', 'main']
+  pull_request:
+    branches: ['dev', 'staging', 'main']
+
+jobs:
+  validate:
+    name: Validate
+    steps:
+      - uses: eas/checkout
+      - uses: eas/install_node_modules
+      - name: Run validate
+        run: pnpm validate

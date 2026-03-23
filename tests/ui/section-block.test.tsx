@@ -1,0 +1,37 @@
+import { StyleSheet, Text } from 'react-native'
+import { SectionBlock } from '@/components/ui/SectionBlock'
+import { themes } from '@/themes'
+import { renderWithProvider, renderWithTheme } from '../support/test-utils'
+
+describe('SectionBlock', () => {
+  it('renders heading content and children', () => {
+    const view = renderWithProvider(
+      <SectionBlock
+        title="Pagamentos"
+        description="Resumo do estado atual."
+        action={<Text>Ver tudo</Text>}
+      >
+        <Text>Conteudo interno</Text>
+      </SectionBlock>,
+    )
+
+    expect(view.getByText('Pagamentos')).toBeTruthy()
+    expect(view.getByText('Resumo do estado atual.')).toBeTruthy()
+    expect(view.getByText('Ver tudo')).toBeTruthy()
+    expect(view.getByText('Conteudo interno')).toBeTruthy()
+  })
+
+  it('uses semantic supporting text colors without opacity dimming', () => {
+    const view = renderWithTheme(
+      <SectionBlock title="Pagamentos" description="Resumo do estado atual.">
+        <Text>Conteudo interno</Text>
+      </SectionBlock>,
+      { defaultTheme: 'dark' },
+    )
+    const description = view.getByText('Resumo do estado atual.')
+    const style = StyleSheet.flatten(description.props.style)
+
+    expect(style?.color).toBe(themes.dark.color11)
+    expect(style?.opacity).toBeUndefined()
+  })
+})

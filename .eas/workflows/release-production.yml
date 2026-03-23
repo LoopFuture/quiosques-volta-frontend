@@ -1,0 +1,90 @@
+name: Release Production
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  fingerprint:
+    name: Calculate fingerprint
+    type: fingerprint
+    environment: production
+
+  android_get_build:
+    name: Find Android production build
+    needs: [fingerprint]
+    type: get-build
+    params:
+      channel: production
+      distribution: store
+      fingerprint_hash: ${{ needs.fingerprint.outputs.android_fingerprint_hash }}
+      platform: android
+      profile: production
+
+  android_build:
+    name: Build Android production
+    needs: [android_get_build]
+    if: ${{ !needs.android_get_build.outputs.build_id }}
+    type: build
+    params:
+      message: Android production build for ${{ github.ref_name || 'manual' }} @ ${{ github.sha }}
+      platform: android
+      profile: production
+
+  android_submit:
+    name: Submit Android production
+    needs: [android_build]
+    type: submit
+    params:
+      build_id: ${{ needs.android_build.outputs.build_id }}
+      profile: production
+
+  android_update:
+    name: Publish Android production update
+    needs: [android_get_build]
+    if: ${{ needs.android_get_build.outputs.build_id }}
+    type: update
+    environment: production
+    params:
+      channel: production
+      message: Android production update for ${{ github.ref_name || 'manual' }} @ ${{ github.sha }}
+      platform: android
+
+  ios_get_build:
+    name: Find iOS production build
+    needs: [fingerprint]
+    type: get-build
+    params:
+      channel: production
+      distribution: store
+      fingerprint_hash: ${{ needs.fingerprint.outputs.ios_fingerprint_hash }}
+      platform: ios
+      profile: production
+
+  ios_build:
+    name: Build iOS production
+    needs: [ios_get_build]
+    if: ${{ !needs.ios_get_build.outputs.build_id }}
+    type: build
+    params:
+      message: iOS production build for ${{ github.ref_name || 'manual' }} @ ${{ github.sha }}
+      platform: ios
+      profile: production
+
+  ios_submit:
+    name: Submit iOS production
+    needs: [ios_build]
+    type: submit
+    params:
+      build_id: ${{ needs.ios_build.outputs.build_id }}
+      profile: production
+
+  ios_update:
+    name: Publish iOS production update
+    needs: [ios_get_build]
+    if: ${{ needs.ios_get_build.outputs.build_id }}
+    type: update
+    environment: production
+    params:
+      channel: production
+      message: iOS production update for ${{ github.ref_name || 'manual' }} @ ${{ github.sha }}
+      platform: ios

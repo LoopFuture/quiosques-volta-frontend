@@ -1,0 +1,93 @@
+import { getProfileLanguageOptions } from '@/features/profile/presentation'
+import { getWalletHistoryFilterOptions } from '@/features/wallet/presentation'
+import {
+  fallbackLocale,
+  i18n,
+  primaryLocale,
+  resolveAppLocale,
+  setLocaleOverrideForTests,
+  syncLocale,
+} from '@/i18n'
+
+const t = i18n.t.bind(i18n)
+
+describe('localization setup', () => {
+  afterEach(() => {
+    setLocaleOverrideForTests('pt-PT')
+    syncLocale()
+  })
+
+  it('uses English copy and interpolation when the device locale is English', () => {
+    setLocaleOverrideForTests('en-US')
+    expect(syncLocale()).toBe(fallbackLocale)
+
+    expect(i18n.t('tabs.home.label')).toBe('Home')
+    expect(i18n.t('routes.notifications.title')).toBe('Notifications')
+    expect(i18n.t('tabScreens.home.overview.title')).toBe('Right now')
+    expect(i18n.t('tabScreens.wallet.movementsPage.title')).toBe('Full history')
+    expect(
+      i18n.t('tabScreens.home.balanceCard.badges.returns', {
+        count: 1,
+      }),
+    ).toBe('1 container')
+    expect(
+      i18n.t('tabScreens.home.balanceCard.badges.returns', {
+        count: 24,
+      }),
+    ).toBe('24 containers')
+    expect(
+      i18n.t('routes.notifications.items.creditAdded.title', {
+        location: 'Pingo Doce - Afragide',
+      }),
+    ).toBe('Credit added at Pingo Doce - Afragide')
+    expect(getWalletHistoryFilterOptions(t)[0]?.label).toBe('All')
+  })
+
+  it('defaults to Portuguese Portugal for unsupported locales', () => {
+    setLocaleOverrideForTests('fr-FR')
+    expect(syncLocale()).toBe(primaryLocale)
+
+    expect(i18n.t('tabs.home.label')).toBe('Início')
+    expect(i18n.t('tabs.home.header.eyebrow')).toBe('Bem-vindo')
+    expect(i18n.t('routes.notifications.title')).toBe('Notificações')
+    expect(getProfileLanguageOptions(t)[0]?.label).toBe('Sistema')
+    expect(i18n.t('tabScreens.profile.privacy.title')).toBe(
+      'Privacidade e segurança',
+    )
+  })
+
+  it('uses Portuguese Portugal pluralization and interpolation for Portuguese device locales', () => {
+    setLocaleOverrideForTests('pt-BR')
+    expect(syncLocale()).toBe(primaryLocale)
+
+    expect(i18n.t('tabScreens.home.overview.title')).toBe('Neste momento')
+    expect(
+      i18n.t('tabScreens.home.balanceCard.badges.credits', {
+        count: 1,
+      }),
+    ).toBe('1 crédito')
+    expect(
+      i18n.t('tabScreens.home.balanceCard.badges.transfers', {
+        count: 2,
+      }),
+    ).toBe('2 transferências pendentes')
+    expect(
+      i18n.t('routes.notifications.items.transferProcessing.message', {
+        amount: '1,20€',
+      }),
+    ).toBe(
+      'O teu pedido de transferência de 1,20€ está a ser enviado para a conta associada.',
+    )
+    expect(getWalletHistoryFilterOptions(t)[0]?.label).toBe('Todos')
+  })
+
+  it('resolves explicit locale overrides without using the device locale', () => {
+    expect(resolveAppLocale('en', 'pt-PT')).toBe(fallbackLocale)
+    expect(resolveAppLocale('pt', 'en-US')).toBe(primaryLocale)
+  })
+
+  it('resolves system locale preferences from the device locale', () => {
+    expect(resolveAppLocale('system', 'en-US')).toBe(fallbackLocale)
+    expect(resolveAppLocale('system', 'fr-FR')).toBe(primaryLocale)
+  })
+})

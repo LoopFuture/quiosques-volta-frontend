@@ -1,0 +1,839 @@
+{
+  "app": {
+    "auth": {
+      "availabilityLabel": "Opening sign in...",
+      "biometricLabel": "Biometrics (Face ID / Fingerprint)",
+      "dividerLabel": "Or continue with",
+      "errorFallback": "We couldn't start authentication. Please try again.",
+      "lock": {
+        "cancelLabel": "Cancel",
+        "cancelledError": "Biometric verification was cancelled. Try again or log in again.",
+        "description": "Use Face ID or fingerprint to reopen your account on this phone.",
+        "failedError": "We couldn't confirm your biometrics. Try again or log in again.",
+        "loginAgainLabel": "Log in again",
+        "notAvailableError": "Biometrics are not available on this device. Log in again to continue.",
+        "notEnrolledError": "Set up Face ID or fingerprint on this device, or log in again to continue.",
+        "promptMessage": "Use Face ID or fingerprint for Volta",
+        "retryLabel": "Try again",
+        "title": "Unlock Volta"
+      },
+      "loginLabel": "Log in",
+      "registerLabel": "Register",
+      "registerPrompt": "Don't have an account yet?",
+      "subtitle": "Welcome back to the sustainable future",
+      "titleLeading": "Volta",
+      "titleTrailing": "Portugal"
+    },
+    "mockAction": {
+      "message": "This action is using mocked data for now."
+    },
+    "onboarding": {
+      "actions": {
+        "finishHelper": "You're all set. You can revisit this introduction later in Profile.",
+        "getStartedLabel": "Enter app",
+        "laterLabel": "Skip introduction",
+        "nextLabel": "Continue",
+        "progressHelper": "Swipe or tap Continue to see the next step."
+      },
+      "description": "Only the essentials for your first return and for understanding when the money reaches you.",
+      "estimate": "Takes less than 30 seconds",
+      "eyebrow": "Quick introduction",
+      "progressLabel": "Step",
+      "progressValue": "{{currentStep}} of {{totalSteps}}",
+      "slides": {
+        "machine": {
+          "description": "At the Volta machine, show your code first and only then start inserting containers.",
+          "detail": "This links the return to your account and helps you avoid starting the wrong flow.",
+          "eyebrow": "At the machine",
+          "title": "Show your code before the containers"
+        },
+        "map": {
+          "description": "Use the map to pick a nearby Volta machine and reach the right location without wasting time.",
+          "detail": "Leave with your Volta code ready so the first step is faster.",
+          "eyebrow": "Before your return",
+          "title": "Pick a machine near you"
+        },
+        "purpose": {
+          "description": "After you insert valid containers, the app shows the credited amount and the matching movement.",
+          "detail": "That way you can confirm right away how much was added after each return.",
+          "eyebrow": "During the return",
+          "title": "Return containers and confirm the amount"
+        },
+        "wallet": {
+          "description": "In Wallet you can review available balance, recent activity, and transfers sent to the IBAN linked to your account.",
+          "detail": "Whenever you want, you can transfer the balance to your bank account.",
+          "eyebrow": "Afterwards",
+          "title": "Check your balance and transfer when needed"
+        }
+      },
+      "title": "Return and get paid without surprises"
+    },
+    "tabs": {
+      "barcode": {
+        "label": "Code",
+        "message": "Show your personal code before you start a return.",
+        "subtitle": "Fast machine identification before you insert containers.",
+        "title": "Code"
+      },
+      "home": {
+        "header": {
+          "eyebrow": "Welcome",
+          "notificationLabel": "Notifications",
+          "notificationUnreadHint_one": "{{count}} unread alert.",
+          "notificationUnreadHint_other": "{{count}} unread alerts.",
+          "title": "Volta"
+        },
+        "label": "Home"
+      },
+      "map": {
+        "label": "Map",
+        "message": "This screen can host the real map and the Volta point details.",
+        "subtitle": "Collection points, nearby machines, and location details.",
+        "title": "Volta Map"
+      },
+      "profile": {
+        "label": "Profile",
+        "message": "This screen can host the profile, settings, and support.",
+        "subtitle": "Personal data, security, and account preferences.",
+        "title": "Profile"
+      },
+      "wallet": {
+        "label": "Wallet",
+        "message": "This screen can host the balance, credited wallet history, and requested transfers.",
+        "subtitle": "Balance, wallet activity, and payment details in a single tab.",
+        "title": "Wallet"
+      }
+    },
+    "topBar": {
+      "offline": "You're offline"
+    },
+    "routes": {
+      "notFound": {
+        "backLabel": "Go back",
+        "ctaLabel": "Go to home",
+        "description": "Go back home to keep going. If you opened an older link, this screen may no longer be available.",
+        "message": "This screen is no longer available.",
+        "title": "Screen unavailable"
+      },
+      "queryError": {
+        "description": "We couldn't load this right now.",
+        "recoveryHint": "Check your connection and try again in a moment.",
+        "retryLabel": "Try again",
+        "title": "Unable to load"
+      },
+      "notifications": {
+        "backLabel": "Back",
+        "clearAllLabel": "Clear all",
+        "clearAllErrorToast": "We couldn't clear the notifications right now.",
+        "clearAllSuccessToast": "The notifications were cleared.",
+        "description": "Credits, transfers, and account alerts.",
+        "errorDescription": "We couldn't load your alerts right now.",
+        "errorRecoveryHint": "Try again to refresh recent wallet and account updates.",
+        "errorTitle": "Alerts unavailable",
+        "emptyStateDescription": "When there is wallet activity or an account alert, we will show it here.",
+        "emptyStateTitle": "No alerts yet",
+        "items": {
+          "barcodeReminder": {
+            "message": "Keep your QR code ready to speed up the next return.",
+            "timeLabel": "Yesterday, 18:05",
+            "title": "Keep your Volta code handy"
+          },
+          "creditAdded": {
+            "message": "You received {{amount}} in your wallet after the return at {{location}}.",
+            "timeLabel": "Today, 14:30",
+            "title": "Credit added at {{location}}"
+          },
+          "transferProcessing": {
+            "message": "Your {{amount}} transfer request is being sent to the linked account.",
+            "timeLabel": "Now",
+            "title": "Transfer is processing"
+          },
+          "securitySettings": {
+            "message": "Confirm your alerts email and permissions in the privacy area.",
+            "timeLabel": "Today, 11:10",
+            "title": "Review your account alerts"
+          },
+          "walletHistory": {
+            "message": "Review the recent credits and transfer requests in your Volta wallet.",
+            "timeLabel": "Yesterday, 09:10",
+            "title": "Wallet history is ready"
+          }
+        },
+        "listDescription": "Open an alert to see the latest wallet or account status.",
+        "listDescriptionUnread_one": "{{count}} unread alert to review.",
+        "listDescriptionUnread_other": "{{count}} unread alerts to review.",
+        "listTitle": "Recent alerts",
+        "manageTitle": "Manage alerts",
+        "markAllReadLabel": "Mark all as read",
+        "markAllReadErrorToast": "We couldn't mark the notifications right now.",
+        "markAllReadSuccessToast": "The notifications were marked as read.",
+        "readA11yLabel": "Read",
+        "title": "Notifications",
+        "unreadCountBadge_one": "{{count}} unread",
+        "unreadCountBadge_other": "{{count}} unread",
+        "unreadA11yLabel": "Unread",
+        "unreadBadgeLabel": "New"
+      },
+      "two": {
+        "title": "Tab Two"
+      }
+    },
+    "tabScreens": {
+      "barcode": {
+        "card": {
+          "countdownA11yLabel": "QR code time remaining",
+          "countdownA11yValue": "{{time}} remaining",
+          "description": "Show this code at the Volta machine before you insert containers.",
+          "expiredDescription": "This code expired and we couldn't generate a new one right now. Try again.",
+          "expiredLabel": "Code expired",
+          "openFullscreenLabel": "Show full screen",
+          "qrExpandLabel": "Open code full screen",
+          "qrModalHint": "Slide the top of your phone into the reader and keep the screen steady.",
+          "qrModalCloseLabel": "Close",
+          "refreshingDescription": "We are generating a new code so you can keep this return moving.",
+          "refreshingLabel": "Generating new code",
+          "retryLabel": "Generate new code",
+          "statusLabel": "Code active",
+          "title": "Your Volta code",
+          "validUntilLabel": "Valid for"
+        },
+        "errors": {
+          "description": "We couldn't load your Volta code right now. Check your connection and try again.",
+          "title": "Code unavailable"
+        },
+        "identity": {
+          "readyLabel": "Ready to present",
+          "title": "Present this code at the machine"
+        }
+      },
+      "home": {
+        "balanceCard": {
+          "actionLabel": "Transfer",
+          "availableBalanceLabel": "Available balance",
+          "badges": {
+            "credits_one": "{{count}} credit",
+            "credits_other": "{{count}} credits",
+            "returns_one": "{{count}} container",
+            "returns_other": "{{count}} containers",
+            "transfers_one": "{{count}} pending transfer",
+            "transfers_other": "{{count}} pending transfers"
+          },
+          "caption": "Ready to transfer to your linked account."
+        },
+        "errors": {
+          "description": "We couldn't load your wallet and return summary right now. Try again to refresh your latest balance.",
+          "title": "Overview unavailable"
+        },
+        "exitHint": "Tap back again to close the app.",
+        "overview": {
+          "accountActionLabel": "See account",
+          "description": "The details that matter before your next return.",
+          "stats": {
+            "creditsHelper": "Credits added today",
+            "creditsLabel": "Credits",
+            "transfersHelper": "Requests still being processed",
+            "transfersLabel": "Pending",
+            "paidHelper": "Completed refunds",
+            "paidLabel": "Paid",
+            "pendingHelper": "Waiting for processing",
+            "pendingLabel": "Pending",
+            "todayHelper": "Containers returned",
+            "todayLabel": "Today"
+          },
+          "title": "Right now"
+        },
+        "quickActions": {
+          "description": "Open your code before you reach the machine, or check where to return next.",
+          "findMachineLabel": "Find machine",
+          "heroTitle": "Start your next return fast",
+          "showCodeLabel": "Show my code",
+          "title": "Next return"
+        },
+        "recentActivity": {
+          "description": "Your latest credits and transfer requests.",
+          "title": "Recent activity",
+          "transactions": {
+            "colomboTitle": "Continente - Colombo",
+            "pingoTitle": "Pingo Doce - Afragide",
+            "processed": "Processed",
+            "todaySubtitle": "Today, 14:30",
+            "yesterdaySubtitle": "Yesterday, 18:15"
+          }
+        }
+      },
+      "map": {
+        "comingSoon": {
+          "actionHint": "What you can do now",
+          "description": "Map search is not available in the app yet. Until then, you can review expected Volta locations and open your code before you reach the machine.",
+          "statusLabel": "Map coming soon",
+          "title": "Use your code now. The map comes next."
+        },
+        "emptyState": {
+          "description": "Search the map to see the closest locations and find the best spot for your next return.",
+          "title": "Volta machines near you will appear here"
+        },
+        "errors": {
+          "description": "We couldn't prepare the Volta location preview right now.",
+          "recoveryHint": "Try again to review the expected locations and keep using your code at the machine.",
+          "title": "Map unavailable"
+        },
+        "fallback": {
+          "actionLabel": "Show my code",
+          "description": "Identify yourself at the machine with your Volta code so you do not need to stop and search when you arrive.",
+          "title": "Be ready for your next return"
+        },
+        "nearby": {
+          "description": "Explore the map and choose the most convenient machine for your next return.",
+          "searchActionLabel": "Search Volta machines",
+          "title": "Find a Volta machine"
+        },
+        "preview": {
+          "description": "Upcoming Volta locations will appear here with a clear status before the full map arrives.",
+          "title": "Volta location preview",
+          "status": {
+            "active": "Available",
+            "temporarilyUnavailable": "Unavailable"
+          }
+        }
+      },
+      "profile": {
+        "errors": {
+          "description": "We couldn't load your account details right now.",
+          "recoveryHint": "Try again to refresh your profile, payout, and security information.",
+          "title": "Account unavailable"
+        },
+        "appSettings": {
+          "appearance": {
+            "darkOption": "Dark",
+            "description": "Use your phone setting or choose a fixed look.",
+            "lightOption": "Light",
+            "systemOption": "System",
+            "title": "App appearance"
+          },
+          "description": "Change how the app looks and reads on this phone.",
+          "language": {
+            "description": "Use your phone language or choose one for the app.",
+            "englishOption": "English",
+            "portugueseOption": "Português",
+            "systemOption": "System",
+            "title": "Language"
+          },
+          "savedToast": "This change was saved on this phone.",
+          "sectionHelper": "These changes apply immediately and only affect this device.",
+          "sectionTitle": "App preferences",
+          "saveLabel": "Save app settings",
+          "title": "App settings"
+        },
+        "common": {
+          "backLabel": "Back"
+        },
+        "editors": {
+          "alertsEmail": {
+            "consentDescription": "Keeps essential notifications and payout alerts enabled for this account.",
+            "consentLabel": "I want to receive security and payout alerts by email.",
+            "description": "Choose the address used for essential alerts, receipts, and quick recovery.",
+            "helperText": "Receive essential alerts, receipts, and refund updates at this address.",
+            "label": "Alerts email",
+            "saveLabel": "Save alerts email",
+            "title": "Update alerts email"
+          },
+          "appearance": {
+            "description": "Choose how the app should look on this device.",
+            "helperText": "Follow the phone theme by default or pick a fixed appearance for the app.",
+            "label": "App appearance",
+            "title": "App appearance"
+          },
+          "biometrics": {
+            "description": "Control access with Face ID or fingerprint.",
+            "helperText": "Protect access with Face ID or fingerprint.",
+            "label": "Biometrics",
+            "saveLabel": "Save biometrics",
+            "title": "Manage biometrics"
+          },
+          "email": {
+            "description": "Set the main email used for receipts, updates, and access recovery.",
+            "helperText": "Used for receipts, updates, and access recovery.",
+            "label": "Email",
+            "saveLabel": "Save email",
+            "title": "Update email"
+          },
+          "phoneNumber": {
+            "description": "Confirm the main phone number linked to your account.",
+            "helperText": "Use the international format, for example +351 912 345 678.",
+            "label": "Phone number",
+            "saveLabel": "Save phone number",
+            "title": "Update phone number"
+          },
+          "iban": {
+            "description": "Choose the bank account where completed refunds should be paid.",
+            "helperText": "Used to send completed refunds.",
+            "label": "Linked IBAN",
+            "saveLabel": "Save IBAN",
+            "title": "Update IBAN"
+          },
+          "language": {
+            "description": "Choose how the app should present content on this device.",
+            "helperText": "Follow the phone language by default or force the app to use a fixed language.",
+            "label": "Language",
+            "title": "Language"
+          },
+          "name": {
+            "description": "Change the name shown in your profile and receipts.",
+            "label": "Full name",
+            "saveLabel": "Save name",
+            "title": "Update name"
+          },
+          "nif": {
+            "description": "Confirm the tax number linked to your account.",
+            "helperText": "Always match the tax details registered on the account.",
+            "label": "Tax ID",
+            "saveLabel": "Save tax ID",
+            "title": "Update tax ID"
+          },
+          "spin": {
+            "description": "Enable or disable instant payouts for this account.",
+            "helperText": "Keep instant payouts enabled for this account.",
+            "label": "SPIN",
+            "saveLabel": "Save SPIN",
+            "title": "Manage SPIN"
+          }
+        },
+        "hub": {
+          "actions": {
+            "reviewAlerts": "Review alerts",
+            "reviewPayments": "Review payments",
+            "reviewSecurity": "Review security"
+          },
+          "accountDescription": "Check the items that affect payouts, alerts, and security before your next return.",
+          "cards": {
+            "appSettings": "App settings",
+            "payments": "Payments",
+            "personal": "Profile data",
+            "privacy": "Privacy & security",
+            "summary": "Summary"
+          },
+          "hero": {
+            "memberSinceLabel": "Member since",
+            "memberSinceValue": "Oct 2023"
+          },
+          "helpRowLabel": "How Volta works",
+          "logoutLabel": "Log out",
+          "readiness": {
+            "alertsAllValue": "Email + push on",
+            "alertsEmailValue": "Email on",
+            "alertsLabel": "Alerts",
+            "alertsPushValue": "Push on",
+            "alertsReviewValue": "Turn on alerts",
+            "paymentsEnabledValue": "{{iban}} · SPIN on",
+            "paymentsLabel": "Payments",
+            "paymentsReviewValue": "{{iban}} · check SPIN",
+            "readyBadge": "Account ready",
+            "readyDescription": "Payments, security, and alerts are set.",
+            "readyTitle": "Ready for refunds",
+            "reviewBadge": "Review account",
+            "reviewDescription": "Check one item before your next refund.",
+            "reviewTitle": "Review before next refund",
+            "securityBiometricsValue": "Biometrics on",
+            "securityLabel": "Security",
+            "securityReviewValue": "Turn on biometrics"
+          },
+          "summaries": {
+            "appSettings": "Language and appearance",
+            "payments": "IBAN and instant payouts",
+            "personal": "Name, phone, tax ID",
+            "privacy": "Push alerts and biometrics"
+          },
+          "rows": {
+            "alertsEmailDisabledHelper": "Disabled",
+            "alertsEmailEnabledHelper": "Enabled",
+            "alertsEmailHelper": "Used for security alerts and refund updates.",
+            "alertsEmailTitle": "Email alerts",
+            "appSettingsHelper": "{{theme}} · {{language}}",
+            "appAppearanceTitle": "App appearance",
+            "biometricsDisabledHelper": "Biometrics disabled",
+            "biometricsEnabledHelper": "Face ID / fingerprint",
+            "biometricsTitle": "Biometrics",
+            "emailTitle": "Email",
+            "helpCenterHelper": "Quick answers and account support.",
+            "helpCenterTitle": "Help center",
+            "ibanHelper": "Linked bank account",
+            "ibanTitle": "IBAN",
+            "languageEnglishHelper": "Fixed to English.",
+            "languagePortugueseHelper": "Fixed to Portuguese.",
+            "languageSystemHelper": "Follows the phone language.",
+            "languageTitle": "Language",
+            "nameTitle": "Name",
+            "nifTitle": "Tax ID",
+            "onboardingHelper": "See the app introduction again.",
+            "onboardingTitle": "How it works",
+            "phoneNumberTitle": "Phone number",
+            "pushNotificationsDisabledHelper": "Push notifications disabled.",
+            "pushNotificationsEnabledHelper": "Push notifications active.",
+            "pushNotificationsTitle": "Push notifications",
+            "summaryHelper": "Activity, credits, and transfers",
+            "spinDisabledHelper": "Instant payments disabled",
+            "spinEnabledHelper": "Instant payments enabled",
+            "spinTitle": "SPIN",
+            "termsHelper": "Usage and privacy conditions.",
+            "termsTitle": "Terms and conditions"
+          },
+          "sections": {
+            "account": "Account",
+            "appSettings": "App settings",
+            "help": "Help",
+            "payout": "Payout settings",
+            "primary": "Review now",
+            "profile": "Profile",
+            "privacy": "Privacy & security",
+            "profileData": "Profile data",
+            "secondary": "More options"
+          },
+          "sessionDescription": "Sign out on this phone if you are finished using your account.",
+          "sessionLabel": "Session",
+          "supportDescription": "See the short introduction again if you want a quick refresher.",
+          "supportLabel": "Need a refresher?"
+        },
+        "summary": {
+          "description": "See your credits, returns, and transfers in one place.",
+          "sections": {
+            "hero": {
+              "headlineLabel": "Since you joined",
+              "pendingTransferActive": "You still have a transfer on the way to your IBAN",
+              "pendingTransferEmpty": "You have no transfers left to finish",
+              "supportingText": "Member since {{memberSince}}. Transfers in progress: {{pendingTransfers}}.",
+              "title": "Credits received"
+            },
+            "totals": {
+              "completedTransfersLabel": "Completed transfers",
+              "description": "All-time totals for your account.",
+              "pendingTransfersLabel": "In progress",
+              "returnedPackagesLabel": "Returned packages",
+              "title": "Totals"
+            }
+          },
+          "title": "Your activity"
+        },
+        "personal": {
+          "description": "Check the identity details linked to your account.",
+          "emailHelper": "Used for receipts, updates, and access recovery.",
+          "emailLockedHelper": "This email comes from your authenticated session and cannot be changed here.",
+          "emailLabel": "Email",
+          "nameLabel": "Full name",
+          "nifHelper": "Always match the tax details registered on the account.",
+          "nifLabel": "Tax ID",
+          "phoneNumberHelper": "Use the international format, for example +351 912 345 678.",
+          "phoneNumberLabel": "Phone number",
+          "photoActionLabel": "Change photo",
+          "photoDescription": "Keep a profile photo ready. In this pass, the action still uses mock feedback.",
+          "photoTitle": "Profile photo",
+          "saveErrorToast": "We couldn't save your profile details right now.",
+          "saveLabel": "Save profile details",
+          "saveSuccessToast": "Your profile details were updated.",
+          "sectionHelper": "Make sure these details match the account used for refunds and tax checks.",
+          "sectionTitle": "Identity details",
+          "title": "Profile data"
+        },
+        "payments": {
+          "description": "Manage where refunds are paid and whether instant payout stays on.",
+          "ibanHelper": "Used to send completed payments and refunds.",
+          "ibanLabel": "Linked IBAN",
+          "saveErrorToast": "We couldn't save your payment details right now.",
+          "saveLabel": "Save payments",
+          "saveSuccessToast": "Your payment details were updated.",
+          "sectionHelper": "Keep the payout account ready so refunds can arrive without delay.",
+          "sectionTitle": "Refund destination",
+          "spinHelper": "Keep instant payments enabled for this account.",
+          "spinLabel": "SPIN",
+          "title": "Payments"
+        },
+        "privacy": {
+          "accountSectionHelper": "These alerts follow your Volta account, not just this device.",
+          "accountSectionTitle": "Account alerts",
+          "biometricCancelledToast": "Biometrics were not enabled on this device.",
+          "biometricFailedToast": "We couldn't confirm your biometrics. Try again.",
+          "biometricHelper": "Protect access with Face ID or fingerprint.",
+          "emailAlertsErrorToast": "We couldn't update email alerts right now.",
+          "biometricLabel": "Biometrics",
+          "biometricNotAvailableToast": "Biometrics are not available on this device yet.",
+          "biometricNotEnrolledToast": "Set up Face ID or fingerprint on this device first.",
+          "deviceSectionHelper": "These controls only affect the phone you are using now.",
+          "deviceSectionTitle": "Device protection",
+          "emailAlertsHelper": "Send payment security alerts to your account email.",
+          "emailAlertsLabel": "Payment security emails",
+          "emailAlertsSuccessToast": "Email alerts were updated.",
+          "description": "Control account alerts and protections on this device.",
+          "pushNotificationsDeniedHelper": "Push notifications were denied for this device.",
+          "pushNotificationsDeviceRequiredHelper": "Push notifications require a physical device.",
+          "pushNotificationsHelper": "Turn this on to receive push notifications on this device.",
+          "pushNotificationsLabel": "Push notifications",
+          "pushNotificationsOpenSettingsLabel": "Open settings",
+          "pushNotificationsPendingHelper": "Requesting notification access for this device.",
+          "pushNotificationsReadyHelper": "This device is ready to receive push notifications.",
+          "pushNotificationsRegistrationErrorHelper": "We could not finish push notification registration for this device.",
+          "pushNotificationsSettingsHelper": "Push notifications are blocked for this device. Open system settings to enable them.",
+          "pushNotificationsTokenValue": "Expo token: {{token}}",
+          "pushNotificationsUnavailableToast": "Push notifications are not ready on this device yet.",
+          "savedOnThisDeviceToast": "This change was saved on this device.",
+          "securityPreferencesHelper": "Security alert emails will be sent to the current email set in your profile: {{email}}.",
+          "securityPreferencesTitle": "Security preferences",
+          "saveLabel": "Save security settings",
+          "title": "Privacy & security"
+        },
+        "setup": {
+          "actions": {
+            "backLabel": "Back",
+            "finishLabel": "Finish setup",
+            "nextLabel": "Continue"
+          },
+          "progressLabel": "Setup progress",
+          "progressValue": "Step {{currentStep}} of {{totalSteps}}",
+          "submitError": "We could not save this setup right now.",
+          "successToast": "Your setup is complete.",
+          "steps": {
+            "payments": {
+              "description": "Link your IBAN and choose whether SPIN should stay enabled for instant payouts.",
+              "title": "Set up payments"
+            },
+            "personal": {
+              "description": "Confirm your name, authenticated email, phone number, and tax ID before entering the app.",
+              "lockedEmailHelper": "This email comes from your JWT and stays locked during the initial setup.",
+              "title": "Confirm your profile"
+            },
+            "security": {
+              "biometricsHelper": "Protect access to the app with Face ID or fingerprint on this device.",
+              "description": "Choose how you want to prepare local security and notification permissions for this account.",
+              "pushNotificationsHelper": "Turn this on when you are ready to request push notification access.",
+              "pushNotificationsLabel": "Enable push notifications",
+              "title": "Security & permissions"
+            }
+          }
+        },
+        "validation": {
+          "appSettings": {
+            "invalidLanguageMode": "Choose a valid language option.",
+            "invalidThemeMode": "Choose a valid appearance option."
+          },
+          "payments": {
+            "ibanInvalid": "Enter a valid Portuguese IBAN.",
+            "ibanRequired": "IBAN is required."
+          },
+          "personal": {
+            "emailInvalid": "Enter a valid email address.",
+            "emailRequired": "Email is required.",
+            "nameRequired": "Name is required.",
+            "nifInvalid": "Tax ID must have 9 digits.",
+            "nifRequired": "Tax ID is required.",
+            "phoneNumberInvalid": "Enter a valid phone number with country code.",
+            "phoneNumberRequired": "Phone number is required."
+          },
+          "privacy": {
+            "alertsEmailInvalid": "Enter a valid alerts email address.",
+            "alertsEmailRequired": "Alerts email is required."
+          }
+        }
+      },
+      "wallet": {
+        "common": {
+          "backLabel": "Back",
+          "notFoundDescription": "We could not load this history item.",
+          "notFoundTitle": "History item unavailable"
+        },
+        "badges": {
+          "credit": "Received",
+          "transferCancelled": "Cancelled",
+          "transferCompleted": "Completed",
+          "transferFailed": "Failed",
+          "transferProcessing": "In process"
+        },
+        "detailLabels": {
+          "amountLabel": "Amount",
+          "cancelledAtLabel": "Cancelled at",
+          "failedAtLabel": "Failed at",
+          "packageCountLabel": "Bottles added",
+          "completedAtLabel": "Completed at",
+          "creditedAtLabel": "Credited at",
+          "expectedArrivalLabel": "Expected arrival",
+          "locationLabel": "Location",
+          "paymentAccountLabel": "Payment account",
+          "referenceLabel": "Reference",
+          "requestedAtLabel": "Requested at",
+          "updatedLabel": "Updated"
+        },
+        "filters": {
+          "all": "All",
+          "credits": "Credits",
+          "transfers": "Transfers"
+        },
+        "items": {
+          "auchanAmadora": {
+            "creditedAt": "Mar 8, 09:10",
+            "location": "Auchan - Amadora",
+            "packageCount": "12",
+            "subtitle": "Mar 8, 09:10 · 12 bottles",
+            "title": "Auchan - Amadora"
+          },
+          "continenteColombo": {
+            "creditedAt": "Yesterday, 18:15",
+            "location": "Continente - Colombo",
+            "packageCount": "3",
+            "subtitle": "Yesterday, 18:15 · 3 bottles",
+            "title": "Continente - Colombo"
+          },
+          "lidlBenfica": {
+            "creditedAt": "Today, 10:05",
+            "location": "Lidl - Benfica",
+            "packageCount": "9",
+            "subtitle": "Today, 10:05 · 9 bottles",
+            "title": "Lidl - Benfica"
+          },
+          "pingoDoceAfragide": {
+            "creditedAt": "Today, 14:30",
+            "location": "Pingo Doce - Afragide",
+            "packageCount": "6",
+            "subtitle": "Today, 14:30 · 6 bottles",
+            "title": "Pingo Doce - Afragide"
+          },
+          "transferMarch11": {
+            "completedAt": "Yesterday, 18:15",
+            "reference": "TRF-2603-1902",
+            "requestedAt": "Yesterday, 17:54",
+            "subtitle": "Yesterday, 17:54",
+            "title": "Transfer"
+          },
+          "transferMarch12": {
+            "expectedArrival": "Today, within 24h",
+            "requestedAt": "Today, 13:10",
+            "subtitle": "Today, 13:10",
+            "title": "Transfer",
+            "updatedAt": "Today, 13:24"
+          }
+        },
+        "movementDetail": {
+          "detailSectionTitle": "Movement details",
+          "credit": {
+            "description": "Credit received after the machine return.",
+            "stateCardTitle": "Credit added",
+            "stateLabel": "Credit received"
+          },
+          "transfer": {
+            "retryActionLabel": "Request another transfer",
+            "cancelled": {
+              "description": "This transfer was cancelled before reaching the linked account.",
+              "stateCardTitle": "Transfer cancelled",
+              "stateLabel": "Cancelled"
+            },
+            "completed": {
+              "description": "The amount has left the wallet and the receipt is now available.",
+              "receiptActionLabel": "Share receipt",
+              "stateCardTitle": "Transfer completed",
+              "stateLabel": "Completed"
+            },
+            "failed": {
+              "description": "We could not complete this transfer to the linked account.",
+              "stateCardTitle": "Transfer failed",
+              "stateLabel": "Failed"
+            },
+            "processing": {
+              "description": "Request received. The amount should reach the linked account within 24h.",
+              "footer": "Available in the account within 24h, depending on the bank.",
+              "stateCardTitle": "Transfer processing",
+              "stateLabel": "Processing",
+              "timeline": {
+                "accountConfirmed": {
+                  "description": "The linked account is ready to receive this amount.",
+                  "label": "Account confirmed"
+                },
+                "completed": {
+                  "description": "Final step before the amount becomes available in the account.",
+                  "label": "Completion expected"
+                },
+                "received": {
+                  "description": "We received the transfer request for your available balance.",
+                  "label": "Request received"
+                },
+                "sending": {
+                  "description": "The amount is on its way to the linked account.",
+                  "label": "Sending to account"
+                }
+              },
+              "timelineTitle": "Transfer status"
+            }
+          }
+        },
+        "movementsPage": {
+          "emptyStateDescription": "New credits and transfers will appear here as soon as they are available.",
+          "emptyStateTitle": "You have no movements yet",
+          "filteredEmptyStateAction": "Show all movements",
+          "filteredEmptyStateDescription": "Try another filter to see the rest of your wallet history.",
+          "filteredEmptyStateTitle": "No movements match this filter",
+          "title": "Full history"
+        },
+        "list": {
+          "transferCancelledTitle": "Transfer cancelled",
+          "transferCompletedTitle": "Transfer to linked account",
+          "transferFailedTitle": "Transfer failed",
+          "transferPendingTitle": "Transfer in progress",
+          "transferTitle": "Transfer"
+        },
+        "overview": {
+          "balanceCard": {
+            "actionLabel": "Transfer balance",
+            "availableBalanceLabel": "Available balance",
+            "caption": "Transfer your balance to the linked account.",
+            "noBalanceCaption": "As soon as you receive new credits, your balance will appear here.",
+            "processingTransfersLabel": "Transfers in progress",
+            "returnedPackagesLabel": "Packages returned",
+            "transferUnavailableBadge": "No balance available to transfer",
+            "title": "Balance ready to transfer"
+          },
+          "latestMovements": {
+            "actionLabel": "See full history",
+            "description": "Your most recent credits and transfers.",
+            "emptyDescription": "As soon as you receive new credits or request a transfer, your activity will appear here.",
+            "emptyNoBalanceDescription": "After your next return, your credits and transfers will appear here.",
+            "emptyTitle": "You do not have recent activity yet",
+            "title": "Recent history"
+          }
+        },
+        "transfer": {
+          "actionLabel": "Request transfer",
+          "amountPendingValue": "Enter an amount",
+          "amountSummaryLabel": "Amount to transfer",
+          "amountFieldHelper": "Enter an amount up to {{amount}}.",
+          "amountFieldLabel": "How much do you want to transfer?",
+          "balanceCaption": "We will send your balance to the linked account.",
+          "balanceTitle": "Available balance",
+          "confirmActionLabel": "Confirm transfer",
+          "confirmActionAmountLabel": "Transfer {{amount}}",
+          "confirmationBadge": "Transfer requested",
+          "confirmationDescription": "Your transfer request for {{amount}} was sent to the linked account.",
+          "confirmationTitle": "Transfer on the way",
+          "description": "Choose the amount and how you want to receive it.",
+          "destinationLabel": "Destination account",
+          "errorToast": "We couldn't request the transfer right now.",
+          "estimatedArrivalValue": "Today, within 24h",
+          "expectedArrivalLabel": "Expected arrival",
+          "exceedsBalanceError": "The amount cannot exceed {{amount}}.",
+          "fullBalanceActionLabel": "Use full balance",
+          "newTransferActionLabel": "Request another transfer",
+          "payoutOptionsTitle": "Choose how you want to receive it",
+          "payoutOptionSepaCaption": "Available within 1 business day.",
+          "payoutOptionSpinCaption": "Receive it as soon as instant payout is available.",
+          "payoutOptionUnavailableBadge": "Unavailable",
+          "payoutMethodLabel": "Payout method",
+          "payoutMethodSepa": "SEPA transfer",
+          "payoutMethodSpin": "SPIN instant payout",
+          "reviewTitle": "Before you confirm",
+          "spinDisabledHelper": "SEPA for this transfer.",
+          "spinEnabledHelper": "Faster when SPIN is active.",
+          "spinHelper": "If you turn on SPIN, we will try to send it right away.",
+          "spinToggleTitle": "Receive with SPIN",
+          "spinUnavailableHelper": "We will use SEPA for this transfer.",
+          "successToast": "Your transfer request was sent.",
+          "title": "Transfer balance",
+          "zeroAmountError": "Enter an amount above 0€."
+        }
+      }
+    }
+  }
+}

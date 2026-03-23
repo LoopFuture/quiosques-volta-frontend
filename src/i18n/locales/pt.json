@@ -1,0 +1,848 @@
+{
+  "app": {
+    "auth": {
+      "availabilityLabel": "A abrir autenticação...",
+      "biometricLabel": "Biometria (Face ID / Digital)",
+      "dividerLabel": "Ou aceder com",
+      "errorFallback": "Não foi possível iniciar a autenticação. Tenta novamente.",
+      "lock": {
+        "cancelLabel": "Cancelar",
+        "cancelledError": "A verificação biométrica foi cancelada. Tenta novamente ou entra de novo.",
+        "description": "Usa Face ID ou impressão digital para voltares a abrir a tua conta neste telemóvel.",
+        "failedError": "Não foi possível confirmar a tua biometria. Tenta novamente ou entra de novo.",
+        "loginAgainLabel": "Entrar de novo",
+        "notAvailableError": "A biometria não está disponível neste dispositivo. Entra de novo para continuar.",
+        "notEnrolledError": "Configura Face ID ou impressão digital neste dispositivo, ou entra de novo para continuar.",
+        "promptMessage": "Usa Face ID ou impressão digital para a Volta",
+        "retryLabel": "Tentar novamente",
+        "title": "Desbloquear a Volta"
+      },
+      "loginLabel": "Entrar",
+      "registerLabel": "Regista-te",
+      "registerPrompt": "Ainda não tens conta?",
+      "subtitle": "Bem-vindo de volta ao futuro sustentável",
+      "titleLeading": "Volta",
+      "titleTrailing": "Portugal"
+    },
+    "mockAction": {
+      "message": "Esta ação está a usar dados simulados por agora."
+    },
+    "onboarding": {
+      "actions": {
+        "finishHelper": "Tudo pronto. Podes rever esta introdução mais tarde no Perfil.",
+        "getStartedLabel": "Entrar na app",
+        "laterLabel": "Saltar introdução",
+        "nextLabel": "Continuar",
+        "progressHelper": "Desliza ou toca em Continuar para ver o passo seguinte."
+      },
+      "description": "Só o essencial para a tua primeira devolução e para perceberes quando o dinheiro entra.",
+      "estimate": "Leva menos de 30 segundos",
+      "eyebrow": "Introdução rápida",
+      "progressLabel": "Passo",
+      "progressValue": "{{currentStep}} de {{totalSteps}}",
+      "slides": {
+        "machine": {
+          "description": "Na máquina Volta, mostra primeiro o teu código e só depois começa a inserir as embalagens.",
+          "detail": "Isto liga a devolução à tua conta e evita começares no fluxo errado.",
+          "eyebrow": "Na máquina",
+          "title": "Mostra o código antes das embalagens"
+        },
+        "map": {
+          "description": "Consulta o mapa para escolheres uma máquina Volta próxima e chegares ao ponto certo sem perder tempo.",
+          "detail": "Sai de casa com o teu código Volta pronto para acelerar o arranque.",
+          "eyebrow": "Antes de devolver",
+          "title": "Escolhe uma máquina perto de ti"
+        },
+        "purpose": {
+          "description": "Depois de inserires as embalagens válidas, a app mostra o crédito recebido e o movimento correspondente.",
+          "detail": "Assim percebes logo quanto entrou depois de cada devolução.",
+          "eyebrow": "Durante a devolução",
+          "title": "Entrega as embalagens e confirma o valor"
+        },
+        "wallet": {
+          "description": "Na carteira vês o saldo disponível, movimentos recentes e transferências enviadas para o teu IBAN associado.",
+          "detail": "Quando quiseres, podes enviar o saldo para a tua conta bancária.",
+          "eyebrow": "Depois",
+          "title": "Vê o saldo e transfere quando quiseres"
+        }
+      },
+      "title": "Devolve e recebe sem surpresas"
+    },
+    "tabs": {
+      "barcode": {
+        "label": "Código",
+        "message": "Mostra o teu código pessoal antes de começares a devolução.",
+        "subtitle": "Identificação rápida na máquina antes de inserires as embalagens.",
+        "title": "Código"
+      },
+      "home": {
+        "header": {
+          "eyebrow": "Bem-vindo",
+          "notificationLabel": "Notificações",
+          "notificationUnreadHint_one": "{{count}} alerta por ler.",
+          "notificationUnreadHint_other": "{{count}} alertas por ler.",
+          "title": "Volta"
+        },
+        "label": "Início"
+      },
+      "map": {
+        "label": "Mapa",
+        "message": "Este ecra pode receber o mapa real e os detalhes do ponto Volta.",
+        "subtitle": "Pontos de recolha, maquinas proximas e detalhe de localizacao.",
+        "title": "Mapa Volta"
+      },
+      "profile": {
+        "label": "Perfil",
+        "message": "Este ecra pode receber o perfil, definicoes e suporte.",
+        "subtitle": "Dados pessoais, seguranca e preferencias da conta.",
+        "title": "Perfil"
+      },
+      "wallet": {
+        "label": "Carteira",
+        "message": "Este ecra pode receber o saldo, o histórico de créditos e as transferências pedidas.",
+        "subtitle": "Saldo, atividade da carteira e detalhes de pagamento num único separador.",
+        "title": "Carteira"
+      }
+    },
+    "topBar": {
+      "offline": "Sem ligação"
+    },
+    "routes": {
+      "notFound": {
+        "backLabel": "Voltar",
+        "ctaLabel": "Ir para o início",
+        "description": "Volta ao início para continuar. Se abriste uma ligação antiga, este ecrã pode já não estar disponível.",
+        "message": "Este ecrã já não está disponível.",
+        "title": "Ecrã indisponível"
+      },
+      "queryError": {
+        "description": "Não foi possível carregar isto agora.",
+        "recoveryHint": "Verifica a ligação e tenta novamente dentro de instantes.",
+        "retryLabel": "Tentar novamente",
+        "title": "Falha ao carregar"
+      },
+      "notifications": {
+        "backLabel": "Voltar",
+        "clearAllLabel": "Limpar tudo",
+        "clearAllErrorToast": "Não foi possível limpar as notificações agora.",
+        "clearAllSuccessToast": "As notificações foram removidas.",
+        "description": "Créditos, transferências e avisos da conta.",
+        "errorDescription": "Não foi possível carregar os teus alertas agora.",
+        "errorRecoveryHint": "Tenta novamente para atualizar novidades da carteira e da conta.",
+        "errorTitle": "Alertas indisponíveis",
+        "emptyStateDescription": "Quando houver crédito, transferências ou avisos da conta, mostramos aqui.",
+        "emptyStateTitle": "Ainda não tens alertas",
+        "items": {
+          "barcodeReminder": {
+            "message": "Mantém o teu QR code pronto para acelerar a próxima devolução.",
+            "timeLabel": "Ontem, 18:05",
+            "title": "Lembra-te do teu código Volta"
+          },
+          "creditAdded": {
+            "message": "Recebeste {{amount}} na carteira depois da devolução em {{location}}.",
+            "timeLabel": "Hoje, 14:30",
+            "title": "Crédito adicionado em {{location}}"
+          },
+          "transferProcessing": {
+            "message": "O teu pedido de transferência de {{amount}} está a ser enviado para a conta associada.",
+            "timeLabel": "Agora",
+            "title": "Transferência em processamento"
+          },
+          "securitySettings": {
+            "message": "Confirma o e-mail e as permissões de alertas na área de privacidade.",
+            "timeLabel": "Hoje, 11:10",
+            "title": "Revê os alertas da tua conta"
+          },
+          "walletHistory": {
+            "message": "Consulta créditos e transferências recentes da tua carteira Volta.",
+            "timeLabel": "Ontem, 09:10",
+            "title": "Histórico da carteira disponível"
+          }
+        },
+        "listDescription": "Abre um alerta para ver o estado mais recente da tua carteira ou conta.",
+        "listDescriptionUnread_one": "{{count}} alerta por rever.",
+        "listDescriptionUnread_other": "{{count}} alertas por rever.",
+        "listTitle": "Alertas recentes",
+        "manageTitle": "Gerir alertas",
+        "markAllReadLabel": "Marcar tudo como lido",
+        "markAllReadErrorToast": "Não foi possível marcar as notificações agora.",
+        "markAllReadSuccessToast": "As notificações foram marcadas como lidas.",
+        "readA11yLabel": "Lida",
+        "title": "Notificações",
+        "unreadCountBadge_one": "{{count}} por ler",
+        "unreadCountBadge_other": "{{count}} por ler",
+        "unreadA11yLabel": "Não lida",
+        "unreadBadgeLabel": "Nova"
+      },
+      "two": {
+        "title": "Tab Two"
+      }
+    },
+    "tabScreens": {
+      "barcode": {
+        "card": {
+          "countdownA11yLabel": "Tempo restante do QR code",
+          "countdownA11yValue": "Faltam {{time}}",
+          "description": "Mostra este código na máquina Volta antes de inserires as embalagens.",
+          "expiredDescription": "O código expirou e não foi possível gerar outro agora. Tenta novamente.",
+          "expiredLabel": "Código expirado",
+          "openFullscreenLabel": "Mostrar em ecrã inteiro",
+          "qrExpandLabel": "Abrir código em ecrã inteiro",
+          "qrModalHint": "Encaixa o topo do telemóvel no leitor e mantém o ecrã estável.",
+          "qrModalCloseLabel": "Fechar",
+          "refreshingDescription": "Estamos a gerar um novo código para continuares esta devolução.",
+          "refreshingLabel": "A gerar novo código",
+          "retryLabel": "Gerar novo código",
+          "statusLabel": "Código ativo",
+          "title": "O teu código Volta",
+          "validUntilLabel": "Válido por"
+        },
+        "errors": {
+          "description": "Não foi possível carregar o teu código Volta agora. Verifica a ligação e tenta novamente.",
+          "title": "Código indisponível"
+        },
+        "identity": {
+          "readyLabel": "Pronto a apresentar",
+          "title": "Apresenta este código na máquina"
+        }
+      },
+      "home": {
+        "balanceCard": {
+          "actionLabel": "Transferir",
+          "availableBalanceLabel": "Saldo disponível",
+          "badges": {
+            "credits_one": "{{count}} crédito",
+            "credits_other": "{{count}} créditos",
+            "returns_one": "{{count}} embalagem",
+            "returns_other": "{{count}} embalagens",
+            "transfers_one": "{{count}} transferência pendente",
+            "transfers_other": "{{count}} transferências pendentes"
+          },
+          "caption": "Pronto para transferir para a conta associada."
+        },
+        "errors": {
+          "description": "Não foi possível carregar o teu saldo e resumo de devoluções agora. Tenta novamente para atualizar a informação.",
+          "title": "Resumo indisponível"
+        },
+        "exitHint": "Toca novamente em voltar para fechar a app.",
+        "overview": {
+          "accountActionLabel": "Ver conta",
+          "description": "O que importa antes da próxima devolução.",
+          "stats": {
+            "creditsHelper": "Créditos recebidos hoje",
+            "creditsLabel": "Créditos",
+            "transfersHelper": "Pedidos ainda em processamento",
+            "transfersLabel": "Pendentes",
+            "paidHelper": "Reembolsos concluídos",
+            "paidLabel": "Pagos",
+            "pendingHelper": "À espera de processamento",
+            "pendingLabel": "Pendentes",
+            "todayHelper": "Embalagens devolvidas",
+            "todayLabel": "Hoje"
+          },
+          "title": "Neste momento"
+        },
+        "quickActions": {
+          "description": "Abre o teu código antes de chegares à máquina ou vê onde devolver a seguir.",
+          "findMachineLabel": "Encontrar máquina",
+          "heroTitle": "Começa a próxima devolução sem perder tempo",
+          "showCodeLabel": "Mostrar código",
+          "title": "Próxima devolução"
+        },
+        "recentActivity": {
+          "description": "Os teus créditos e pedidos de transferência mais recentes.",
+          "title": "Atividade recente",
+          "transactions": {
+            "colomboTitle": "Continente - Colombo",
+            "pingoTitle": "Pingo Doce - Afragide",
+            "processed": "Processado",
+            "todaySubtitle": "Hoje, 14:30",
+            "yesterdaySubtitle": "Ontem, 18:15"
+          }
+        }
+      },
+      "map": {
+        "comingSoon": {
+          "actionHint": "O que podes fazer agora",
+          "description": "A pesquisa no mapa ainda não está disponível na app. Enquanto isso, podes confirmar pontos Volta previstos e abrir o teu código antes de chegares à máquina.",
+          "statusLabel": "Mapa em breve",
+          "title": "Usa já o teu código. O mapa vem a seguir."
+        },
+        "emptyState": {
+          "description": "Procura no mapa para veres os pontos mais próximos e encontrares o melhor local para a tua próxima devolução.",
+          "title": "As máquinas Volta perto de ti vão aparecer aqui"
+        },
+        "errors": {
+          "description": "Não foi possível preparar a pré-visualização dos pontos Volta agora.",
+          "recoveryHint": "Tenta novamente para veres os locais previstos e continua a usar o teu código na máquina.",
+          "title": "Mapa indisponível"
+        },
+        "fallback": {
+          "actionLabel": "Mostrar código",
+          "description": "Identifica-te logo na máquina com o teu código Volta e evita parar para procurar quando chegares.",
+          "title": "Identificação pronta para a próxima devolução"
+        },
+        "nearby": {
+          "description": "Explora o mapa e escolhe a máquina mais conveniente para a tua próxima devolução.",
+          "searchActionLabel": "Procurar máquinas Volta",
+          "title": "Encontra uma máquina Volta"
+        },
+        "preview": {
+          "description": "Os próximos pontos Volta vão aparecer aqui com estado claro antes do mapa completo chegar.",
+          "title": "Pré-visualização de pontos Volta",
+          "status": {
+            "active": "Disponível",
+            "temporarilyUnavailable": "Indisponível"
+          }
+        }
+      },
+      "profile": {
+        "errors": {
+          "description": "Não foi possível carregar os detalhes da tua conta agora.",
+          "recoveryHint": "Tenta novamente para atualizar o teu perfil, pagamentos e segurança.",
+          "title": "Conta indisponível"
+        },
+        "appSettings": {
+          "appearance": {
+            "darkOption": "Escuro",
+            "description": "Usa a definição do telemóvel ou escolhe um aspeto fixo.",
+            "lightOption": "Claro",
+            "systemOption": "Sistema",
+            "title": "Aspeto da app"
+          },
+          "description": "Muda o aspeto e o idioma da app neste telemóvel.",
+          "language": {
+            "description": "Usa o idioma do telemóvel ou escolhe um idioma fixo para a app.",
+            "englishOption": "English",
+            "portugueseOption": "Português",
+            "systemOption": "Sistema",
+            "title": "Idioma"
+          },
+          "savedToast": "Esta alteração foi guardada neste telemóvel.",
+          "sectionHelper": "Estas alterações aplicam-se de imediato e afetam apenas este dispositivo.",
+          "sectionTitle": "Preferências da app",
+          "saveLabel": "Guardar definições da app",
+          "title": "Definições da app"
+        },
+        "common": {
+          "backLabel": "Voltar"
+        },
+        "editors": {
+          "alertsEmail": {
+            "consentDescription": "Mantém ativas as notificações essenciais e os alertas de reembolso desta conta.",
+            "consentLabel": "Quero receber alertas de segurança e reembolso por e-mail.",
+            "description": "Escolhe o endereço usado para alertas essenciais, recibos e recuperação rápida.",
+            "helperText": "Recebe alertas essenciais, recibos e atualizações de reembolso neste endereço.",
+            "label": "E-mail para alertas",
+            "saveLabel": "Guardar alertas",
+            "title": "Atualizar e-mail de alertas"
+          },
+          "appearance": {
+            "description": "Escolhe como a app deve aparecer neste dispositivo.",
+            "helperText": "Segue o tema do telemóvel por predefinição ou escolhe um modo fixo para a app.",
+            "label": "Aspeto da app",
+            "title": "Aspeto da app"
+          },
+          "biometrics": {
+            "description": "Controla o acesso com Face ID ou impressão digital.",
+            "helperText": "Protege o acesso com Face ID ou impressão digital.",
+            "label": "Biometria",
+            "saveLabel": "Guardar biometria",
+            "title": "Gerir biometria"
+          },
+          "email": {
+            "description": "Define o e-mail principal usado para recibos, atualizações e recuperação de acesso.",
+            "helperText": "Usado em recibos, atualizações e recuperação de acesso.",
+            "label": "E-mail",
+            "saveLabel": "Guardar e-mail",
+            "title": "Atualizar e-mail"
+          },
+          "phoneNumber": {
+            "description": "Confirma o número de telefone principal associado à tua conta.",
+            "helperText": "Usa o formato internacional, por exemplo +351 912 345 678.",
+            "label": "Telefone",
+            "saveLabel": "Guardar telefone",
+            "title": "Atualizar telefone"
+          },
+          "iban": {
+            "description": "Escolhe a conta bancária onde queres receber reembolsos concluídos.",
+            "helperText": "Usado para enviar reembolsos concluídos.",
+            "label": "IBAN associado",
+            "saveLabel": "Guardar IBAN",
+            "title": "Atualizar IBAN"
+          },
+          "language": {
+            "description": "Escolhe como a app deve apresentar o conteúdo neste dispositivo.",
+            "helperText": "Mantém o idioma do telemóvel por predefinição ou força a app a usar um idioma fixo.",
+            "label": "Idioma",
+            "title": "Idioma"
+          },
+          "name": {
+            "description": "Altera o nome que aparece no teu perfil e nos comprovativos.",
+            "label": "Nome completo",
+            "saveLabel": "Guardar nome",
+            "title": "Atualizar nome"
+          },
+          "nif": {
+            "description": "Confirma o número fiscal associado à tua conta.",
+            "helperText": "Confere sempre com os dados fiscais da conta.",
+            "label": "NIF",
+            "saveLabel": "Guardar NIF",
+            "title": "Atualizar NIF"
+          },
+          "spin": {
+            "description": "Ativa ou desativa os pagamentos instantâneos para esta conta.",
+            "helperText": "Mantém os pagamentos instantâneos ativos para esta conta.",
+            "label": "SPIN",
+            "saveLabel": "Guardar SPIN",
+            "title": "Gerir SPIN"
+          }
+        },
+        "hub": {
+          "actions": {
+            "reviewAlerts": "Rever alertas",
+            "reviewPayments": "Rever pagamentos",
+            "reviewSecurity": "Rever segurança"
+          },
+          "accountDescription": "Confirma primeiro os pontos que afetam pagamentos, alertas e segurança antes da próxima devolução.",
+          "cards": {
+            "appSettings": "Definições da app",
+            "payments": "Pagamentos",
+            "personal": "Dados do perfil",
+            "privacy": "Privacidade e segurança",
+            "summary": "Resumo"
+          },
+          "hero": {
+            "memberSinceLabel": "Membro desde",
+            "memberSinceValue": "Out 2023"
+          },
+          "helpRowLabel": "Como funciona a Volta",
+          "logoutLabel": "Terminar sessão",
+          "readiness": {
+            "alertsAllValue": "E-mail + push ativos",
+            "alertsEmailValue": "E-mail ativo",
+            "alertsLabel": "Alertas",
+            "alertsPushValue": "Push ativa",
+            "alertsReviewValue": "Ativa os alertas",
+            "paymentsEnabledValue": "{{iban}} · SPIN ativo",
+            "paymentsLabel": "Pagamentos",
+            "paymentsReviewValue": "{{iban}} · rever SPIN",
+            "readyBadge": "Conta pronta",
+            "readyDescription": "Pagamentos, segurança e alertas estão configurados.",
+            "readyTitle": "Pronto para reembolsos",
+            "reviewBadge": "Rever conta",
+            "reviewDescription": "Revê um ponto antes do próximo reembolso.",
+            "reviewTitle": "Rever antes do reembolso",
+            "securityBiometricsValue": "Biometria ativa",
+            "securityLabel": "Segurança",
+            "securityReviewValue": "Ativa a biometria"
+          },
+          "summaries": {
+            "appSettings": "Idioma e aspeto",
+            "payments": "IBAN e pagamentos instantâneos",
+            "personal": "Nome, telefone e NIF",
+            "privacy": "Alertas push e biometria"
+          },
+          "rows": {
+            "alertsEmailDisabledHelper": "Desativados",
+            "alertsEmailEnabledHelper": "Ativados",
+            "alertsEmailHelper": "Usado para alertas de segurança e reembolsos.",
+            "alertsEmailTitle": "Alertas por e-mail",
+            "appSettingsHelper": "{{theme}} · {{language}}",
+            "appAppearanceTitle": "Aspeto da app",
+            "biometricsDisabledHelper": "Biometria desativada",
+            "biometricsEnabledHelper": "Face ID / impressão digital",
+            "biometricsTitle": "Biometria",
+            "emailTitle": "E-mail",
+            "helpCenterHelper": "Respostas rápidas e apoio com a conta.",
+            "helpCenterTitle": "Centro de ajuda",
+            "ibanHelper": "Conta bancária associada",
+            "ibanTitle": "IBAN",
+            "languageEnglishHelper": "Idioma fixo em inglês.",
+            "languagePortugueseHelper": "Idioma fixo em português.",
+            "languageSystemHelper": "Segue o idioma do telemóvel.",
+            "languageTitle": "Idioma",
+            "nameTitle": "Nome",
+            "nifTitle": "NIF",
+            "onboardingHelper": "Voltar a ver a introdução da app.",
+            "onboardingTitle": "Como funciona",
+            "phoneNumberTitle": "Telefone",
+            "pushNotificationsDisabledHelper": "Notificações push desativadas.",
+            "pushNotificationsEnabledHelper": "Notificações push ativas.",
+            "pushNotificationsTitle": "Notificações push",
+            "summaryHelper": "Atividade, créditos e transferências",
+            "spinDisabledHelper": "Pagamentos instantâneos desativados",
+            "spinEnabledHelper": "Pagamentos instantâneos ativos",
+            "spinTitle": "SPIN",
+            "termsHelper": "Condições de utilização e privacidade.",
+            "termsTitle": "Termos e condições"
+          },
+          "sections": {
+            "account": "Conta",
+            "appSettings": "Definições da app",
+            "help": "Ajuda",
+            "payout": "Definições de pagamento",
+            "primary": "O que rever agora",
+            "profile": "Perfil",
+            "privacy": "Privacidade e segurança",
+            "profileData": "Dados do perfil",
+            "secondary": "Mais opções"
+          },
+          "sessionDescription": "Termina a sessão neste telemóvel quando acabares de usar a tua conta.",
+          "sessionLabel": "Sessão",
+          "supportDescription": "Vê novamente a introdução curta se quiseres um lembrete rápido.",
+          "supportLabel": "Precisas de rever?"
+        },
+        "summary": {
+          "description": "Vê os teus créditos, devoluções e transferências num só lugar.",
+          "sections": {
+            "hero": {
+              "headlineLabel": "Desde que aderiste",
+              "pendingTransferActive": "Há uma transferência a caminho para o teu IBAN",
+              "pendingTransferEmpty": "Não tens transferências por concluir",
+              "supportingText": "Membro desde {{memberSince}}. Transferências em processamento: {{pendingTransfers}}.",
+              "title": "Créditos recebidos"
+            },
+            "totals": {
+              "completedTransfersLabel": "Transferências concluídas",
+              "description": "Totais acumulados da tua conta.",
+              "pendingTransfersLabel": "Em processamento",
+              "returnedPackagesLabel": "Embalagens devolvidas",
+              "title": "Totais"
+            }
+          },
+          "title": "A tua atividade"
+        },
+        "personal": {
+          "description": "Confirma os dados de identificação associados à tua conta.",
+          "emailHelper": "Usado em recibos, atualizações e recuperação de acesso.",
+          "emailLockedHelper": "Este e-mail vem da tua sessão autenticada e não pode ser alterado aqui.",
+          "emailLabel": "E-mail",
+          "nameLabel": "Nome completo",
+          "nifHelper": "Confere sempre com os dados fiscais da conta.",
+          "nifLabel": "NIF",
+          "phoneNumberHelper": "Usa o formato internacional, por exemplo +351 912 345 678.",
+          "phoneNumberLabel": "Telefone",
+          "photoActionLabel": "Alterar foto",
+          "photoDescription": "Mantém uma foto de perfil atualizada. Nesta fase, a ação usa dados simulados.",
+          "photoTitle": "Foto de perfil",
+          "saveErrorToast": "Não foi possível guardar os teus dados agora.",
+          "saveLabel": "Guardar dados",
+          "saveSuccessToast": "Os teus dados foram atualizados.",
+          "sectionHelper": "Confirma que estes dados batem certo com a conta usada para reembolsos e validações fiscais.",
+          "sectionTitle": "Dados de identificação",
+          "title": "Dados do perfil"
+        },
+        "payments": {
+          "description": "Gere a conta onde recebes reembolsos e mantém os pagamentos imediatos ativos, se quiseres.",
+          "ibanHelper": "Usado para enviar pagamentos concluídos e reembolsos.",
+          "ibanLabel": "IBAN associado",
+          "saveErrorToast": "Não foi possível guardar os pagamentos agora.",
+          "saveLabel": "Guardar pagamentos",
+          "saveSuccessToast": "Os teus pagamentos foram atualizados.",
+          "sectionHelper": "Mantém a conta de pagamento pronta para receber reembolsos sem atraso.",
+          "sectionTitle": "Destino dos reembolsos",
+          "spinHelper": "Mantém os pagamentos instantâneos ativos para esta conta.",
+          "spinLabel": "SPIN",
+          "title": "Pagamentos"
+        },
+        "privacy": {
+          "accountSectionHelper": "Estes alertas seguem a tua conta Volta, não apenas este dispositivo.",
+          "accountSectionTitle": "Alertas da conta",
+          "biometricCancelledToast": "A biometria não ficou ativada neste dispositivo.",
+          "biometricFailedToast": "Não foi possível confirmar a tua biometria. Tenta novamente.",
+          "biometricHelper": "Protege o acesso com Face ID ou impressão digital.",
+          "emailAlertsErrorToast": "Não foi possível atualizar os alertas por e-mail agora.",
+          "biometricLabel": "Biometria",
+          "biometricNotAvailableToast": "A biometria ainda não está disponível neste dispositivo.",
+          "biometricNotEnrolledToast": "Configura Face ID ou impressão digital neste dispositivo primeiro.",
+          "deviceSectionHelper": "Estes controlos só afetam o telemóvel que estás a usar agora.",
+          "deviceSectionTitle": "Proteção do dispositivo",
+          "emailAlertsHelper": "Recebe alertas de segurança de pagamentos no e-mail da conta.",
+          "emailAlertsLabel": "E-mails de segurança dos pagamentos",
+          "emailAlertsSuccessToast": "Os alertas por e-mail foram atualizados.",
+          "description": "Controla os alertas da conta e as proteções neste dispositivo.",
+          "pushNotificationsDeniedHelper": "As notificações push foram negadas neste dispositivo.",
+          "pushNotificationsDeviceRequiredHelper": "As notificações push precisam de um dispositivo físico.",
+          "pushNotificationsHelper": "Ativa isto para receberes notificações push neste dispositivo.",
+          "pushNotificationsLabel": "Notificações push",
+          "pushNotificationsOpenSettingsLabel": "Abrir definições",
+          "pushNotificationsPendingHelper": "A pedir acesso às notificações para este dispositivo.",
+          "pushNotificationsReadyHelper": "Este dispositivo está pronto para receber notificações push.",
+          "pushNotificationsRegistrationErrorHelper": "Não foi possível concluir o registo das notificações push neste dispositivo.",
+          "pushNotificationsSettingsHelper": "As notificações push estão bloqueadas neste dispositivo. Abre as definições do sistema para as ativar.",
+          "pushNotificationsTokenValue": "Token Expo: {{token}}",
+          "pushNotificationsUnavailableToast": "As notificações push ainda não estão prontas neste dispositivo.",
+          "savedOnThisDeviceToast": "Esta alteração foi guardada neste dispositivo.",
+          "securityPreferencesHelper": "Os e-mails de alertas de segurança serão enviados para o e-mail atual definido no teu perfil: {{email}}.",
+          "securityPreferencesTitle": "Preferências de segurança",
+          "saveLabel": "Guardar segurança",
+          "title": "Privacidade e segurança"
+        },
+        "setup": {
+          "actions": {
+            "backLabel": "Voltar",
+            "finishLabel": "Finalizar registo",
+            "nextLabel": "Continuar"
+          },
+          "progressLabel": "Registo",
+          "progressValue": "Passo {{currentStep}} de {{totalSteps}}",
+          "submitError": "Não foi possível guardar esta configuração agora.",
+          "successToast": "O teu registo está concluído.",
+          "topBarTitle": "Configuração inicial",
+          "steps": {
+            "payments": {
+              "accountSectionLabel": "Conta para receber",
+              "description": "Escolhe para onde enviamos os teus pagamentos e se queres manter transferências imediatas.",
+              "speedSectionLabel": "Velocidade de pagamento",
+              "title": "Configura os pagamentos"
+            },
+            "personal": {
+              "contactSectionLabel": "Contacto",
+              "description": "Confirma os teus dados para receber pagamentos e recuperar a conta sem falhas.",
+              "lockedEmailHelper": "O e-mail da tua conta já está confirmado e não pode ser alterado aqui.",
+              "taxSectionLabel": "Dados fiscais",
+              "title": "Confirma o teu perfil",
+              "verifiedBadgeLabel": "Confirmado",
+              "verifiedTitle": "E-mail da conta"
+            },
+            "security": {
+              "biometricsHelper": "Protege a entrada na app com Face ID ou impressão digital neste dispositivo.",
+              "description": "Define como queres proteger este dispositivo e receber avisos importantes da conta.",
+              "deviceSectionLabel": "Proteção do dispositivo",
+              "notificationsSectionLabel": "Avisos da conta",
+              "pushNotificationsHelper": "Ativa para receberes avisos importantes neste dispositivo.",
+              "pushNotificationsLabel": "Ativar notificações push",
+              "title": "Segurança e permissões"
+            }
+          }
+        },
+        "validation": {
+          "appSettings": {
+            "invalidLanguageMode": "Escolhe uma opcao de idioma valida.",
+            "invalidThemeMode": "Escolhe uma opcao de aspeto valida."
+          },
+          "payments": {
+            "ibanInvalid": "Insere um IBAN portugues valido.",
+            "ibanRequired": "O IBAN e obrigatorio."
+          },
+          "personal": {
+            "emailInvalid": "Insere um e-mail valido.",
+            "emailRequired": "O e-mail e obrigatorio.",
+            "nameRequired": "O nome e obrigatorio.",
+            "nifInvalid": "O NIF tem de ter 9 digitos.",
+            "nifRequired": "O NIF e obrigatorio.",
+            "phoneNumberInvalid": "Insere um telefone valido com indicativo internacional.",
+            "phoneNumberRequired": "O telefone e obrigatorio."
+          },
+          "privacy": {
+            "alertsEmailInvalid": "Insere um e-mail de alertas valido.",
+            "alertsEmailRequired": "O e-mail de alertas e obrigatorio."
+          }
+        }
+      },
+      "wallet": {
+        "common": {
+          "backLabel": "Voltar",
+          "notFoundDescription": "Não foi possível carregar este registo do histórico.",
+          "notFoundTitle": "Registo indisponível"
+        },
+        "badges": {
+          "credit": "Recebido",
+          "transferCancelled": "Cancelada",
+          "transferCompleted": "Concluída",
+          "transferFailed": "Falhou",
+          "transferProcessing": "Em processo"
+        },
+        "detailLabels": {
+          "amountLabel": "Montante",
+          "cancelledAtLabel": "Cancelada em",
+          "failedAtLabel": "Falhou em",
+          "packageCountLabel": "Garrafas adicionadas",
+          "completedAtLabel": "Concluído em",
+          "creditedAtLabel": "Creditado em",
+          "expectedArrivalLabel": "Chegada prevista",
+          "locationLabel": "Local",
+          "paymentAccountLabel": "Conta de pagamento",
+          "referenceLabel": "Referência",
+          "requestedAtLabel": "Pedida em",
+          "updatedLabel": "Atualizado"
+        },
+        "filters": {
+          "all": "Todos",
+          "credits": "Créditos",
+          "transfers": "Transferências"
+        },
+        "items": {
+          "auchanAmadora": {
+            "creditedAt": "8 Mar, 09:10",
+            "location": "Auchan - Amadora",
+            "packageCount": "12",
+            "subtitle": "8 Mar, 09:10 · 12 garrafas",
+            "title": "Auchan - Amadora"
+          },
+          "continenteColombo": {
+            "creditedAt": "Ontem, 18:15",
+            "location": "Continente - Colombo",
+            "packageCount": "3",
+            "subtitle": "Ontem, 18:15 · 3 garrafas",
+            "title": "Continente - Colombo"
+          },
+          "lidlBenfica": {
+            "creditedAt": "Hoje, 10:05",
+            "location": "Lidl - Benfica",
+            "packageCount": "9",
+            "subtitle": "Hoje, 10:05 · 9 garrafas",
+            "title": "Lidl - Benfica"
+          },
+          "pingoDoceAfragide": {
+            "creditedAt": "Hoje, 14:30",
+            "location": "Pingo Doce - Afragide",
+            "packageCount": "6",
+            "subtitle": "Hoje, 14:30 · 6 garrafas",
+            "title": "Pingo Doce - Afragide"
+          },
+          "transferMarch11": {
+            "completedAt": "Ontem, 18:15",
+            "reference": "TRF-2603-1902",
+            "requestedAt": "Ontem, 17:54",
+            "subtitle": "Ontem, 17:54",
+            "title": "Transferência"
+          },
+          "transferMarch12": {
+            "expectedArrival": "Hoje, até 24h",
+            "requestedAt": "Hoje, 13:10",
+            "subtitle": "Hoje, 13:10",
+            "title": "Transferência",
+            "updatedAt": "Hoje, 13:24"
+          }
+        },
+        "movementDetail": {
+          "detailSectionTitle": "Detalhes do movimento",
+          "credit": {
+            "description": "Crédito recebido depois da devolução na máquina.",
+            "stateCardTitle": "Crédito adicionado",
+            "stateLabel": "Crédito recebido"
+          },
+          "transfer": {
+            "retryActionLabel": "Pedir nova transferência",
+            "cancelled": {
+              "description": "Esta transferência foi cancelada antes de chegar à conta associada.",
+              "stateCardTitle": "Transferência cancelada",
+              "stateLabel": "Cancelada"
+            },
+            "completed": {
+              "description": "O montante já saiu da carteira e o comprovativo está disponível.",
+              "receiptActionLabel": "Partilhar comprovativo",
+              "stateCardTitle": "Transferência concluída",
+              "stateLabel": "Concluída"
+            },
+            "failed": {
+              "description": "Não foi possível concluir esta transferência para a conta associada.",
+              "stateCardTitle": "Transferência falhada",
+              "stateLabel": "Falhou"
+            },
+            "processing": {
+              "description": "Pedido recebido. O montante deve chegar à conta associada em menos de 24h.",
+              "footer": "Disponível na conta até 24h, dependendo do banco.",
+              "stateCardTitle": "Transferência em processamento",
+              "stateLabel": "Em processamento",
+              "timeline": {
+                "accountConfirmed": {
+                  "description": "A conta associada já está pronta para receber este montante.",
+                  "label": "Conta confirmada"
+                },
+                "completed": {
+                  "description": "Última etapa antes do montante ficar disponível na conta.",
+                  "label": "Conclusão prevista"
+                },
+                "received": {
+                  "description": "Recebemos o pedido de transferência do saldo disponível.",
+                  "label": "Pedido recebido"
+                },
+                "sending": {
+                  "description": "O montante está a caminho da conta associada.",
+                  "label": "A enviar para a conta"
+                }
+              },
+              "timelineTitle": "Estado da transferência"
+            }
+          }
+        },
+        "movementsPage": {
+          "emptyStateDescription": "Quando tiveres novos créditos ou transferências, eles vão aparecer aqui.",
+          "emptyStateTitle": "Ainda não tens movimentos",
+          "filteredEmptyStateAction": "Ver todos os movimentos",
+          "filteredEmptyStateDescription": "Experimenta outro filtro para veres o resto do histórico da carteira.",
+          "filteredEmptyStateTitle": "Este filtro não tem movimentos",
+          "title": "Histórico completo"
+        },
+        "list": {
+          "transferCancelledTitle": "Transferência cancelada",
+          "transferCompletedTitle": "Transferência para a conta",
+          "transferFailedTitle": "Transferência falhada",
+          "transferPendingTitle": "Transferência em curso",
+          "transferTitle": "Transferência"
+        },
+        "overview": {
+          "balanceCard": {
+            "actionLabel": "Transferir saldo",
+            "availableBalanceLabel": "Saldo disponível",
+            "caption": "Transfere o saldo para a conta associada.",
+            "noBalanceCaption": "Assim que receberes novos créditos, o saldo vai aparecer aqui.",
+            "processingTransfersLabel": "Transferências em curso",
+            "returnedPackagesLabel": "Garrafas devolvidas",
+            "transferUnavailableBadge": "Sem saldo para transferir",
+            "title": "Saldo pronto a transferir"
+          },
+          "latestMovements": {
+            "actionLabel": "Ver histórico completo",
+            "description": "Os teus créditos e transferências mais recentes.",
+            "emptyDescription": "Quando receberes novos créditos ou pedires uma transferência, os movimentos vão aparecer aqui.",
+            "emptyNoBalanceDescription": "Depois da tua próxima devolução, os créditos e as transferências vão aparecer aqui.",
+            "emptyTitle": "Ainda não tens movimentos recentes",
+            "title": "Histórico recente"
+          }
+        },
+        "transfer": {
+          "actionLabel": "Pedir transferência",
+          "amountPendingValue": "Insere um montante",
+          "amountSummaryLabel": "Montante a transferir",
+          "amountFieldHelper": "Insere um valor até {{amount}}.",
+          "amountFieldLabel": "Quanto queres transferir?",
+          "balanceCaption": "Enviamos o saldo para a conta associada.",
+          "balanceTitle": "Saldo disponível",
+          "confirmActionLabel": "Confirmar transferência",
+          "confirmActionAmountLabel": "Transferir {{amount}}",
+          "confirmationBadge": "Transferência pedida",
+          "confirmationDescription": "O teu pedido de transferência de {{amount}} foi enviado para a conta associada.",
+          "confirmationTitle": "Transferência a caminho",
+          "description": "Escolhe o montante e como queres receber.",
+          "destinationLabel": "Conta de destino",
+          "errorToast": "Não foi possível pedir a transferência agora.",
+          "estimatedArrivalValue": "Hoje, até 24h",
+          "expectedArrivalLabel": "Chegada prevista",
+          "exceedsBalanceError": "O montante não pode exceder {{amount}}.",
+          "fullBalanceActionLabel": "Usar saldo total",
+          "newTransferActionLabel": "Pedir nova transferência",
+          "payoutOptionsTitle": "Escolhe como queres receber",
+          "payoutOptionSepaCaption": "Disponível até 1 dia útil.",
+          "payoutOptionSpinCaption": "Receber logo que o pagamento imediato estiver disponível.",
+          "payoutOptionUnavailableBadge": "Indisponível",
+          "payoutMethodLabel": "Método de pagamento",
+          "payoutMethodSepa": "Transferência SEPA",
+          "payoutMethodSpin": "Pagamento imediato SPIN",
+          "reviewTitle": "Antes de confirmar",
+          "spinDisabledHelper": "SEPA para esta transferência.",
+          "spinEnabledHelper": "Mais rápido quando o SPIN estiver ativo.",
+          "spinHelper": "Se ativares o SPIN, tentamos enviar já.",
+          "spinToggleTitle": "Receber por SPIN",
+          "spinUnavailableHelper": "Para esta transferência, vamos usar SEPA.",
+          "successToast": "O pedido de transferência foi enviado.",
+          "title": "Transferir saldo",
+          "zeroAmountError": "Insere um valor acima de 0€."
+        }
+      }
+    }
+  }
+}

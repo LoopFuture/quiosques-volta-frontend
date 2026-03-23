@@ -4,27 +4,49 @@
   },
   "build": {
     "development": {
+      "channel": "development",
       "developmentClient": true,
       "distribution": "internal",
+      "environment": "development",
+      "env": {
+        "KEYCLOAK_ISSUER_URL": "https://keycloak-development.stg.theloop.tech/realms/quiosques-volta",
+        "KEYCLOAK_CLIENT_ID": "volta-client-mobile",
+        "KEYCLOAK_SCOPES": "openid profile email",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "SENTRY_ENVIRONMENT": "development"
+      },
       "android": {
         "buildType": "apk"
-      }
-    },
-    "development-simulator": {
-      "developmentClient": true,
-      "distribution": "internal",
+      },
       "ios": {
         "simulator": true
       }
     },
     "preview": {
+      "channel": "preview",
       "distribution": "internal",
+      "environment": "preview",
+      "env": {
+        "SENTRY_ENVIRONMENT": "preview"
+      },
       "android": {
         "buildType": "apk"
       }
     },
+    "e2e-test": {
+      "extends": "preview",
+      "ios": {
+        "simulator": true
+      },
+      "withoutCredentials": true
+    },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "production",
+      "environment": "production",
+      "env": {
+        "SENTRY_ENVIRONMENT": "production"
+      }
     }
   },
   "submit": {

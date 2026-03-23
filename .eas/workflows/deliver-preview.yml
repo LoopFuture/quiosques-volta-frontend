@@ -1,0 +1,76 @@
+name: Deliver Preview
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ['staging']
+
+jobs:
+  fingerprint:
+    name: Calculate fingerprint
+    type: fingerprint
+    environment: preview
+
+  android_get_build:
+    name: Find Android preview build
+    needs: [fingerprint]
+    type: get-build
+    params:
+      channel: preview
+      distribution: internal
+      fingerprint_hash: ${{ needs.fingerprint.outputs.android_fingerprint_hash }}
+      platform: android
+      profile: preview
+
+  android_build:
+    name: Build Android preview
+    needs: [android_get_build]
+    if: ${{ !needs.android_get_build.outputs.build_id }}
+    type: build
+    params:
+      message: Android preview build for ${{ github.ref_name }} @ ${{ github.sha }}
+      platform: android
+      profile: preview
+
+  android_update:
+    name: Publish Android preview update
+    needs: [android_get_build]
+    if: ${{ needs.android_get_build.outputs.build_id }}
+    type: update
+    environment: preview
+    params:
+      channel: preview
+      message: Android preview update for ${{ github.ref_name }} @ ${{ github.sha }}
+      platform: android
+
+  ios_get_build:
+    name: Find iOS preview build
+    needs: [fingerprint]
+    type: get-build
+    params:
+      channel: preview
+      distribution: internal
+      fingerprint_hash: ${{ needs.fingerprint.outputs.ios_fingerprint_hash }}
+      platform: ios
+      profile: preview
+
+  ios_build:
+    name: Build iOS preview
+    needs: [ios_get_build]
+    if: ${{ !needs.ios_get_build.outputs.build_id }}
+    type: build
+    params:
+      message: iOS preview build for ${{ github.ref_name }} @ ${{ github.sha }}
+      platform: ios
+      profile: preview
+
+  ios_update:
+    name: Publish iOS preview update
+    needs: [ios_get_build]
+    if: ${{ needs.ios_get_build.outputs.build_id }}
+    type: update
+    environment: preview
+    params:
+      channel: preview
+      message: iOS preview update for ${{ github.ref_name }} @ ${{ github.sha }}
+      platform: ios
