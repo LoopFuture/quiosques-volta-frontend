@@ -224,7 +224,7 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - `pnpm install` enables Husky hooks automatically.
 - Pre-commit formats staged files and runs cached ESLint only on staged JS/TS files.
 - Pre-push runs `pnpm validate`.
-- GitLab CI runs `pnpm validate` and `pnpm build`. It does not run EAS commands.
+- CI should run `pnpm validate` and `pnpm build`. It does not run EAS commands.
 - EAS Workflows are committed for manual use now and for GitHub-triggered automation later.
 
 ## Recommended Validation Flow
