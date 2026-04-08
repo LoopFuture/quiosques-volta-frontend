@@ -59,17 +59,18 @@ describe('wallet hooks', () => {
   })
 
   it('wires the wallet overview query with the expected key, metadata, and signal forwarding', async () => {
-    const query = useWalletOverviewQuery()
+    useWalletOverviewQuery()
     const signal = new AbortController().signal
+    const [options] = mockUseQuery.mock.calls[0]
 
     expect(mockUseQuery).toHaveBeenCalledTimes(1)
-    expect(query.queryKey).toEqual(appQueryKeys.wallet.overview())
-    expect(query.meta).toEqual({
+    expect(options.queryKey).toEqual(appQueryKeys.wallet.overview())
+    expect(options.meta).toEqual({
       feature: 'wallet',
       operation: 'overview-state',
     })
 
-    await query.queryFn({
+    await options.queryFn({
       signal,
     })
 
@@ -77,18 +78,19 @@ describe('wallet hooks', () => {
   })
 
   it('wires the wallet history query with cursor pagination support', async () => {
-    const query = useWalletHistoryQuery()
+    useWalletHistoryQuery()
     const signal = new AbortController().signal
+    const [options] = mockUseInfiniteQuery.mock.calls[0]
 
     expect(mockUseInfiniteQuery).toHaveBeenCalledTimes(1)
-    expect(query.queryKey).toEqual(appQueryKeys.wallet.history())
-    expect(query.initialPageParam).toBeUndefined()
-    expect(query.meta).toEqual({
+    expect(options.queryKey).toEqual(appQueryKeys.wallet.history())
+    expect(options.initialPageParam).toBeUndefined()
+    expect(options.meta).toEqual({
       feature: 'wallet',
       operation: 'history-state',
     })
     expect(
-      query.getNextPageParam({
+      options.getNextPageParam({
         pageInfo: {
           hasNextPage: true,
           nextCursor: 'cursor-2',
@@ -96,7 +98,7 @@ describe('wallet hooks', () => {
       }),
     ).toBe('cursor-2')
     expect(
-      query.getNextPageParam({
+      options.getNextPageParam({
         pageInfo: {
           hasNextPage: false,
           nextCursor: null,
@@ -104,7 +106,7 @@ describe('wallet hooks', () => {
       }),
     ).toBeUndefined()
 
-    await query.queryFn({
+    await options.queryFn({
       pageParam: 'cursor-1',
       signal,
     })
@@ -116,12 +118,13 @@ describe('wallet hooks', () => {
   })
 
   it('disables the movement detail query until a movement id is available', () => {
-    const query = useWalletMovementDetailQuery()
+    useWalletMovementDetailQuery()
+    const [options] = mockUseQuery.mock.calls[0]
 
     expect(mockUseQuery).toHaveBeenCalledTimes(1)
-    expect(query.enabled).toBe(false)
-    expect(query.queryKey).toEqual(appQueryKeys.wallet.movement('missing'))
-    expect(query.meta).toEqual({
+    expect(options.enabled).toBe(false)
+    expect(options.queryKey).toEqual(appQueryKeys.wallet.movement('missing'))
+    expect(options.meta).toEqual({
       feature: 'wallet',
       operation: 'movement-detail-state',
       tags: {
@@ -132,11 +135,14 @@ describe('wallet hooks', () => {
 
   it('wires the movement detail query to the requested movement id', async () => {
     const signal = new AbortController().signal
-    const query = useWalletMovementDetailQuery('movement-123')
+    useWalletMovementDetailQuery('movement-123')
+    const [options] = mockUseQuery.mock.calls[0]
 
-    expect(query.enabled).toBe(true)
-    expect(query.queryKey).toEqual(appQueryKeys.wallet.movement('movement-123'))
-    expect(query.meta).toEqual({
+    expect(options.enabled).toBe(true)
+    expect(options.queryKey).toEqual(
+      appQueryKeys.wallet.movement('movement-123'),
+    )
+    expect(options.meta).toEqual({
       feature: 'wallet',
       operation: 'movement-detail-state',
       tags: {
@@ -144,7 +150,7 @@ describe('wallet hooks', () => {
       },
     })
 
-    await query.queryFn({
+    await options.queryFn({
       signal,
     })
 
@@ -155,25 +161,26 @@ describe('wallet hooks', () => {
   })
 
   it('invalidates wallet and home queries after a successful transfer request', async () => {
-    const mutation = useRequestWalletTransferMutation()
+    useRequestWalletTransferMutation()
     const request = {
       amount: {
         amountMinor: 470,
         currency: 'EUR',
       },
     }
+    const [options] = mockUseMutation.mock.calls[0]
 
     expect(mockUseMutation).toHaveBeenCalledTimes(1)
-    expect(mutation.mutationKey).toEqual(
+    expect(options.mutationKey).toEqual(
       appMutationKeys.wallet.requestTransfer(),
     )
-    expect(mutation.meta).toEqual({
+    expect(options.meta).toEqual({
       feature: 'wallet',
       operation: 'request-transfer',
     })
 
-    await mutation.mutationFn(request)
-    await mutation.onSuccess()
+    await options.mutationFn(request)
+    await options.onSuccess()
 
     expect(mockRequestWalletTransfer).toHaveBeenCalledWith(request)
     expect(invalidateWalletQueries).toHaveBeenCalledWith(queryClient)

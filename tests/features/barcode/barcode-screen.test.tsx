@@ -187,6 +187,120 @@ describe('BarcodeScreen', () => {
     })
   })
 
+  it('restores the captured brightness value when Android is not using system brightness', async () => {
+    currentBarcodeQueryState = {
+      data: activeBarcode,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    }
+    mockIsUsingSystemBrightnessAsync.mockResolvedValue(false)
+
+    renderBarcodeScreen()
+
+    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
+    })
+    await flushAsync()
+
+    fireEvent.press(screen.getByTestId('barcode-qr-close'))
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('barcode-qr-modal')).toBeNull()
+    })
+
+    expect(screen.getByTestId('barcode-screen')).toBeTruthy()
+  })
+
+  it('skips brightness adjustments when the API is unavailable', async () => {
+    currentBarcodeQueryState = {
+      data: activeBarcode,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    }
+    mockIsAvailableAsync.mockResolvedValue(false)
+
+    renderBarcodeScreen()
+
+    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
+    })
+    await flushAsync()
+
+    fireEvent.press(screen.getByTestId('barcode-qr-close'))
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('barcode-qr-modal')).toBeNull()
+    })
+
+    expect(screen.getByTestId('barcode-screen')).toBeTruthy()
+  })
+
+  it('falls back to restoring the captured brightness when Android system-brightness lookup fails', async () => {
+    currentBarcodeQueryState = {
+      data: activeBarcode,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    }
+    mockIsUsingSystemBrightnessAsync.mockRejectedValueOnce(
+      new Error('system brightness unavailable'),
+    )
+
+    renderBarcodeScreen()
+
+    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
+    })
+    await flushAsync()
+
+    fireEvent.press(screen.getByTestId('barcode-qr-close'))
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('barcode-qr-modal')).toBeNull()
+    })
+
+    expect(screen.getByTestId('barcode-screen')).toBeTruthy()
+  })
+
+  it('restores the captured brightness value on iOS', async () => {
+    currentBarcodeQueryState = {
+      data: activeBarcode,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    }
+    setPlatformOS('ios')
+
+    renderBarcodeScreen()
+
+    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
+    })
+    await flushAsync()
+
+    fireEvent.press(screen.getByTestId('barcode-qr-close'))
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('barcode-qr-modal')).toBeNull()
+    })
+
+    expect(screen.getByTestId('barcode-screen')).toBeTruthy()
+  })
+
   it('shows refreshing and expired states for an expired barcode while keeping the modal open', async () => {
     const refetch = jest.fn()
 

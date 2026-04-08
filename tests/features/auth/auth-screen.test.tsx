@@ -13,6 +13,7 @@ import {
   onboardingPreferenceStorage,
   ONBOARDING_COMPLETED_STORAGE_KEY,
 } from '@/features/app-data/storage/device/onboarding'
+import { i18n } from '@/i18n'
 import { createMockExpoConfig } from '../../support/expo-config'
 
 const mockCompleteSignIn = jest.fn()
@@ -93,6 +94,24 @@ describe('auth screen', () => {
     expect(screen.getByText('1 de 4')).toBeTruthy()
     expect(screen.queryByTestId('auth-login-button')).toBeNull()
     expect(__getAuthRequests()).toHaveLength(0)
+  })
+
+  it('skips onboarding when the user is already authenticated', () => {
+    act(() => {
+      onboardingPreferenceStorage.remove(ONBOARDING_COMPLETED_STORAGE_KEY)
+    })
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        isAuthenticated: true,
+        session: { accessToken: 'token', expiresAt: null },
+        status: 'authenticated',
+      }),
+    )
+
+    renderWithProvider(<AuthScreen />)
+
+    expect(screen.queryByTestId('onboarding-screen')).toBeNull()
+    expect(screen.getByTestId('auth-login-button')).toBeTruthy()
   })
 
   it('stores onboarding completion and skips it on later auth renders', () => {
@@ -270,6 +289,44 @@ describe('auth screen', () => {
     })
   })
 
+  it.each([
+    ['not-available', 'auth.lock.notAvailableError'],
+    ['not-enrolled', 'auth.lock.notEnrolledError'],
+    ['cancelled', 'auth.lock.cancelledError'],
+    ['failed', 'auth.lock.failedError'],
+  ] as const)(
+    'shows the translated biometric unlock error for %s',
+    async (reason, translationKey) => {
+      const unlockWithBiometrics = jest.fn().mockResolvedValue({
+        reason,
+        success: false,
+      })
+
+      mockUseAuthSession.mockReturnValue(
+        createAuthSessionMock({
+          consumePendingBiometricPrompt: jest.fn(() => false),
+          isAppLocked: true,
+          isAuthenticated: true,
+          session: { accessToken: 'token', expiresAt: null },
+          status: 'authenticated',
+          unlockWithBiometrics,
+        }),
+      )
+
+      renderWithProvider(<AuthScreen />)
+
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('auth-biometric-button'))
+      })
+
+      await waitFor(() => {
+        expect(unlockWithBiometrics).toHaveBeenCalledTimes(1)
+        expect(screen.getByTestId('auth-error-text')).toBeTruthy()
+        expect(screen.getByText(i18n.t(translationKey))).toBeTruthy()
+      })
+    },
+  )
+
   it('does not auto-prompt biometrics again when the auth screen remounts without a new lock event', async () => {
     const consumePendingBiometricPrompt = jest
       .fn()
@@ -432,6 +489,34 @@ describe('auth screen', () => {
     })
   })
 
+  it('does not exchange tokens when the auth prompt is cancelled', async () => {
+    __setNextPromptResults([
+      {
+        authentication: null,
+        error: null,
+        errorCode: null,
+        params: {},
+        type: 'cancel',
+        url: null,
+      },
+    ])
+
+    renderWithProvider(<AuthScreen />)
+    const authRequests = __getAuthRequests().slice(-3)
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('auth-login-button'))
+    })
+
+    await waitFor(() => {
+      expect(authRequests[0].promptAsync).toHaveBeenCalledTimes(1)
+    })
+
+    expect(exchangeCodeAsync).not.toHaveBeenCalled()
+    expect(mockCompleteSignIn).not.toHaveBeenCalled()
+    expect(mockRouterReplace).not.toHaveBeenCalled()
+  })
+
   it('shows the error state when code exchange fails', async () => {
     __setNextPromptResults([
       {
@@ -464,5 +549,31 @@ describe('auth screen', () => {
       }),
     )
     expect(captureException).toHaveBeenCalledWith(expect.any(Error))
+  })
+
+  it('falls back to the generic auth error copy for non-Error failures', async () => {
+    __setNextPromptResults([
+      {
+        authentication: null,
+        error: null,
+        errorCode: null,
+        params: {
+          code: 'broken-code',
+        },
+        type: 'success',
+        url: 'voltafrontend://auth/callback?code=broken-code',
+      },
+    ])
+    exchangeCodeAsync.mockRejectedValueOnce('broken')
+
+    renderWithProvider(<AuthScreen />)
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('auth-login-button'))
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(i18n.t('auth.errorFallback'))).toBeTruthy()
+    })
   })
 })

@@ -19,6 +19,8 @@ const legacyProfileSetupPreferencesSchema = z.object({
   notificationsAccepted: z.boolean(),
 })
 
+const EMPTY_PROFILE_EMAIL = 'setup@volta.invalid'
+
 export const profileSetupPreferencesSchema = z
   .union([
     currentProfileSetupPreferencesSchema,
@@ -67,7 +69,7 @@ function createEmptyProfileResponse() {
     },
     payoutAccount: null,
     personal: {
-      email: '',
+      email: EMPTY_PROFILE_EMAIL,
       name: null,
       nif: null,
       phoneNumber: null,

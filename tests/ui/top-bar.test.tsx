@@ -1,6 +1,7 @@
 import { Text } from 'react-native'
 import { fireEvent, within } from '@testing-library/react-native'
 import { TopBar } from '@/components/ui/TopBar'
+import { mockWindowDimensions } from '../support/react-native'
 import { renderWithProvider } from '../support/test-utils'
 
 jest.mock('expo-network', () => ({
@@ -54,20 +55,38 @@ describe('TopBar', () => {
   })
 
   it('renders the centered title variant with optional actions', () => {
+    const onBackPress = jest.fn()
+    const onMorePress = jest.fn()
     const view = renderWithProvider(
       <TopBar
         variant="title"
+        eyebrow="Conta"
         title="Perfil"
         subtitle="Gestao de conta"
-        leftAction={{ icon: <Text>Back</Text>, label: 'Voltar' }}
-        rightAction={{ icon: <Text>More</Text>, label: 'Mais' }}
+        leftAction={{
+          icon: <Text>Back</Text>,
+          label: 'Voltar',
+          onPress: onBackPress,
+        }}
+        rightAction={{
+          icon: <Text>More</Text>,
+          label: 'Mais',
+          onPress: onMorePress,
+        }}
       />,
     )
 
+    expect(view.getByText('Conta')).toBeTruthy()
     expect(view.getByText('Perfil')).toBeTruthy()
     expect(view.getByText('Gestao de conta')).toBeTruthy()
     expect(view.getByText('Back')).toBeTruthy()
     expect(view.getByText('More')).toBeTruthy()
+
+    fireEvent.press(view.getByLabelText('Voltar'))
+    fireEvent.press(view.getByLabelText('Mais'))
+
+    expect(onBackPress).toHaveBeenCalledTimes(1)
+    expect(onMorePress).toHaveBeenCalledTimes(1)
   })
 
   it('keeps long badge values on the notifications action', () => {
@@ -98,5 +117,17 @@ describe('TopBar', () => {
 
     expect(await view.findByTestId('top-bar-offline-indicator')).toBeTruthy()
     expect(view.getByText('Sem ligação')).toBeTruthy()
+  })
+
+  it('keeps the compact home layout usable without eyebrow, subtitle, or actions', () => {
+    const windowSpy = mockWindowDimensions({ width: 320 })
+    const view = renderWithProvider(<TopBar variant="home" title="Volta" />)
+
+    expect(view.getByTestId('top-bar-home-logo')).toBeTruthy()
+    expect(view.queryByText('Bem-vindo')).toBeNull()
+    expect(view.queryByLabelText('Notificacoes')).toBeNull()
+    expect(view.queryByTestId('top-bar-action-badge')).toBeNull()
+
+    windowSpy.mockRestore()
   })
 })

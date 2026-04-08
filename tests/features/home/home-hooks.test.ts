@@ -20,17 +20,18 @@ describe('home hooks', () => {
   })
 
   it('wires the home screen query with the expected key, metadata, and signal forwarding', async () => {
-    const query = useHomeScreenQuery()
+    useHomeScreenQuery()
     const signal = new AbortController().signal
+    const [options] = mockUseQuery.mock.calls[0]
 
     expect(mockUseQuery).toHaveBeenCalledTimes(1)
-    expect(query.queryKey).toEqual(appQueryKeys.home.state())
-    expect(query.meta).toEqual({
+    expect(options.queryKey).toEqual(appQueryKeys.home.state())
+    expect(options.meta).toEqual({
       feature: 'home',
       operation: 'screen-state',
     })
 
-    await query.queryFn({
+    await options.queryFn({
       signal,
     })
 

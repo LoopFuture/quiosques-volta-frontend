@@ -1,6 +1,17 @@
-import { screen } from '@testing-library/react-native'
+import { fireEvent, screen } from '@testing-library/react-native'
 import MapScreen from '@/app/(tabs)/map'
+import { barcodeRoutes } from '@/features/barcode/routes'
 import { renderWithProvider } from '../../support/test-utils'
+
+jest.mock('expo-router', () => {
+  const { createExpoRouterMock } = jest.requireActual(
+    '../../support/expo-router-mock',
+  )
+
+  return createExpoRouterMock()
+})
+
+const { __mockRouterPush: mockRouterPush } = jest.requireMock('expo-router')
 
 describe('map screen', () => {
   beforeEach(() => {
@@ -19,5 +30,9 @@ describe('map screen', () => {
     ).toBeTruthy()
     expect(screen.getByText('Mostrar código')).toBeTruthy()
     expect(screen.queryByTestId('map-preview-card')).toBeNull()
+
+    fireEvent.press(screen.getByText('Mostrar código'))
+
+    expect(mockRouterPush).toHaveBeenCalledWith(barcodeRoutes.index)
   })
 })

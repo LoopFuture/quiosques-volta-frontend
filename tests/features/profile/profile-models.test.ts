@@ -414,4 +414,66 @@ describe('profile models and forms', () => {
       'jwt-email@volta.pt',
     )
   })
+
+  it('falls back to empty setup defaults and normalizes nullable profile fields', () => {
+    const emptySeedState = getProfileSetupSeedState()
+
+    expect(emptySeedState.profile.personal.email).toBe('setup@volta.invalid')
+    expect(emptySeedState.profile.personal.name).toBeNull()
+    expect(emptySeedState.profile.preferences).toEqual({
+      alertsEmail: 'setup@volta.invalid',
+      alertsEnabled: false,
+    })
+    expect(emptySeedState.profile.onboarding.status).toBe('in_progress')
+
+    const nullableProfile = profileResponseSchema.parse({
+      ...profile,
+      payoutAccount: null,
+      personal: {
+        email: 'profile-email@volta.pt',
+        name: null,
+        nif: null,
+        phoneNumber: null,
+      },
+      preferences: null,
+    })
+
+    const fallbackSeedState = getProfileSetupSeedState({
+      identity: {
+        email: null,
+        name: null,
+      },
+      profile: nullableProfile,
+    })
+
+    expect(fallbackSeedState.profile.personal.email).toBe(
+      'profile-email@volta.pt',
+    )
+    expect(fallbackSeedState.profile.personal.name).toBeNull()
+    expect(fallbackSeedState.profile.preferences).toEqual({
+      alertsEmail: 'profile-email@volta.pt',
+      alertsEnabled: false,
+    })
+    expect(
+      getProfileSetupSnapshotFromProfile(nullableProfile, {
+        biometricsEnabled: false,
+        pushNotificationsEnabled: true,
+      }),
+    ).toEqual({
+      payments: {
+        iban: '',
+        spinEnabled: false,
+      },
+      personal: {
+        email: 'profile-email@volta.pt',
+        name: '',
+        nif: '',
+        phoneNumber: '',
+      },
+      preferences: {
+        biometricsEnabled: false,
+        pushNotificationsEnabled: true,
+      },
+    })
+  })
 })

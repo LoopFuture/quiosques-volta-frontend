@@ -90,18 +90,19 @@ describe('profile hooks', () => {
   })
 
   it('wires the profile query with the expected key, metadata, and signal forwarding', async () => {
-    const query = useProfileQuery()
+    useProfileQuery()
     const signal = new AbortController().signal
+    const [options] = mockUseQuery.mock.calls[0]
 
     expect(mockUseQuery).toHaveBeenCalledTimes(1)
-    expect(query.queryKey).toEqual(appQueryKeys.profile.state())
-    expect(query.enabled).toBe(true)
-    expect(query.meta).toEqual({
+    expect(options.queryKey).toEqual(appQueryKeys.profile.state())
+    expect(options.enabled).toBe(true)
+    expect(options.meta).toEqual({
       feature: 'profile',
       operation: 'profile-state',
     })
 
-    await query.queryFn({
+    await options.queryFn({
       signal,
     })
 
@@ -109,33 +110,35 @@ describe('profile hooks', () => {
   })
 
   it('allows the profile query to be disabled explicitly', () => {
-    const query = useProfileQuery({
+    useProfileQuery({
       enabled: false,
     })
+    const [options] = mockUseQuery.mock.calls[0]
 
-    expect(query.enabled).toBe(false)
+    expect(options.enabled).toBe(false)
   })
 
   it('invalidates profile and barcode queries after updating personal data', async () => {
-    const mutation = useUpdateProfilePersonalMutation()
+    useUpdateProfilePersonalMutation()
     const patch = {
       personal: {
         name: 'Ana Silva',
       },
     }
+    const [options] = mockUseMutation.mock.calls[0]
 
     expect(mockUseMutation).toHaveBeenCalledTimes(1)
-    expect(mutation.mutationKey).toEqual(
+    expect(options.mutationKey).toEqual(
       appMutationKeys.profile.updatePersonal(),
     )
-    expect(mutation.meta).toEqual({
+    expect(options.meta).toEqual({
       feature: 'profile',
       operation: 'update-personal',
       redactKeys: ['email', 'name', 'nif', 'phoneNumber'],
     })
 
-    await mutation.mutationFn(patch)
-    await mutation.onSuccess(profileState)
+    await options.mutationFn(patch)
+    await options.onSuccess(profileState)
 
     expect(mockPatchProfile).toHaveBeenCalledWith(patch)
     expect(queryClient.setQueryData).toHaveBeenCalledWith(
@@ -147,25 +150,26 @@ describe('profile hooks', () => {
   })
 
   it('invalidates wallet and home queries after updating payments', async () => {
-    const mutation = useUpdateProfilePaymentsMutation()
+    useUpdateProfilePaymentsMutation()
     const patch = {
       payoutAccount: {
         iban: 'PT50000201231234567890154',
         rail: 'sepa',
       },
     }
+    const [options] = mockUseMutation.mock.calls[0]
 
-    expect(mutation.mutationKey).toEqual(
+    expect(options.mutationKey).toEqual(
       appMutationKeys.profile.updatePayments(),
     )
-    expect(mutation.meta).toEqual({
+    expect(options.meta).toEqual({
       feature: 'profile',
       operation: 'update-payments',
       redactKeys: ['iban'],
     })
 
-    await mutation.mutationFn(patch)
-    await mutation.onSuccess(profileState)
+    await options.mutationFn(patch)
+    await options.onSuccess(profileState)
 
     expect(mockPatchProfile).toHaveBeenCalledWith(patch)
     expect(invalidateProfileQueries).toHaveBeenCalledWith(queryClient)
@@ -174,24 +178,25 @@ describe('profile hooks', () => {
   })
 
   it('invalidates the profile query after updating preferences', async () => {
-    const mutation = useUpdateProfilePreferencesMutation()
+    useUpdateProfilePreferencesMutation()
     const patch = {
       preferences: {
         alertsEmail: 'alerts@volta.pt',
       },
     }
+    const [options] = mockUseMutation.mock.calls[0]
 
-    expect(mutation.mutationKey).toEqual(
+    expect(options.mutationKey).toEqual(
       appMutationKeys.profile.updatePreferences(),
     )
-    expect(mutation.meta).toEqual({
+    expect(options.meta).toEqual({
       feature: 'profile',
       operation: 'update-preferences',
       redactKeys: ['alertsEmail'],
     })
 
-    await mutation.mutationFn(patch)
-    await mutation.onSuccess(profileState)
+    await options.mutationFn(patch)
+    await options.onSuccess(profileState)
 
     expect(mockPatchProfile).toHaveBeenCalledWith(patch)
     expect(invalidateProfileQueries).toHaveBeenCalledWith(queryClient)
@@ -201,18 +206,17 @@ describe('profile hooks', () => {
   })
 
   it('serializes setup completion and invalidates dependent queries', async () => {
-    const mutation = useCompleteProfileSetupMutation()
+    useCompleteProfileSetupMutation()
+    const [options] = mockUseMutation.mock.calls[0]
 
-    expect(mutation.mutationKey).toEqual(
-      appMutationKeys.profile.completeSetup(),
-    )
-    expect(mutation.meta).toEqual({
+    expect(options.mutationKey).toEqual(appMutationKeys.profile.completeSetup())
+    expect(options.meta).toEqual({
       feature: 'profile',
       operation: 'complete-setup',
       redactKeys: ['email', 'iban', 'name', 'nif', 'phoneNumber'],
     })
 
-    await mutation.mutationFn({
+    await options.mutationFn({
       snapshot: {
         payments: {
           iban: 'PT50000201231234567890154',
@@ -230,7 +234,7 @@ describe('profile hooks', () => {
         },
       },
     })
-    await mutation.onSuccess(profileState)
+    await options.onSuccess(profileState)
 
     expect(mockPatchProfile).toHaveBeenCalledWith({
       onboarding: {

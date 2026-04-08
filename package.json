@@ -22,7 +22,7 @@
     "test:file": "jest --runInBand --watch=false",
     "test:coverage": "jest --coverage --runInBand --watch=false",
     "test:watch": "jest --watch",
-    "test:ci": "jest --runInBand --watch=false",
+    "test:ci": "jest --coverage --runInBand --watch=false",
     "typecheck": "tsc --noEmit",
     "upload:sourcemaps": "node ./scripts/upload-sentry-sourcemaps.mjs",
     "validate": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:ci",

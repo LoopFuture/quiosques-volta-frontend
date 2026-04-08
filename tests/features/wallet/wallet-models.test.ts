@@ -96,6 +96,36 @@ const completedTransfer = walletTransactionSchema.parse({
   status: 'completed',
 })
 
+const creditWithoutLocation = walletTransactionSchema.parse({
+  ...creditMovement,
+  creditDetails: undefined,
+  id: 'credit-no-location',
+})
+
+const creditWithoutSummaryCopy = walletTransactionSchema.parse({
+  ...creditMovement,
+  creditDetails: undefined,
+  description: null,
+  id: 'credit-no-copy',
+})
+
+const pendingTransferWithoutOptionalDetails = walletTransactionSchema.parse({
+  ...processingTransfer,
+  id: 'transfer-pending-fallbacks',
+  status: 'pending',
+  transferDetails: {
+    expectedArrivalAt: null,
+    payoutAccount: undefined,
+    requestedAt: '2026-03-15T10:30:00Z',
+  },
+})
+
+const completedTransferWithoutDetails = walletTransactionSchema.parse({
+  ...completedTransfer,
+  id: 'transfer-completed-fallbacks',
+  transferDetails: undefined,
+})
+
 describe('wallet models, forms, and presentation', () => {
   beforeEach(() => {
     setLocaleOverrideForTests('pt-PT')
@@ -283,6 +313,69 @@ describe('wallet models, forms, and presentation', () => {
         state: 'upcoming',
       }),
     ])
+  })
+
+  it('falls back when credit and transfer detail fields are missing', () => {
+    expect(getWalletMovementTitle(t, creditWithoutLocation)).toBe(
+      'Credit generated',
+    )
+    expect(getWalletMovementTitle(t, creditWithoutSummaryCopy)).toBe('-')
+    expect(
+      getWalletMovementSubtitle('pt', completedTransferWithoutDetails),
+    ).toEqual(expect.any(String))
+
+    expect(
+      getWalletMovementDetailItems(
+        t,
+        'pt',
+        pendingTransferWithoutOptionalDetails,
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.paymentAccountLabel'),
+          value: '-',
+        }),
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.expectedArrivalLabel'),
+          value: '-',
+        }),
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.requestedAtLabel'),
+          value: formatWalletDateTime('2026-03-15T10:30:00Z', 'pt'),
+        }),
+      ]),
+    )
+
+    expect(
+      getWalletMovementSummaryItems(
+        t,
+        'pt',
+        pendingTransferWithoutOptionalDetails,
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.expectedArrivalLabel'),
+          value: '-',
+        }),
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.paymentAccountLabel'),
+          value: '-',
+        }),
+      ]),
+    )
+
+    expect(
+      getWalletMovementSummaryItems(t, 'pt', completedTransferWithoutDetails),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.paymentAccountLabel'),
+          value: '-',
+        }),
+      ]),
+    )
   })
 
   it('normalizes transfer input, validates balances, and serializes the request payload', () => {

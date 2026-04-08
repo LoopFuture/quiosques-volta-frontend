@@ -19,17 +19,18 @@ describe('barcode hooks', () => {
   })
 
   it('wires the barcode screen query with the expected key, metadata, and signal forwarding', async () => {
-    const query = useBarcodeScreenQuery()
+    useBarcodeScreenQuery()
     const signal = new AbortController().signal
+    const [options] = mockUseQuery.mock.calls[0]
 
     expect(mockUseQuery).toHaveBeenCalledTimes(1)
-    expect(query.queryKey).toEqual(appQueryKeys.barcode.screen())
-    expect(query.meta).toEqual({
+    expect(options.queryKey).toEqual(appQueryKeys.barcode.screen())
+    expect(options.meta).toEqual({
       feature: 'barcode',
       operation: 'screen-state',
     })
 
-    await query.queryFn({
+    await options.queryFn({
       signal,
     })
 

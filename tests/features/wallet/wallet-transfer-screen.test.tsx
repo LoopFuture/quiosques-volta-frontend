@@ -144,6 +144,19 @@ describe('WalletTransferScreen', () => {
     expect(screen.getByTestId('wallet-transfer-screen-skeleton')).toBeTruthy()
   })
 
+  it('keeps the skeleton visible until both queries resolve', () => {
+    mockUseWalletOverviewQuery.mockReturnValue({
+      data: walletOverviewState,
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<WalletTransferScreen />)
+
+    expect(screen.getByTestId('wallet-transfer-screen-skeleton')).toBeTruthy()
+  })
+
   it('renders the error state and retries both queries', () => {
     const refetchWallet = jest.fn()
     const refetchProfile = jest.fn()
@@ -290,5 +303,67 @@ describe('WalletTransferScreen', () => {
         i18n.t('tabScreens.wallet.transfer.errorToast'),
       )
     })
+  })
+
+  it('renders fallback review values when no payout account is configured', () => {
+    mockUseWalletOverviewQuery.mockReturnValue({
+      data: walletOverviewState,
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+    mockUseProfileQuery.mockReturnValue({
+      data: {
+        ...profileState,
+        payoutAccount: null,
+      },
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<WalletTransferScreen />)
+
+    expect(
+      screen.getByText(i18n.t('tabScreens.wallet.transfer.reviewTitle')),
+    ).toBeTruthy()
+    expect(screen.getAllByText('-').length).toBeGreaterThan(0)
+    expect(screen.queryByTestId('wallet-transfer-review-note')).toBeNull()
+    expect(
+      screen.getByText(i18n.t('tabScreens.wallet.transfer.confirmActionLabel')),
+    ).toBeTruthy()
+  })
+
+  it('renders SEPA payout review copy when the payout account is not SPIN', () => {
+    mockUseWalletOverviewQuery.mockReturnValue({
+      data: walletOverviewState,
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+    mockUseProfileQuery.mockReturnValue({
+      data: {
+        ...profileState,
+        payoutAccount: {
+          ibanMasked: 'PT50************1234',
+          rail: 'sepa',
+        },
+      },
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<WalletTransferScreen />)
+
+    expect(
+      screen.getAllByText(i18n.t('tabScreens.wallet.transfer.payoutMethodSepa'))
+        .length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText(
+        i18n.t('tabScreens.wallet.transfer.payoutOptionSepaCaption'),
+      ).length,
+    ).toBeGreaterThan(0)
   })
 })
