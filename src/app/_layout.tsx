@@ -180,12 +180,6 @@ function RootLayoutNav({ fontsReady }: { fontsReady: boolean }) {
               headerShown: false,
             }}
           />
-          <Stack.Screen
-            name="notifications"
-            options={{
-              headerShown: false,
-            }}
-          />
         </Stack.Protected>
       </Stack>
     </>

@@ -10,7 +10,7 @@ export async function fetchProfileState(signal?: AbortSignal) {
         operation: 'profile-state',
       },
       method: 'GET',
-      path: '/profile',
+      path: '/api/v1/profile',
       signal,
     }),
   )
@@ -26,7 +26,7 @@ export async function patchProfile(patch: ProfilePatchRequest) {
         redactKeys: ['email', 'iban', 'name', 'nif', 'phoneNumber'],
       },
       method: 'PATCH',
-      path: '/profile',
+      path: '/api/v1/profile',
     }),
   )
 }

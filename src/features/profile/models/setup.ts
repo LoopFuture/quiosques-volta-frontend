@@ -3,8 +3,7 @@ import type { AppAuthIdentity } from '@/features/auth/models/identity'
 import {
   devicePrivacySettingsSchema,
   getDefaultDevicePrivacySettings,
-  getProfileMockData,
-  profilePersonalSchema,
+  isSpinPayoutRail,
   profileResponseSchema,
   type DevicePrivacySettings,
   type ProfileResponse,
@@ -38,7 +37,12 @@ export const profileSetupSnapshotSchema = z.object({
     iban: z.string(),
     spinEnabled: z.boolean(),
   }),
-  personal: profilePersonalSchema,
+  personal: z.object({
+    email: z.string().email(),
+    name: z.string(),
+    nif: z.string(),
+    phoneNumber: z.string(),
+  }),
   preferences: profileSetupPreferencesSchema,
 })
 
@@ -51,20 +55,47 @@ function resolveIdentityEmail(
   identity?: Pick<AppAuthIdentity, 'email'> | null,
   fallbackEmail?: string,
 ) {
-  return identity?.email ?? fallbackEmail ?? getProfileMockData().personal.email
+  return identity?.email ?? fallbackEmail ?? ''
+}
+
+function createEmptyProfileResponse() {
+  return profileResponseSchema.parse({
+    memberSince: '',
+    onboarding: {
+      completedAt: null,
+      status: 'in_progress',
+    },
+    payoutAccount: null,
+    personal: {
+      email: '',
+      name: null,
+      nif: null,
+      phoneNumber: null,
+    },
+    preferences: null,
+    stats: {
+      completedTransfersCount: 0,
+      creditsEarned: {
+        amountMinor: 0,
+        currency: 'EUR',
+      },
+      processingTransfersCount: 0,
+      returnedPackagesCount: 0,
+    },
+  })
 }
 
 export function getProfileSetupSeedState({
   deviceSettings = getDefaultDevicePrivacySettings(),
   identity,
-  profile = getProfileMockData(),
+  profile = createEmptyProfileResponse(),
 }: {
   deviceSettings?: DevicePrivacySettings
   identity?: Pick<AppAuthIdentity, 'email' | 'name'> | null
   profile?: ProfileResponse
 } = {}) {
   const resolvedEmail = resolveIdentityEmail(identity, profile.personal.email)
-  const resolvedName = identity?.name ?? profile.personal.name
+  const resolvedName = identity?.name ?? profile.personal.name ?? null
 
   return {
     deviceSettings: devicePrivacySettingsSchema.parse(deviceSettings),
@@ -80,7 +111,9 @@ export function getProfileSetupSeedState({
         name: resolvedName,
       },
       preferences: {
-        ...profile.preferences,
+        ...(profile.preferences ?? {
+          alertsEnabled: false,
+        }),
         alertsEmail: resolvedEmail,
       },
     }),
@@ -94,9 +127,14 @@ export function getProfileSetupSnapshotFromProfile(
   return profileSetupSnapshotSchema.parse({
     payments: {
       iban: '',
-      spinEnabled: profile.payoutAccount.spinEnabled,
+      spinEnabled: isSpinPayoutRail(profile.payoutAccount?.rail),
     },
-    personal: profile.personal,
+    personal: {
+      email: profile.personal.email,
+      name: profile.personal.name ?? '',
+      nif: profile.personal.nif ?? '',
+      phoneNumber: profile.personal.phoneNumber ?? '',
+    },
     preferences: {
       biometricsEnabled: deviceSettings.biometricsEnabled,
       pushNotificationsEnabled: deviceSettings.pushNotificationsEnabled,

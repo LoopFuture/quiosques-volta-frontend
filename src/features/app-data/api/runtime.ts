@@ -1,9 +1,7 @@
 import Constants from 'expo-constants'
-import { MOCK_API_ORIGIN } from './constants'
 
 export type ApiRuntimeConfig = {
-  baseUrl?: string
-  mockingEnabled: boolean
+  baseUrl: string
   resolvedBaseUrl: string
 }
 
@@ -19,16 +17,23 @@ function toOptionalString(value: unknown) {
   return trimmedValue.length > 0 ? trimmedValue : undefined
 }
 
-function toOptionalBoolean(value: unknown) {
-  if (typeof value === 'boolean') {
-    return value
+function resolveBaseUrl(value: unknown) {
+  const baseUrl = toOptionalString(value)
+
+  if (!baseUrl) {
+    throw new Error(
+      'Missing or invalid API runtime config. Define API_BASE_URL in app config env.',
+    )
   }
 
-  return undefined
-}
-
-function getDefaultMockingEnabled() {
-  return process.env.NODE_ENV !== 'production'
+  try {
+    new URL(baseUrl)
+    return baseUrl
+  } catch {
+    throw new Error(
+      'Missing or invalid API runtime config. Define API_BASE_URL in app config env.',
+    )
+  }
 }
 
 export function getApiRuntimeConfig(): ApiRuntimeConfig {
@@ -41,27 +46,14 @@ export function getApiRuntimeConfig(): ApiRuntimeConfig {
     typeof Constants.expoConfig.extra.api === 'object'
       ? (Constants.expoConfig.extra.api as Record<string, unknown>)
       : undefined
-  const baseUrl = toOptionalString(apiConfig?.baseUrl)
-  const mockingEnabled =
-    toOptionalBoolean(apiConfig?.mockingEnabled) ?? getDefaultMockingEnabled()
-
-  if (!mockingEnabled && !baseUrl) {
-    throw new Error(
-      'Missing app API runtime config. Define API_BASE_URL or enable API_MOCKING_ENABLED.',
-    )
-  }
+  const baseUrl = resolveBaseUrl(apiConfig?.baseUrl)
 
   cachedApiRuntimeConfig = {
-    ...(baseUrl ? { baseUrl } : {}),
-    mockingEnabled,
-    resolvedBaseUrl: mockingEnabled ? MOCK_API_ORIGIN : (baseUrl as string),
+    baseUrl,
+    resolvedBaseUrl: baseUrl,
   }
 
   return cachedApiRuntimeConfig
-}
-
-export function isMockApiEnabled() {
-  return getApiRuntimeConfig().mockingEnabled
 }
 
 export function resetApiRuntimeConfigForTests() {

@@ -22,7 +22,7 @@ describe('localization setup', () => {
     expect(syncLocale()).toBe(fallbackLocale)
 
     expect(i18n.t('tabs.home.label')).toBe('Home')
-    expect(i18n.t('routes.notifications.title')).toBe('Notifications')
+    expect(i18n.t('tabScreens.barcode.card.title')).toBe('Your Volta code')
     expect(i18n.t('tabScreens.home.overview.title')).toBe('Right now')
     expect(i18n.t('tabScreens.wallet.movementsPage.title')).toBe('Full history')
     expect(
@@ -35,11 +35,9 @@ describe('localization setup', () => {
         count: 24,
       }),
     ).toBe('24 containers')
-    expect(
-      i18n.t('routes.notifications.items.creditAdded.title', {
-        location: 'Pingo Doce - Afragide',
-      }),
-    ).toBe('Credit added at Pingo Doce - Afragide')
+    expect(i18n.t('tabScreens.profile.personal.photoTitle')).toBe(
+      'Profile photo',
+    )
     expect(getWalletHistoryFilterOptions(t)[0]?.label).toBe('All')
   })
 
@@ -49,7 +47,7 @@ describe('localization setup', () => {
 
     expect(i18n.t('tabs.home.label')).toBe('Início')
     expect(i18n.t('tabs.home.header.eyebrow')).toBe('Bem-vindo')
-    expect(i18n.t('routes.notifications.title')).toBe('Notificações')
+    expect(i18n.t('tabScreens.barcode.card.title')).toBe('O teu código Volta')
     expect(getProfileLanguageOptions(t)[0]?.label).toBe('Sistema')
     expect(i18n.t('tabScreens.profile.privacy.title')).toBe(
       'Privacidade e segurança',
@@ -71,12 +69,8 @@ describe('localization setup', () => {
         count: 2,
       }),
     ).toBe('2 transferências pendentes')
-    expect(
-      i18n.t('routes.notifications.items.transferProcessing.message', {
-        amount: '1,20€',
-      }),
-    ).toBe(
-      'O teu pedido de transferência de 1,20€ está a ser enviado para a conta associada.',
+    expect(i18n.t('tabScreens.profile.personal.photoTitle')).toBe(
+      'Foto de perfil',
     )
     expect(getWalletHistoryFilterOptions(t)[0]?.label).toBe('Todos')
   })

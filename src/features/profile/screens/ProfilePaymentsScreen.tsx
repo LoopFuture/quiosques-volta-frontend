@@ -44,7 +44,7 @@ function ProfilePaymentsScreenSkeleton() {
   )
 }
 
-function ProfilePaymentsForm({ payments }: { payments: PayoutAccount }) {
+function ProfilePaymentsForm({ payments }: { payments: PayoutAccount | null }) {
   const updatePaymentsMutation = useUpdateProfilePaymentsMutation()
   const { showError, showSuccess } = useActionToast()
   const { t } = useTranslation()
@@ -81,7 +81,9 @@ function ProfilePaymentsForm({ payments }: { payments: PayoutAccount }) {
                 helperText={
                   fieldState.error
                     ? undefined
-                    : `${t('tabScreens.profile.payments.ibanHelper')} ${payments.ibanMasked}`
+                    : payments?.ibanMasked
+                      ? `${t('tabScreens.profile.payments.ibanHelper')} ${payments.ibanMasked}`
+                      : t('tabScreens.profile.payments.ibanHelper')
                 }
                 label={t('tabScreens.profile.payments.ibanLabel')}
                 onBlur={field.onBlur}

@@ -16,8 +16,8 @@ describe('PersonalBarcodeCard', () => {
     const view = renderWithProvider(
       <PersonalBarcodeCard
         barcode={<Text>QR customizado</Text>}
+        code="VF-0001-RTM-2026"
         description="Apresenta a maquina para iniciar o pagamento."
-        reference="VF-0001-RTM-2026"
         title="O teu barcode pessoal"
       />,
     )

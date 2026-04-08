@@ -1,18 +1,16 @@
 import type { Tone } from '@/components/ui/types'
 
-export type AppToastVariant = 'success' | 'error' | 'hint' | 'mock'
+export type AppToastVariant = 'success' | 'error' | 'hint'
 
 export const APP_TOAST_DEFAULT_DURATION_MS: Record<AppToastVariant, number> = {
   error: 5000,
   hint: 2500,
-  mock: 4500,
   success: 3500,
 }
 
 export const APP_TOAST_TONE: Record<AppToastVariant, Tone> = {
   error: 'error',
   hint: 'neutral',
-  mock: 'warning',
   success: 'accent',
 }
 

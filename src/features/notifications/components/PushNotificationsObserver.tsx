@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useRef } from 'react'
 import * as Notifications from 'expo-notifications'
 import { useRouter } from 'expo-router'
 import { recordDiagnosticEvent } from '@/features/app-data/monitoring'
-import { notificationsRoutes } from '../routes'
+import { homeRoutes } from '@/features/home/routes'
 import { usePushNotifications } from '../hooks/usePushNotifications'
 import { parseNotificationRouteUrl } from '../models/runtime'
 
@@ -55,7 +55,7 @@ export function PushNotificationsObserver() {
 
       const rawRoute = response.notification.request.content.data?.url
       const parsedRoute = parseNotificationRouteUrl(rawRoute)
-      const nextRoute = parsedRoute ?? notificationsRoutes.index
+      const nextRoute = parsedRoute ?? homeRoutes.index
 
       recordDiagnosticEvent({
         details: {

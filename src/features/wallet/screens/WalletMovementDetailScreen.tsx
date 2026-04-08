@@ -9,7 +9,6 @@ import {
   StatusTimeline,
   SurfaceCard,
 } from '@/components/ui'
-import { useMockActionFeedback } from '@/features/app-shell/hooks/useMockActionFeedback'
 import { WalletDetailScreenFrame } from '../components/WalletDetailScreenFrame'
 import { WalletMovementSummaryCard } from '../components/WalletMovementSummaryCard'
 import { WalletReceiptCard } from '../components/WalletReceiptCard'
@@ -62,7 +61,6 @@ function WalletMovementDetailSkeleton() {
 
 export default function WalletMovementDetailScreen() {
   const router = useRouter()
-  const showMockAction = useMockActionFeedback()
   const { i18n, t } = useTranslation()
   const { movementId } = useLocalSearchParams<{
     movementId?: string | string[]
@@ -157,22 +155,7 @@ export default function WalletMovementDetailScreen() {
     <WalletDetailScreenFrame
       description=""
       footer={
-        movement.type === 'transfer_debit' &&
-        movement.status === 'completed' ? (
-          <PrimaryButton
-            onPress={() =>
-              showMockAction(
-                t(
-                  'tabScreens.wallet.movementDetail.transfer.completed.receiptActionLabel',
-                ),
-              )
-            }
-          >
-            {t(
-              'tabScreens.wallet.movementDetail.transfer.completed.receiptActionLabel',
-            )}
-          </PrimaryButton>
-        ) : isRetryableTransfer ? (
+        isRetryableTransfer ? (
           <PrimaryButton onPress={() => router.push(walletRoutes.transfer)}>
             {t('tabScreens.wallet.movementDetail.transfer.retryActionLabel')}
           </PrimaryButton>

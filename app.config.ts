@@ -43,29 +43,6 @@ function parseScopes(value?: string) {
     .filter(Boolean)
 }
 
-function parseBoolean(
-  name: string,
-  value: string | undefined,
-): boolean | undefined {
-  if (!value) {
-    return undefined
-  }
-
-  const normalizedValue = value.trim().toLowerCase()
-
-  if (normalizedValue === 'true' || normalizedValue === '1') {
-    return true
-  }
-
-  if (normalizedValue === 'false' || normalizedValue === '0') {
-    return false
-  }
-
-  throw new Error(
-    `Invalid boolean environment variable: ${name}. Use "true" or "false".`,
-  )
-}
-
 function parseNumber(
   name: string,
   value: string | undefined,
@@ -96,10 +73,6 @@ function parseNumber(
   }
 
   return parsedValue
-}
-
-function getDefaultApiMockingEnabled() {
-  return process.env.NODE_ENV !== 'production'
 }
 
 function getBuildProfile() {
@@ -263,12 +236,9 @@ const config: ExpoConfig = {
         ) ?? getDefaultSentryTracesSampleRate(sentryEnvironment),
     },
     api: {
-      baseUrl: getEnvironmentVariable('API_BASE_URL'),
-      mockingEnabled:
-        parseBoolean(
-          'API_MOCKING_ENABLED',
-          getEnvironmentVariable('API_MOCKING_ENABLED'),
-        ) ?? getDefaultApiMockingEnabled(),
+      baseUrl: getEnvironmentVariable('API_BASE_URL', {
+        required: true,
+      }),
     },
   },
 }

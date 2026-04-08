@@ -14,8 +14,8 @@ describe('native intent redirects', () => {
     expect(
       redirectSystemPath({
         initial: false,
-        path: '/notifications',
+        path: '/wallet',
       }),
-    ).toBe('/notifications')
+    ).toBe('/wallet')
   })
 })

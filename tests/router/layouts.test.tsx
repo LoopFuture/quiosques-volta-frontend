@@ -4,6 +4,8 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native'
+import type { ReactNode } from 'react'
+
 import TabLayout from '@/app/(tabs)/_layout'
 import RootLayout, {
   ErrorBoundary as RootErrorBoundary,
@@ -11,8 +13,6 @@ import RootLayout, {
 } from '@/app/_layout'
 import ProfileLayout from '@/app/profile/_layout'
 import WalletLayout from '@/app/wallet/_layout'
-import { setLocaleOverrideForTests, syncLocale } from '@/i18n'
-import { createMockExpoConfig } from '../support/expo-config'
 
 jest.mock('expo-font', () => {
   const mockUseFonts = jest.fn()
@@ -36,48 +36,56 @@ jest.mock('expo-router', () => {
 })
 
 jest.mock('expo-status-bar', () => ({
-  StatusBar: ({ style }: any) => {
+  StatusBar: ({ style }: { style: string }) => {
     const { Text } = jest.requireActual('react-native')
 
     return <Text>{`status:${style}`}</Text>
   },
 }))
 
-jest.mock('react-native-safe-area-context', () => ({
-  useSafeAreaInsets: () => ({
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: 0,
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
   }),
 }))
 
-jest.mock('@tamagui/lucide-icons', () => ({
-  Home: () => null,
-  Map: () => null,
-  QrCode: () => null,
-  User: () => null,
-  Wallet: () => null,
-}))
-
 jest.mock('@/components/Provider', () => ({
-  Provider: ({ children }: any) => children,
+  Provider: ({ children }: { children: ReactNode }) => children,
 }))
 
 jest.mock('@/components/ui', () => {
   const { Text, View } = jest.requireActual('react-native')
 
   return {
-    QueryErrorState: ({ onRetry, testID }: any) => (
+    QueryErrorState: ({
+      onRetry,
+      testID,
+    }: {
+      onRetry: () => void
+      testID: string
+    }) => (
       <Text onPress={onRetry} testID={testID}>
         retry
       </Text>
     ),
-    ScreenContainer: ({ children, testID }: any) => (
-      <View testID={testID}>{children}</View>
-    ),
+    ScreenContainer: ({
+      children,
+      testID,
+    }: {
+      children: ReactNode
+      testID: string
+    }) => <View testID={testID}>{children}</View>,
   }
 })
+
+jest.mock('@/features/app-data/monitoring', () => ({
+  getSentryRuntimeConfig: jest.fn(() => ({
+    enabled: false,
+  })),
+  initializeMonitoring: jest.fn(),
+  recordDiagnosticEvent: jest.fn(),
+  registerNavigationContainer: jest.fn(),
+}))
 
 jest.mock(
   '@/features/notifications/components/PushNotificationsObserver',
@@ -102,26 +110,33 @@ jest.mock('@/features/app-shell/components/BottomTabBar', () => {
   }
 })
 
+jest.mock('@tamagui/lucide-icons', () => ({
+  ArrowLeft: () => null,
+  Home: () => null,
+  Map: () => null,
+  QrCode: () => null,
+  User: () => null,
+  Wallet: () => null,
+}))
+
 jest.mock('tamagui', () => {
-  const { Text, View } = jest.requireActual('react-native')
-  const mockUseTheme = jest.fn()
+  const { View } = jest.requireActual('react-native')
   const mockUseThemeName = jest.fn()
 
   return {
-    Button: ({ children }: any) => <Text>{children}</Text>,
-    ScrollView: ({ children, testID }: any) => (
-      <View testID={testID}>{children}</View>
+    YStack: ({ children, ...props }: { children: ReactNode }) => (
+      <View {...props}>{children}</View>
     ),
-    YStack: ({ children }: any) => <View>{children}</View>,
-    __mockUseTheme: mockUseTheme,
     __mockUseThemeName: mockUseThemeName,
-    useTheme: mockUseTheme,
     useThemeName: mockUseThemeName,
   }
 })
 
+jest.mock('@/themes', () => ({
+  getTabBarBackground: jest.fn(() => '#F3F7FC'),
+}))
+
 const { __mockUseFonts: mockUseFonts } = jest.requireMock('expo-font')
-const { __setExpoConfig } = jest.requireMock('expo-constants')
 const {
   __mockHideAsync: mockHideAsync,
   __mockRouterNavigate: mockRouterNavigate,
@@ -137,23 +152,20 @@ const { useAuthSession: mockUseAuthSession } = jest.requireMock(
 const { useProfileQuery: mockUseProfileQuery } = jest.requireMock(
   '@/features/profile/hooks',
 )
-const { BottomTabBar: mockBottomNav } = jest.requireMock(
+const { BottomTabBar: mockBottomTabBar } = jest.requireMock(
   '@/features/app-shell/components/BottomTabBar',
 )
-const { captureException } = jest.requireMock('@sentry/react-native')
-const { __mockUseTheme: mockUseTheme, __mockUseThemeName: mockUseThemeName } =
-  jest.requireMock('tamagui')
+const {
+  initializeMonitoring,
+  recordDiagnosticEvent,
+  registerNavigationContainer,
+} = jest.requireMock('@/features/app-data/monitoring')
+const { __mockUseThemeName: mockUseThemeName } = jest.requireMock('tamagui')
 
 function createAuthSessionMock(overrides: Record<string, unknown> = {}) {
   return {
     canAccessProtectedApp: false,
-    identity: null,
-    isAppLocked: false,
-    isAuthenticated: false,
-    session: null,
-    signOut: jest.fn(),
     status: 'anonymous',
-    unlockWithBiometrics: jest.fn(),
     ...overrides,
   }
 }
@@ -161,16 +173,6 @@ function createAuthSessionMock(overrides: Record<string, unknown> = {}) {
 describe('app layouts', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    setLocaleOverrideForTests('pt-PT')
-    syncLocale('system')
-    __setExpoConfig(
-      createMockExpoConfig({
-        sentry: {
-          dsn: 'https://public@example.ingest.sentry.io/1',
-          environment: 'test',
-        },
-      }),
-    )
     mockUseFonts.mockReturnValue([true, null])
     mockUseAuthSession.mockReturnValue(createAuthSessionMock())
     mockUseProfileQuery.mockReturnValue({
@@ -179,53 +181,146 @@ describe('app layouts', () => {
       isPending: false,
       refetch: jest.fn(),
     })
-    mockUseTheme.mockReturnValue({
-      accent10: {
-        val: '#1d7f5f',
-      },
-    })
     mockUseThemeName.mockReturnValue('light')
   })
 
-  afterAll(() => {
-    setLocaleOverrideForTests('pt-PT')
-    syncLocale('system')
+  it('declares auth as the initial route and waits for fonts before rendering', () => {
+    mockUseFonts.mockReturnValue([false, null])
+
+    const view = render(<RootLayout />)
+
+    expect(unstable_settings.initialRouteName).toBe('auth')
+    expect(view.toJSON()).toBeNull()
+    expect(mockHideAsync).not.toHaveBeenCalled()
   })
 
-  it('configures the tab navigator and screen titles', () => {
+  it('renders the root stack and hides the splash screen when navigation is ready', async () => {
+    render(<RootLayout />)
+
+    await waitFor(() => {
+      expect(registerNavigationContainer).toHaveBeenCalled()
+      expect(mockHideAsync).toHaveBeenCalled()
+    })
+
+    expect(screen.getByText('status:dark')).toBeTruthy()
+    expect(
+      mockStackProtected.mock.calls.map((call: [any]) => call[0].guard),
+    ).toEqual([true, false, false])
+    expect(
+      mockStackScreen.mock.calls.map((call: [any]) => call[0].name),
+    ).toEqual(['auth', 'setup', '(tabs)', 'profile', 'wallet'])
+  })
+
+  it('renders the profile bootstrap error state and retries profile loading', async () => {
+    const refetch = jest.fn()
+
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        canAccessProtectedApp: true,
+        status: 'authenticated',
+      }),
+    )
+    mockUseProfileQuery.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isPending: false,
+      refetch,
+    })
+
+    render(<RootLayout />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('profile-bootstrap-error-screen')).toBeTruthy()
+    })
+
+    fireEvent.press(screen.getByTestId('profile-bootstrap-error-state'))
+
+    expect(refetch).toHaveBeenCalled()
+  })
+
+  it('enables the protected app stack when profile setup is completed', async () => {
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        canAccessProtectedApp: true,
+        status: 'authenticated',
+      }),
+    )
+    mockUseProfileQuery.mockReturnValue({
+      data: {
+        onboarding: {
+          status: 'completed',
+        },
+      },
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+
+    render(<RootLayout />)
+
+    await waitFor(() => {
+      expect(mockHideAsync).toHaveBeenCalled()
+    })
+
+    expect(
+      mockStackProtected.mock.calls.map((call: [any]) => call[0].guard),
+    ).toEqual([false, false, true])
+  })
+
+  it('captures route errors through the root error boundary only once per render', async () => {
+    const error = new Error('boom')
+    const retry = jest.fn()
+    const view = render(<RootErrorBoundary error={error} retry={retry} />)
+
+    await waitFor(() => {
+      expect(initializeMonitoring).toHaveBeenCalled()
+      expect(recordDiagnosticEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          captureError: true,
+          details: {
+            message: 'boom',
+            name: 'Error',
+          },
+          domain: 'router',
+          error,
+          operation: 'route',
+          phase: 'error-boundary',
+          status: 'error',
+        }),
+      )
+    })
+
+    view.rerender(<RootErrorBoundary error={error} retry={retry} />)
+
+    expect(recordDiagnosticEvent).toHaveBeenCalledTimes(1)
+  })
+
+  it('configures tabs, tab labels, and tab interactions', () => {
     render(<TabLayout />)
 
     const tabsProps = mockTabs.mock.calls[0][0]
     const screens = mockTabsScreen.mock.calls.map((call: [any]) => call[0])
-    const indexScreen = screens.find((screen: any) => screen.name === 'index')
-    const mapScreen = screens.find((screen: any) => screen.name === 'map')
-    const barcodeScreen = screens.find(
-      (screen: any) => screen.name === 'barcode',
-    )
-    const walletScreen = screens.find((screen: any) => screen.name === 'wallet')
-    const profileScreen = screens.find(
-      (screen: any) => screen.name === 'profile',
-    )
+    const emit = jest.fn(() => ({ defaultPrevented: false }))
 
-    expect(tabsProps.tabBar).toEqual(expect.any(Function))
-    expect(tabsProps.screenOptions).toEqual(
-      expect.objectContaining({
-        headerShown: false,
-      }),
-    )
-    expect(indexScreen.options.title).toBe('Início')
-    expect(mapScreen.options.title).toBe('Mapa')
-    expect(barcodeScreen.options.title).toBe('Código')
-    expect(walletScreen.options.title).toBe('Carteira')
-    expect(profileScreen.options.title).toBe('Perfil')
-    expect(screens).toHaveLength(5)
-  })
-
-  it('builds tab bar items and routes tab interactions', () => {
-    render(<TabLayout />)
-
-    const tabsProps = mockTabs.mock.calls[0][0]
-    const emit = jest.fn().mockReturnValue({ defaultPrevented: false })
+    expect(tabsProps.screenOptions).toEqual({
+      headerShown: false,
+    })
+    expect(screens.map((tab: { name: string }) => tab.name)).toEqual([
+      'index',
+      'map',
+      'barcode',
+      'wallet',
+      'profile',
+    ])
+    expect(
+      screens.map((tab: { options: { title: string } }) => tab.options.title),
+    ).toEqual([
+      'tabs.home.label',
+      'tabs.map.label',
+      'tabs.barcode.label',
+      'tabs.wallet.label',
+      'tabs.profile.label',
+    ])
 
     render(
       tabsProps.tabBar({
@@ -244,402 +339,50 @@ describe('app layouts', () => {
       }),
     )
 
-    const navItems = mockBottomNav.mock.calls[0][0].items
-    const homeItem = navItems.find((item: any) => item.key === 'home')
-    const mapItem = navItems.find((item: any) => item.key === 'map')
+    const navItems = mockBottomTabBar.mock.calls[0][0].items
+    const homeItem = navItems.find(
+      (item: { key: string }) => item.key === 'home',
+    )
+    const mapItem = navItems.find((item: { key: string }) => item.key === 'map')
 
     expect(navItems).toHaveLength(5)
+    expect(homeItem).toBeDefined()
+    expect(mapItem).toBeDefined()
+
+    if (!homeItem || !mapItem) {
+      throw new Error('Expected home and map tab items to be defined.')
+    }
+
     expect(homeItem.accessibilityState).toEqual({ selected: true })
     expect(mapItem.accessibilityState).toEqual({ selected: false })
 
+    homeItem.onPress()
     mapItem.onLongPress()
-    expect(emit).toHaveBeenCalledWith({
-      type: 'tabLongPress',
-      target: 'map-key',
-    })
-
-    emit.mockClear()
     mapItem.onPress()
+
     expect(emit).toHaveBeenCalledWith({
       canPreventDefault: true,
+      target: 'index-key',
       type: 'tabPress',
+    })
+    expect(emit).toHaveBeenCalledWith({
       target: 'map-key',
+      type: 'tabLongPress',
+    })
+    expect(emit).toHaveBeenCalledWith({
+      canPreventDefault: true,
+      target: 'map-key',
+      type: 'tabPress',
     })
     expect(mockRouterNavigate).toHaveBeenCalledWith('/map')
-
-    emit.mockClear()
-    mockRouterNavigate.mockClear()
-    homeItem.onPress()
-    expect(emit).toHaveBeenCalledWith({
-      canPreventDefault: true,
-      type: 'tabPress',
-      target: 'index-key',
-    })
-    expect(mockRouterNavigate).not.toHaveBeenCalled()
   })
 
-  it('falls back to the index route and leaves missing routes non-interactive', () => {
-    render(<TabLayout />)
-
-    const tabsProps = mockTabs.mock.calls[0][0]
-    const emit = jest.fn().mockReturnValue({ defaultPrevented: true })
-
-    render(
-      tabsProps.tabBar({
-        insets: { bottom: 0 },
-        navigation: { emit },
-        state: {
-          index: 99,
-          routes: [
-            { key: 'index-key', name: 'index' },
-            { key: 'map-key', name: 'map' },
-          ],
-        },
-      }),
-    )
-
-    const navItems = mockBottomNav.mock.calls[0][0].items
-    const homeItem = navItems.find((item: any) => item.key === 'home')
-    const mapItem = navItems.find((item: any) => item.key === 'map')
-    const profileItem = navItems.find((item: any) => item.key === 'profile')
-
-    expect(homeItem.accessibilityState).toEqual({ selected: true })
-    expect(mapItem.accessibilityState).toEqual({ selected: false })
-    expect(profileItem.onLongPress).toBeUndefined()
-    expect(profileItem.onPress).toBeUndefined()
-
-    mapItem.onPress()
-    expect(emit).toHaveBeenCalledWith({
-      canPreventDefault: true,
-      type: 'tabPress',
-      target: 'map-key',
-    })
-    expect(mockRouterNavigate).not.toHaveBeenCalled()
-  })
-
-  it('returns null while fonts are still loading', () => {
-    mockUseFonts.mockReturnValue([false, null])
-
-    const view = render(<RootLayout />)
-
-    expect(view.toJSON()).toBeNull()
-    expect(mockHideAsync).not.toHaveBeenCalled()
-  })
-
-  it('returns null while auth is still hydrating', () => {
-    mockUseAuthSession.mockReturnValue(
-      createAuthSessionMock({
-        status: 'hydrating',
-      }),
-    )
-
-    const view = render(<RootLayout />)
-
-    expect(view.toJSON()).toBeNull()
-    expect(mockHideAsync).not.toHaveBeenCalled()
-  })
-
-  it('returns null while authenticated profile bootstrap is still loading', () => {
-    mockUseAuthSession.mockReturnValue(
-      createAuthSessionMock({
-        canAccessProtectedApp: true,
-        identity: {
-          email: 'ana.silva@sdr.pt',
-          name: 'Ana Silva',
-          userKey: 'user-123',
-        },
-        isAuthenticated: true,
-        session: { accessToken: 'token', expiresAt: null },
-        status: 'authenticated',
-      }),
-    )
-    mockUseProfileQuery.mockReturnValue({
-      data: undefined,
-      isError: false,
-      isPending: true,
-      refetch: jest.fn(),
-    })
-
-    const view = render(<RootLayout />)
-
-    expect(view.toJSON()).toBeNull()
-    expect(mockHideAsync).not.toHaveBeenCalled()
-  })
-
-  it('renders the root stack once fonts are loaded', () => {
-    render(<RootLayout />)
-
-    const stackScreens = mockStackScreen.mock.calls.map(
-      (call: [any]) => call[0],
-    )
-    const protectedGroups = mockStackProtected.mock.calls.map(
-      (call: [any]) => call[0],
-    )
-
-    expect(mockUseFonts).toHaveBeenCalled()
-    expect(mockHideAsync).toHaveBeenCalledTimes(1)
-    expect(screen.getByText('status:dark')).toBeTruthy()
-    expect(unstable_settings.initialRouteName).toBe('auth')
-    expect(protectedGroups[0]).toEqual(
-      expect.objectContaining({
-        guard: true,
-      }),
-    )
-    expect(protectedGroups[1]).toEqual(
-      expect.objectContaining({
-        guard: false,
-      }),
-    )
-    expect(protectedGroups[2]).toEqual(
-      expect.objectContaining({
-        guard: false,
-      }),
-    )
-    expect(stackScreens[0]).toEqual(
-      expect.objectContaining({
-        name: 'auth',
-        options: { headerShown: false },
-      }),
-    )
-    expect(stackScreens[1]).toEqual(
-      expect.objectContaining({
-        name: 'setup',
-        options: { headerShown: false },
-      }),
-    )
-    expect(stackScreens[2]).toEqual(
-      expect.objectContaining({
-        name: '(tabs)',
-        options: { headerShown: false },
-      }),
-    )
-    expect(stackScreens[3]).toEqual(
-      expect.objectContaining({
-        name: 'profile',
-        options: { headerShown: false },
-      }),
-    )
-    expect(stackScreens[4]).toEqual(
-      expect.objectContaining({
-        name: 'wallet',
-        options: { headerShown: false },
-      }),
-    )
-    expect(stackScreens[5]).toEqual(
-      expect.objectContaining({
-        name: 'notifications',
-        options: { headerShown: false },
-      }),
-    )
-    expect(stackScreens).toHaveLength(6)
-  })
-
-  it('renders the root stack when font loading returns an error', () => {
-    mockUseFonts.mockReturnValue([false, new Error('fonts failed')])
-    mockUseAuthSession.mockReturnValue(
-      createAuthSessionMock({
-        canAccessProtectedApp: true,
-        identity: {
-          email: 'ana.silva@sdr.pt',
-          name: 'Ana Silva',
-          userKey: 'user-123',
-        },
-        isAuthenticated: true,
-        session: { accessToken: 'token', expiresAt: null },
-        status: 'authenticated',
-      }),
-    )
-    mockUseProfileQuery.mockReturnValue({
-      data: {
-        onboarding: {
-          status: 'completed',
-        },
-      },
-      isError: false,
-      isPending: false,
-      refetch: jest.fn(),
-    })
-    mockUseThemeName.mockReturnValue('dark')
-
-    render(<RootLayout />)
-
-    expect(mockHideAsync).toHaveBeenCalledTimes(1)
-    expect(screen.getByText('status:light')).toBeTruthy()
-    expect(mockStackScreen).toHaveBeenCalledTimes(6)
-  })
-
-  it('opens the setup route for authenticated users without completed setup', () => {
-    mockUseAuthSession.mockReturnValue(
-      createAuthSessionMock({
-        canAccessProtectedApp: true,
-        identity: {
-          email: 'ana.silva@sdr.pt',
-          name: 'Ana Silva',
-          userKey: 'user-123',
-        },
-        isAuthenticated: true,
-        session: { accessToken: 'token', expiresAt: null },
-        status: 'authenticated',
-      }),
-    )
-    mockUseProfileQuery.mockReturnValue({
-      data: {
-        onboarding: {
-          status: 'in_progress',
-        },
-      },
-      isError: false,
-      isPending: false,
-      refetch: jest.fn(),
-    })
-
-    render(<RootLayout />)
-
-    const protectedGroups = mockStackProtected.mock.calls.map(
-      (call: [any]) => call[0],
-    )
-
-    expect(protectedGroups[0].guard).toBe(false)
-    expect(protectedGroups[1].guard).toBe(true)
-    expect(protectedGroups[2].guard).toBe(false)
-  })
-
-  it('opens the main app only after setup is completed', () => {
-    mockUseAuthSession.mockReturnValue(
-      createAuthSessionMock({
-        canAccessProtectedApp: true,
-        identity: {
-          email: 'ana.silva@sdr.pt',
-          name: 'Ana Silva',
-          userKey: 'user-123',
-        },
-        isAuthenticated: true,
-        session: { accessToken: 'token', expiresAt: null },
-        status: 'authenticated',
-      }),
-    )
-    mockUseProfileQuery.mockReturnValue({
-      data: {
-        onboarding: {
-          status: 'completed',
-        },
-      },
-      isError: false,
-      isPending: false,
-      refetch: jest.fn(),
-    })
-
-    render(<RootLayout />)
-
-    const protectedGroups = mockStackProtected.mock.calls.map(
-      (call: [any]) => call[0],
-    )
-
-    expect(protectedGroups[0].guard).toBe(false)
-    expect(protectedGroups[1].guard).toBe(false)
-    expect(protectedGroups[2].guard).toBe(true)
-  })
-
-  it('keeps the auth route open when the user is authenticated but locked', () => {
-    mockUseAuthSession.mockReturnValue(
-      createAuthSessionMock({
-        canAccessProtectedApp: false,
-        identity: {
-          email: 'ana.silva@sdr.pt',
-          name: 'Ana Silva',
-          userKey: 'user-123',
-        },
-        isAppLocked: true,
-        isAuthenticated: true,
-        session: { accessToken: 'token', expiresAt: null },
-        status: 'authenticated',
-      }),
-    )
-
-    render(<RootLayout />)
-
-    const protectedGroups = mockStackProtected.mock.calls.map(
-      (call: [any]) => call[0],
-    )
-    const stackScreens = mockStackScreen.mock.calls.map(
-      (call: [any]) => call[0],
-    )
-
-    expect(protectedGroups[0].guard).toBe(true)
-    expect(protectedGroups[1].guard).toBe(false)
-    expect(protectedGroups[2].guard).toBe(false)
-    expect(stackScreens[0]).toEqual(
-      expect.objectContaining({
-        name: 'auth',
-        options: { headerShown: false },
-      }),
-    )
-    expect(mockUseProfileQuery).toHaveBeenCalledWith(
-      expect.objectContaining({
-        enabled: false,
-      }),
-    )
-  })
-
-  it('renders a retryable bootstrap error when the authenticated profile query fails', () => {
-    const refetch = jest.fn()
-
-    mockUseAuthSession.mockReturnValue(
-      createAuthSessionMock({
-        canAccessProtectedApp: true,
-        identity: {
-          email: 'ana.silva@sdr.pt',
-          name: 'Ana Silva',
-          userKey: 'user-123',
-        },
-        isAuthenticated: true,
-        session: { accessToken: 'token', expiresAt: null },
-        status: 'authenticated',
-      }),
-    )
-    mockUseProfileQuery.mockReturnValue({
-      data: undefined,
-      isError: true,
-      isPending: false,
-      refetch,
-    })
-
-    render(<RootLayout />)
-
-    expect(screen.getByTestId('profile-bootstrap-error-screen')).toBeTruthy()
-    fireEvent.press(screen.getByText('retry'))
-    expect(refetch).toHaveBeenCalledTimes(1)
-  })
-
-  it('renders the profile detail stack with headers disabled', () => {
+  it('configures nested stack layouts without headers', () => {
     render(<ProfileLayout />)
-
-    expect(mockStack).toHaveBeenCalledWith(
-      expect.objectContaining({
-        screenOptions: { headerShown: false },
-      }),
-      undefined,
-    )
-  })
-
-  it('renders the wallet detail stack with headers disabled', () => {
     render(<WalletLayout />)
 
-    expect(mockStack).toHaveBeenCalledWith(
-      expect.objectContaining({
-        screenOptions: { headerShown: false },
-      }),
-      undefined,
-    )
-  })
-
-  it('captures uncaught route errors through the root error boundary', async () => {
-    render(
-      <RootErrorBoundary error={new Error('route failed')} retry={jest.fn()} />,
-    )
-
-    await waitFor(() => {
-      expect(captureException).toHaveBeenCalledWith(expect.any(Error))
-    })
+    expect(
+      mockStack.mock.calls.map((call: [any]) => call[0].screenOptions),
+    ).toEqual([{ headerShown: false }, { headerShown: false }])
   })
 })

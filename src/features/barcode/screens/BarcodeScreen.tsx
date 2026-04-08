@@ -239,7 +239,7 @@ export default function BarcodeScreen() {
   } = useBarcodeScreenQuery()
   const barcodeCountdown = useBarcodeCountdown(barcodeScreenState)
   const barcodePayloadKey = barcodeScreenState
-    ? `${barcodeScreenState.reference}:${barcodeScreenState.expiresAt}`
+    ? `${barcodeScreenState.code}:${barcodeScreenState.expiresAt}`
     : null
   const modalQrSize = Math.floor(
     Math.max(208, Math.min(width - 80, height * 0.42, 336)),
@@ -340,7 +340,7 @@ export default function BarcodeScreen() {
           <BarcodeQrCode
             size={INLINE_QR_SIZE}
             testID="barcode-inline-qr"
-            value={barcodeScreenState.reference}
+            value={barcodeScreenState.code}
           />
         </Pressable>
       ) : isRefreshingExpiredCode ? (
@@ -404,6 +404,8 @@ export default function BarcodeScreen() {
           <PersonalBarcodeCard
             action={inlineAction}
             barcode={inlineQrNode}
+            code={barcodeScreenState.code}
+            codeDisplay={null}
             description={t('tabScreens.barcode.card.description')}
             eyebrow={
               <BarcodeStatusLabel
@@ -422,8 +424,6 @@ export default function BarcodeScreen() {
                 />
               </YStack>
             }
-            reference={barcodeScreenState.reference}
-            referenceDisplay={null}
             title={t('tabScreens.barcode.card.title')}
           />
         )}
@@ -494,7 +494,7 @@ export default function BarcodeScreen() {
                         <BarcodeQrCode
                           size={modalQrSize}
                           testID="barcode-modal-qr"
-                          value={barcodeScreenState.reference}
+                          value={barcodeScreenState.code}
                         />
                       ) : isRefreshingExpiredCode ? (
                         <BarcodeQrRefreshPlaceholder

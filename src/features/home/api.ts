@@ -9,7 +9,7 @@ export async function fetchHomeScreenState(signal?: AbortSignal) {
         operation: 'screen-state',
       },
       method: 'GET',
-      path: '/home',
+      path: '/api/v1/home',
       signal,
     }),
   )

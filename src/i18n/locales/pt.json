@@ -24,9 +24,6 @@
       "titleLeading": "Volta",
       "titleTrailing": "Portugal"
     },
-    "mockAction": {
-      "message": "Esta ação está a usar dados simulados por agora."
-    },
     "onboarding": {
       "actions": {
         "finishHelper": "Tudo pronto. Podes rever esta introdução mais tarde no Perfil.",
@@ -78,9 +75,6 @@
       "home": {
         "header": {
           "eyebrow": "Bem-vindo",
-          "notificationLabel": "Notificações",
-          "notificationUnreadHint_one": "{{count}} alerta por ler.",
-          "notificationUnreadHint_other": "{{count}} alertas por ler.",
           "title": "Volta"
         },
         "label": "Início"
@@ -120,59 +114,6 @@
         "recoveryHint": "Verifica a ligação e tenta novamente dentro de instantes.",
         "retryLabel": "Tentar novamente",
         "title": "Falha ao carregar"
-      },
-      "notifications": {
-        "backLabel": "Voltar",
-        "clearAllLabel": "Limpar tudo",
-        "clearAllErrorToast": "Não foi possível limpar as notificações agora.",
-        "clearAllSuccessToast": "As notificações foram removidas.",
-        "description": "Créditos, transferências e avisos da conta.",
-        "errorDescription": "Não foi possível carregar os teus alertas agora.",
-        "errorRecoveryHint": "Tenta novamente para atualizar novidades da carteira e da conta.",
-        "errorTitle": "Alertas indisponíveis",
-        "emptyStateDescription": "Quando houver crédito, transferências ou avisos da conta, mostramos aqui.",
-        "emptyStateTitle": "Ainda não tens alertas",
-        "items": {
-          "barcodeReminder": {
-            "message": "Mantém o teu QR code pronto para acelerar a próxima devolução.",
-            "timeLabel": "Ontem, 18:05",
-            "title": "Lembra-te do teu código Volta"
-          },
-          "creditAdded": {
-            "message": "Recebeste {{amount}} na carteira depois da devolução em {{location}}.",
-            "timeLabel": "Hoje, 14:30",
-            "title": "Crédito adicionado em {{location}}"
-          },
-          "transferProcessing": {
-            "message": "O teu pedido de transferência de {{amount}} está a ser enviado para a conta associada.",
-            "timeLabel": "Agora",
-            "title": "Transferência em processamento"
-          },
-          "securitySettings": {
-            "message": "Confirma o e-mail e as permissões de alertas na área de privacidade.",
-            "timeLabel": "Hoje, 11:10",
-            "title": "Revê os alertas da tua conta"
-          },
-          "walletHistory": {
-            "message": "Consulta créditos e transferências recentes da tua carteira Volta.",
-            "timeLabel": "Ontem, 09:10",
-            "title": "Histórico da carteira disponível"
-          }
-        },
-        "listDescription": "Abre um alerta para ver o estado mais recente da tua carteira ou conta.",
-        "listDescriptionUnread_one": "{{count}} alerta por rever.",
-        "listDescriptionUnread_other": "{{count}} alertas por rever.",
-        "listTitle": "Alertas recentes",
-        "manageTitle": "Gerir alertas",
-        "markAllReadLabel": "Marcar tudo como lido",
-        "markAllReadErrorToast": "Não foi possível marcar as notificações agora.",
-        "markAllReadSuccessToast": "As notificações foram marcadas como lidas.",
-        "readA11yLabel": "Lida",
-        "title": "Notificações",
-        "unreadCountBadge_one": "{{count}} por ler",
-        "unreadCountBadge_other": "{{count}} por ler",
-        "unreadA11yLabel": "Não lida",
-        "unreadBadgeLabel": "Nova"
       },
       "two": {
         "title": "Tab Two"
@@ -524,7 +465,7 @@
           "phoneNumberHelper": "Usa o formato internacional, por exemplo +351 912 345 678.",
           "phoneNumberLabel": "Telefone",
           "photoActionLabel": "Alterar foto",
-          "photoDescription": "Mantém uma foto de perfil atualizada. Nesta fase, a ação usa dados simulados.",
+          "photoDescription": "Mantém uma foto de perfil atualizada para que os dados da conta fiquem consistentes.",
           "photoTitle": "Foto de perfil",
           "saveErrorToast": "Não foi possível guardar os teus dados agora.",
           "saveLabel": "Guardar dados",
@@ -672,50 +613,6 @@
           "all": "Todos",
           "credits": "Créditos",
           "transfers": "Transferências"
-        },
-        "items": {
-          "auchanAmadora": {
-            "creditedAt": "8 Mar, 09:10",
-            "location": "Auchan - Amadora",
-            "packageCount": "12",
-            "subtitle": "8 Mar, 09:10 · 12 garrafas",
-            "title": "Auchan - Amadora"
-          },
-          "continenteColombo": {
-            "creditedAt": "Ontem, 18:15",
-            "location": "Continente - Colombo",
-            "packageCount": "3",
-            "subtitle": "Ontem, 18:15 · 3 garrafas",
-            "title": "Continente - Colombo"
-          },
-          "lidlBenfica": {
-            "creditedAt": "Hoje, 10:05",
-            "location": "Lidl - Benfica",
-            "packageCount": "9",
-            "subtitle": "Hoje, 10:05 · 9 garrafas",
-            "title": "Lidl - Benfica"
-          },
-          "pingoDoceAfragide": {
-            "creditedAt": "Hoje, 14:30",
-            "location": "Pingo Doce - Afragide",
-            "packageCount": "6",
-            "subtitle": "Hoje, 14:30 · 6 garrafas",
-            "title": "Pingo Doce - Afragide"
-          },
-          "transferMarch11": {
-            "completedAt": "Ontem, 18:15",
-            "reference": "TRF-2603-1902",
-            "requestedAt": "Ontem, 17:54",
-            "subtitle": "Ontem, 17:54",
-            "title": "Transferência"
-          },
-          "transferMarch12": {
-            "expectedArrival": "Hoje, até 24h",
-            "requestedAt": "Hoje, 13:10",
-            "subtitle": "Hoje, 13:10",
-            "title": "Transferência",
-            "updatedAt": "Hoje, 13:24"
-          }
         },
         "movementDetail": {
           "detailSectionTitle": "Detalhes do movimento",

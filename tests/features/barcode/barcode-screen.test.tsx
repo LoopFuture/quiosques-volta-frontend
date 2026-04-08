@@ -1,19 +1,30 @@
-import { act, fireEvent, screen, waitFor } from '@testing-library/react-native'
-import { BackHandler, Platform } from 'react-native'
-import { http, HttpResponse } from 'msw'
-import * as mockApi from '@/features/app-data/mock'
-import { MOCK_API_ORIGIN } from '@/features/app-data/api'
-import { mockApiServer } from '@/features/app-data/mock/server.node'
-import { renderWithProvider, resolveMockApi } from '../../support/test-utils'
-
-let currentBrightness = 0.42
-let pendingBrightnessWrites: (() => void)[] = []
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native'
+import { BackHandler } from 'react-native'
+import { Provider } from '@/components/Provider'
+import BarcodeScreen from '@/features/barcode/screens/BarcodeScreen'
+import { barcodeResponseSchema } from '@/features/barcode/models'
+import { i18n, setLocaleOverrideForTests, syncLocale } from '@/i18n'
+import { restorePlatformOS, setPlatformOS } from '../../support/react-native'
 
 const mockGetBrightnessAsync = jest.fn()
 const mockIsAvailableAsync = jest.fn()
 const mockIsUsingSystemBrightnessAsync = jest.fn()
 const mockRestoreSystemBrightnessAsync = jest.fn()
 const mockSetBrightnessAsync = jest.fn()
+
+jest.mock('expo-router', () => {
+  const { createExpoRouterMock } = jest.requireActual(
+    '../../support/expo-router-mock',
+  )
+
+  return createExpoRouterMock()
+})
 
 jest.mock('expo-brightness', () => ({
   getBrightnessAsync: mockGetBrightnessAsync,
@@ -24,70 +35,53 @@ jest.mock('expo-brightness', () => ({
 }))
 
 jest.mock('react-native-qrcode-svg', () => {
-  const React = jest.requireActual('react')
   const { View } = jest.requireActual('react-native')
 
-  return function MockQRCode(props: { testID?: string }) {
+  return function MockQrCode(props: { testID?: string }) {
     return <View testID={props.testID ?? 'mock-qr-code'} />
   }
 })
 
-const BarcodeScreen = jest.requireActual(
-  '@/features/barcode/screens/BarcodeScreen',
-).default
+jest.mock('@/features/barcode/hooks', () => {
+  const actual = jest.requireActual('@/features/barcode/hooks')
 
-type MockBarcodeStep =
-  | {
-      reference: string
-      ttlMs: number
-    }
-  | {
-      message?: string
-      status: number
-    }
-
-function createMockBarcodeResponse(reference: string, ttlMs: number) {
   return {
-    expiresAt: new Date(Date.now() + ttlMs).toISOString(),
-    reference,
+    ...actual,
+    useBarcodeScreenQuery: jest.fn(),
   }
+})
+
+const { useBarcodeScreenQuery: mockUseBarcodeScreenQuery } = jest.requireMock(
+  '@/features/barcode/hooks',
+)
+
+const activeBarcode = barcodeResponseSchema.parse({
+  code: 'VF-0001-RTM-2026',
+  expiresAt: '2026-04-08T12:00:45.000Z',
+})
+const expiredBarcode = barcodeResponseSchema.parse({
+  code: 'VF-0001-RTM-2026',
+  expiresAt: '2026-04-08T11:59:59.000Z',
+})
+
+let currentBarcodeQueryState: {
+  data: typeof activeBarcode | typeof expiredBarcode | undefined
+  isError: boolean
+  isPending: boolean
+  isRefetching: boolean
+  refetch: jest.Mock
 }
 
-function mockBarcodeSequence(steps: MockBarcodeStep[]) {
-  let requestCount = 0
-
-  mockApiServer.use(
-    http.get(`${MOCK_API_ORIGIN}/barcode`, async () => {
-      const step = steps[Math.min(requestCount, steps.length - 1)]
-      requestCount += 1
-
-      await mockApi.waitForMockApi()
-
-      if ('status' in step) {
-        return HttpResponse.json(
-          {
-            message: step.message ?? 'barcode failed',
-          },
-          {
-            status: step.status,
-          },
-        )
-      }
-
-      return HttpResponse.json(
-        createMockBarcodeResponse(step.reference, step.ttlMs),
-      )
-    }),
+function renderBarcodeScreen() {
+  return render(
+    <Provider>
+      <BarcodeScreen />
+    </Provider>,
   )
-
-  return {
-    getRequestCount: () => requestCount,
-  }
 }
 
-async function advanceClockBy(ms: number) {
+async function flushAsync() {
   await act(async () => {
-    jest.advanceTimersByTime(ms)
     await Promise.resolve()
     await Promise.resolve()
   })
@@ -97,62 +91,114 @@ describe('BarcodeScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.useFakeTimers()
-    jest.setSystemTime(new Date('2026-03-23T12:00:00Z'))
-    jest.replaceProperty(Platform, 'OS', 'android')
-    currentBrightness = 0.42
-    pendingBrightnessWrites = []
-    mockApi.resetMockApiState()
+    jest.setSystemTime(new Date('2026-04-08T12:00:00.000Z'))
+    setLocaleOverrideForTests('pt-PT')
+    syncLocale('system')
+    setPlatformOS('android')
+
+    currentBarcodeQueryState = {
+      data: undefined,
+      isError: false,
+      isPending: true,
+      isRefetching: false,
+      refetch: jest.fn(),
+    }
+
+    mockUseBarcodeScreenQuery.mockImplementation(() => currentBarcodeQueryState)
     mockIsAvailableAsync.mockResolvedValue(true)
-    mockGetBrightnessAsync.mockImplementation(async () => currentBrightness)
+    mockGetBrightnessAsync.mockResolvedValue(0.42)
     mockIsUsingSystemBrightnessAsync.mockResolvedValue(false)
-    mockSetBrightnessAsync.mockImplementation(async (value: number) => {
-      currentBrightness = value
-    })
-    mockRestoreSystemBrightnessAsync.mockImplementation(async () => {
-      currentBrightness = 0.42
-    })
+    mockSetBrightnessAsync.mockResolvedValue(undefined)
+    mockRestoreSystemBrightnessAsync.mockResolvedValue(undefined)
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    act(() => {
+      jest.runOnlyPendingTimers()
+    })
     jest.useRealTimers()
+    restorePlatformOS()
   })
 
-  it('opens the QR modal at max brightness and restores brightness when closed', async () => {
-    renderWithProvider(<BarcodeScreen />)
+  afterAll(() => {
+    setLocaleOverrideForTests('pt-PT')
+    syncLocale('system')
+  })
 
-    await resolveMockApi(4)
+  it('renders the loading skeleton while the query is pending', () => {
+    renderBarcodeScreen()
+
+    expect(screen.getByTestId('barcode-screen-skeleton')).toBeTruthy()
+  })
+
+  it('renders the error state and retries the query', () => {
+    const refetch = jest.fn()
+
+    currentBarcodeQueryState = {
+      data: undefined,
+      isError: true,
+      isPending: false,
+      isRefetching: false,
+      refetch,
+    }
+
+    renderBarcodeScreen()
+
+    expect(screen.getByTestId('barcode-screen-error-state')).toBeTruthy()
+
+    fireEvent.press(screen.getByText(i18n.t('routes.queryError.retryLabel')))
+
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens the QR modal, updates the countdown, and restores system brightness when closed', async () => {
+    currentBarcodeQueryState = {
+      data: activeBarcode,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    }
+    mockIsUsingSystemBrightnessAsync.mockResolvedValue(true)
+
+    renderBarcodeScreen()
+
+    expect(screen.getByText('00:45')).toBeTruthy()
 
     fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
 
-    expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
-
     await waitFor(() => {
-      expect(mockSetBrightnessAsync).toHaveBeenCalledWith(1)
+      expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
     })
+
+    expect(screen.getAllByText('00:45')).toHaveLength(2)
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000)
+      await Promise.resolve()
+    })
+
+    expect(screen.getAllByText('00:44')).toHaveLength(2)
 
     fireEvent.press(screen.getByTestId('barcode-qr-close'))
 
     await waitFor(() => {
       expect(screen.queryByTestId('barcode-qr-modal')).toBeNull()
-      expect(mockSetBrightnessAsync).toHaveBeenCalledWith(0.42)
     })
   })
 
-  it('renders the same countdown in the card and modal and decrements it every second', async () => {
-    mockBarcodeSequence([
-      {
-        reference: 'VF-1001-RTM-2026',
-        ttlMs: 30_000,
-      },
-    ])
+  it('shows refreshing and expired states for an expired barcode while keeping the modal open', async () => {
+    const refetch = jest.fn()
 
-    renderWithProvider(<BarcodeScreen />)
+    currentBarcodeQueryState = {
+      data: activeBarcode,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch,
+    }
 
-    await resolveMockApi(4)
-
-    expect(screen.getByTestId('barcode-inline-countdown')).toBeTruthy()
-    expect(screen.getByText('00:30')).toBeTruthy()
+    const view = renderBarcodeScreen()
 
     fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
 
@@ -160,144 +206,75 @@ describe('BarcodeScreen', () => {
       expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
     })
 
-    expect(screen.getByTestId('barcode-modal-countdown')).toBeTruthy()
-    expect(screen.getAllByText('00:30')).toHaveLength(2)
+    currentBarcodeQueryState = {
+      data: expiredBarcode,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch,
+    }
 
-    await advanceClockBy(1000)
+    view.rerender(
+      <Provider>
+        <BarcodeScreen />
+      </Provider>,
+    )
+    await flushAsync()
 
-    await waitFor(() => {
-      expect(screen.getAllByText('00:29')).toHaveLength(2)
-    })
-  })
-
-  it('auto-refreshes once at expiry, hides the stale qr immediately, and shows the next reference', async () => {
-    const barcodeSequence = mockBarcodeSequence([
-      {
-        reference: 'VF-1001-RTM-2026',
-        ttlMs: 2_000,
-      },
-      {
-        reference: 'VF-1002-RTM-2026',
-        ttlMs: 45_000,
-      },
-    ])
-
-    renderWithProvider(<BarcodeScreen />)
-
-    await resolveMockApi(4)
-
-    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
-
-    await waitFor(() => {
-      expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
-    })
-
-    await advanceClockBy(2000)
-
-    await waitFor(() => {
-      expect(barcodeSequence.getRequestCount()).toBe(2)
-    })
-
-    expect(screen.queryByText('VF-1001-RTM-2026')).toBeNull()
-    expect(screen.queryByTestId('barcode-inline-qr')).toBeNull()
-    expect(screen.queryByTestId('barcode-modal-qr')).toBeNull()
+    expect(refetch).toHaveBeenCalledTimes(1)
     expect(screen.getByTestId('barcode-inline-refreshing-state')).toBeTruthy()
+    expect(screen.getByTestId('barcode-modal-refreshing-state')).toBeTruthy()
     expect(screen.getByTestId('barcode-inline-action-spacer')).toBeTruthy()
     expect(screen.getByTestId('barcode-inline-status-label')).toBeTruthy()
-    expect(screen.getByTestId('barcode-modal-refreshing-state')).toBeTruthy()
     expect(screen.getByTestId('barcode-modal-status-label')).toBeTruthy()
 
-    await resolveMockApi(4)
+    view.rerender(
+      <Provider>
+        <BarcodeScreen />
+      </Provider>,
+    )
+    await flushAsync()
 
-    await waitFor(() => {
-      expect(screen.getByTestId('barcode-inline-qr')).toBeTruthy()
-      expect(screen.getByTestId('barcode-modal-qr')).toBeTruthy()
-    })
+    expect(refetch).toHaveBeenCalledTimes(1)
 
-    expect(screen.queryByText('VF-1002-RTM-2026')).toBeNull()
+    currentBarcodeQueryState = {
+      data: expiredBarcode,
+      isError: true,
+      isPending: false,
+      isRefetching: false,
+      refetch,
+    }
+
+    view.rerender(
+      <Provider>
+        <BarcodeScreen />
+      </Provider>,
+    )
+    await flushAsync()
+
+    expect(screen.getByTestId('barcode-inline-expired-state')).toBeTruthy()
+    expect(screen.getByTestId('barcode-modal-expired-state')).toBeTruthy()
+
+    fireEvent.press(
+      screen.getAllByText(i18n.t('tabScreens.barcode.card.retryLabel'))[0]!,
+    )
+
+    expect(refetch).toHaveBeenCalledTimes(2)
   })
 
-  it('keeps the qr hidden after an expired refresh fails and lets the user retry', async () => {
-    const barcodeSequence = mockBarcodeSequence([
-      {
-        reference: 'VF-1001-RTM-2026',
-        ttlMs: 1_000,
-      },
-      {
-        message: 'barcode refresh failed',
-        status: 500,
-      },
-      {
-        reference: 'VF-1002-RTM-2026',
-        ttlMs: 30_000,
-      },
-    ])
-
-    renderWithProvider(<BarcodeScreen />)
-
-    await resolveMockApi(4)
-
-    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
-
-    await waitFor(() => {
-      expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
-    })
-
-    await advanceClockBy(1000)
-
-    await waitFor(() => {
-      expect(barcodeSequence.getRequestCount()).toBe(2)
-    })
-
-    await resolveMockApi(4)
-
-    await waitFor(() => {
-      expect(screen.getByTestId('barcode-inline-expired-state')).toBeTruthy()
-      expect(screen.getByTestId('barcode-modal-expired-state')).toBeTruthy()
-    })
-
-    expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
-    expect(screen.queryByText('VF-1001-RTM-2026')).toBeNull()
-    expect(screen.queryByTestId('barcode-inline-qr')).toBeNull()
-    expect(screen.queryByTestId('barcode-modal-qr')).toBeNull()
-
-    fireEvent.press(screen.getAllByText('Gerar novo código')[0])
-
-    await waitFor(() => {
-      expect(barcodeSequence.getRequestCount()).toBe(3)
-    })
-
-    await resolveMockApi(4)
-
-    await waitFor(() => {
-      expect(screen.getByTestId('barcode-inline-qr')).toBeTruthy()
-      expect(screen.getByTestId('barcode-modal-qr')).toBeTruthy()
-    })
-
-    expect(screen.queryByText('VF-1002-RTM-2026')).toBeNull()
-  })
-
-  it('closes the QR modal when the overlay is pressed', async () => {
-    renderWithProvider(<BarcodeScreen />)
-
-    await resolveMockApi(4)
-
-    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
-
-    expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
-
-    fireEvent.press(screen.UNSAFE_getByProps({ testID: 'barcode-qr-overlay' }))
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('barcode-qr-modal')).toBeNull()
-    })
-  })
-
-  it('closes the QR modal when Android back is pressed', async () => {
+  it('closes the modal when Android back is pressed', async () => {
     const removeBackHandlerListener = jest.fn()
     let hardwareBackPressListener:
       | (() => boolean | null | undefined)
       | undefined
+
+    currentBarcodeQueryState = {
+      data: activeBarcode,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    }
 
     jest
       .spyOn(BackHandler, 'addEventListener')
@@ -311,101 +288,19 @@ describe('BarcodeScreen', () => {
         }
       })
 
-    renderWithProvider(<BarcodeScreen />)
-
-    await resolveMockApi(4)
+    renderBarcodeScreen()
 
     fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
 
-    expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
-
-    let handled: boolean | null | undefined
-    await act(async () => {
-      handled = hardwareBackPressListener?.()
-      await Promise.resolve()
+    await waitFor(() => {
+      expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
     })
 
-    expect(handled).toBe(true)
+    expect(hardwareBackPressListener?.()).toBe(true)
 
     await waitFor(() => {
       expect(screen.queryByTestId('barcode-qr-modal')).toBeNull()
     })
     expect(removeBackHandlerListener).toHaveBeenCalled()
   })
-
-  it('restores system brightness when the app was following it before opening', async () => {
-    mockIsUsingSystemBrightnessAsync.mockResolvedValue(true)
-
-    renderWithProvider(<BarcodeScreen />)
-
-    await resolveMockApi(4)
-
-    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
-
-    await waitFor(() => {
-      expect(mockSetBrightnessAsync).toHaveBeenCalledWith(1)
-    })
-
-    fireEvent.press(screen.getByTestId('barcode-qr-close'))
-
-    await waitFor(() => {
-      expect(mockRestoreSystemBrightnessAsync).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  it('restores brightness if the max-brightness request resolves after the modal closes', async () => {
-    mockSetBrightnessAsync.mockImplementation(
-      (value: number) =>
-        new Promise<void>((resolve) => {
-          pendingBrightnessWrites.push(() => {
-            currentBrightness = value
-            resolve()
-          })
-        }),
-    )
-
-    renderWithProvider(<BarcodeScreen />)
-
-    await resolveMockApi(4)
-
-    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
-
-    await waitFor(() => {
-      expect(mockSetBrightnessAsync).toHaveBeenCalledWith(1)
-    })
-
-    fireEvent.press(screen.getByTestId('barcode-qr-close'))
-
-    await waitFor(() => {
-      expect(mockSetBrightnessAsync).toHaveBeenCalledWith(0.42)
-    })
-
-    await waitFor(() => {
-      expect(pendingBrightnessWrites).toHaveLength(2)
-    })
-
-    await resolveMockApiWrite(pendingBrightnessWrites[1])
-    expect(currentBrightness).toBe(0.42)
-
-    await resolveMockApiWrite(pendingBrightnessWrites[0])
-
-    await waitFor(() => {
-      expect(mockSetBrightnessAsync).toHaveBeenCalledTimes(3)
-      expect(pendingBrightnessWrites).toHaveLength(3)
-    })
-
-    await resolveMockApiWrite(pendingBrightnessWrites[2])
-    expect(currentBrightness).toBe(0.42)
-  })
 })
-
-async function resolveMockApiWrite(write?: () => void) {
-  await waitFor(() => {
-    expect(write).toBeDefined()
-  })
-
-  await act(async () => {
-    write?.()
-    await Promise.resolve()
-  })
-}

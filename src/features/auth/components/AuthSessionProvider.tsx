@@ -44,10 +44,6 @@ import {
   readStoredAuthSession,
   saveStoredAuthSession,
 } from '@/features/auth/storage'
-import {
-  getOrCreatePushInstallationId,
-  unregisterPushInstallation,
-} from '@/features/notifications/api'
 
 export type BiometricUnlockResult =
   | {
@@ -302,12 +298,6 @@ export function AuthSessionProvider({
       // Local sign-out must still complete if the remote logout flow fails.
     } finally {
       const getClearDurationMs = createDiagnosticTimer()
-
-      try {
-        await unregisterPushInstallation(getOrCreatePushInstallationId())
-      } catch {
-        // Ignore push installation cleanup failures during sign-out.
-      }
 
       await clearSessionArtifacts()
       clearSessionState()

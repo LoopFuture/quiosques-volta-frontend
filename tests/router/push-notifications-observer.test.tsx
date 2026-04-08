@@ -85,7 +85,7 @@ describe('push notifications observer', () => {
     )
   })
 
-  it('falls back to the notifications route when the payload does not include a valid url', async () => {
+  it('falls back to the home route when the payload does not include a valid url', async () => {
     __setLastNotificationResponse({
       actionIdentifier: 'expo.modules.notifications.actions.DEFAULT',
       notification: {
@@ -101,7 +101,7 @@ describe('push notifications observer', () => {
     renderObserver()
 
     await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledWith('/notifications')
+      expect(mockRouterPush).toHaveBeenCalledWith('/')
     })
 
     expect(addBreadcrumb).toHaveBeenCalledWith(

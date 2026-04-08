@@ -345,7 +345,7 @@ describe('auth session provider', () => {
       expect(handleSessionCleared).toHaveBeenCalledTimes(1)
     })
 
-    expect(mockFetch).toHaveBeenCalledTimes(2)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
 
     const [logoutUrl, requestInit] = mockFetch.mock.calls[0]
     const requestBody = new URLSearchParams(String(requestInit?.body))

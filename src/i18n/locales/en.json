@@ -24,9 +24,6 @@
       "titleLeading": "Volta",
       "titleTrailing": "Portugal"
     },
-    "mockAction": {
-      "message": "This action is using mocked data for now."
-    },
     "onboarding": {
       "actions": {
         "finishHelper": "You're all set. You can revisit this introduction later in Profile.",
@@ -78,9 +75,6 @@
       "home": {
         "header": {
           "eyebrow": "Welcome",
-          "notificationLabel": "Notifications",
-          "notificationUnreadHint_one": "{{count}} unread alert.",
-          "notificationUnreadHint_other": "{{count}} unread alerts.",
           "title": "Volta"
         },
         "label": "Home"
@@ -120,59 +114,6 @@
         "recoveryHint": "Check your connection and try again in a moment.",
         "retryLabel": "Try again",
         "title": "Unable to load"
-      },
-      "notifications": {
-        "backLabel": "Back",
-        "clearAllLabel": "Clear all",
-        "clearAllErrorToast": "We couldn't clear the notifications right now.",
-        "clearAllSuccessToast": "The notifications were cleared.",
-        "description": "Credits, transfers, and account alerts.",
-        "errorDescription": "We couldn't load your alerts right now.",
-        "errorRecoveryHint": "Try again to refresh recent wallet and account updates.",
-        "errorTitle": "Alerts unavailable",
-        "emptyStateDescription": "When there is wallet activity or an account alert, we will show it here.",
-        "emptyStateTitle": "No alerts yet",
-        "items": {
-          "barcodeReminder": {
-            "message": "Keep your QR code ready to speed up the next return.",
-            "timeLabel": "Yesterday, 18:05",
-            "title": "Keep your Volta code handy"
-          },
-          "creditAdded": {
-            "message": "You received {{amount}} in your wallet after the return at {{location}}.",
-            "timeLabel": "Today, 14:30",
-            "title": "Credit added at {{location}}"
-          },
-          "transferProcessing": {
-            "message": "Your {{amount}} transfer request is being sent to the linked account.",
-            "timeLabel": "Now",
-            "title": "Transfer is processing"
-          },
-          "securitySettings": {
-            "message": "Confirm your alerts email and permissions in the privacy area.",
-            "timeLabel": "Today, 11:10",
-            "title": "Review your account alerts"
-          },
-          "walletHistory": {
-            "message": "Review the recent credits and transfer requests in your Volta wallet.",
-            "timeLabel": "Yesterday, 09:10",
-            "title": "Wallet history is ready"
-          }
-        },
-        "listDescription": "Open an alert to see the latest wallet or account status.",
-        "listDescriptionUnread_one": "{{count}} unread alert to review.",
-        "listDescriptionUnread_other": "{{count}} unread alerts to review.",
-        "listTitle": "Recent alerts",
-        "manageTitle": "Manage alerts",
-        "markAllReadLabel": "Mark all as read",
-        "markAllReadErrorToast": "We couldn't mark the notifications right now.",
-        "markAllReadSuccessToast": "The notifications were marked as read.",
-        "readA11yLabel": "Read",
-        "title": "Notifications",
-        "unreadCountBadge_one": "{{count}} unread",
-        "unreadCountBadge_other": "{{count}} unread",
-        "unreadA11yLabel": "Unread",
-        "unreadBadgeLabel": "New"
       },
       "two": {
         "title": "Tab Two"
@@ -524,7 +465,7 @@
           "phoneNumberHelper": "Use the international format, for example +351 912 345 678.",
           "phoneNumberLabel": "Phone number",
           "photoActionLabel": "Change photo",
-          "photoDescription": "Keep a profile photo ready. In this pass, the action still uses mock feedback.",
+          "photoDescription": "Keep a profile photo ready so your account details stay up to date.",
           "photoTitle": "Profile photo",
           "saveErrorToast": "We couldn't save your profile details right now.",
           "saveLabel": "Save profile details",
@@ -663,50 +604,6 @@
           "all": "All",
           "credits": "Credits",
           "transfers": "Transfers"
-        },
-        "items": {
-          "auchanAmadora": {
-            "creditedAt": "Mar 8, 09:10",
-            "location": "Auchan - Amadora",
-            "packageCount": "12",
-            "subtitle": "Mar 8, 09:10 · 12 bottles",
-            "title": "Auchan - Amadora"
-          },
-          "continenteColombo": {
-            "creditedAt": "Yesterday, 18:15",
-            "location": "Continente - Colombo",
-            "packageCount": "3",
-            "subtitle": "Yesterday, 18:15 · 3 bottles",
-            "title": "Continente - Colombo"
-          },
-          "lidlBenfica": {
-            "creditedAt": "Today, 10:05",
-            "location": "Lidl - Benfica",
-            "packageCount": "9",
-            "subtitle": "Today, 10:05 · 9 bottles",
-            "title": "Lidl - Benfica"
-          },
-          "pingoDoceAfragide": {
-            "creditedAt": "Today, 14:30",
-            "location": "Pingo Doce - Afragide",
-            "packageCount": "6",
-            "subtitle": "Today, 14:30 · 6 bottles",
-            "title": "Pingo Doce - Afragide"
-          },
-          "transferMarch11": {
-            "completedAt": "Yesterday, 18:15",
-            "reference": "TRF-2603-1902",
-            "requestedAt": "Yesterday, 17:54",
-            "subtitle": "Yesterday, 17:54",
-            "title": "Transfer"
-          },
-          "transferMarch12": {
-            "expectedArrival": "Today, within 24h",
-            "requestedAt": "Today, 13:10",
-            "subtitle": "Today, 13:10",
-            "title": "Transfer",
-            "updatedAt": "Today, 13:24"
-          }
         },
         "movementDetail": {
           "detailSectionTitle": "Movement details",

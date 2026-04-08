@@ -16,7 +16,7 @@ const WALLET_HISTORY_PAGE_SIZE = 20
 
 type FetchWalletHistoryStateOptions = {
   cursor?: string
-  pageSize?: number
+  limit?: number
   signal?: AbortSignal
 }
 
@@ -28,7 +28,7 @@ export async function fetchWalletOverviewState(signal?: AbortSignal) {
         operation: 'overview-state',
       },
       method: 'GET',
-      path: '/wallet',
+      path: '/api/v1/wallet',
       signal,
     }),
   )
@@ -36,7 +36,7 @@ export async function fetchWalletOverviewState(signal?: AbortSignal) {
 
 export async function fetchWalletHistoryState({
   cursor,
-  pageSize = WALLET_HISTORY_PAGE_SIZE,
+  limit = WALLET_HISTORY_PAGE_SIZE,
   signal,
 }: FetchWalletHistoryStateOptions = {}) {
   return walletTransactionListResponseSchema.parse(
@@ -46,10 +46,10 @@ export async function fetchWalletHistoryState({
         operation: 'history-state',
       },
       method: 'GET',
-      path: '/wallet/transactions',
+      path: '/api/v1/wallet/transactions',
       query: {
         cursor,
-        pageSize,
+        limit,
       },
       signal,
     }),
@@ -70,7 +70,7 @@ export async function fetchWalletMovementDetailState(
         },
       },
       method: 'GET',
-      path: `/wallet/transactions/${encodeURIComponent(movementId)}`,
+      path: `/api/v1/wallet/transactions/${encodeURIComponent(movementId)}`,
       signal,
     }),
   )
@@ -90,7 +90,7 @@ export async function requestWalletTransfer(
         operation: 'request-transfer',
       },
       method: 'POST',
-      path: '/wallet/transfers',
+      path: '/api/v1/wallet/transfers',
     }),
   )
 }

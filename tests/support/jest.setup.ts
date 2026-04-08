@@ -1,10 +1,8 @@
 import { cleanup } from '@testing-library/react-native'
 import { resetApiRuntimeConfigForTests } from '@/features/app-data/api'
-import { resetMockApiState } from '@/features/app-data/mock'
-import { mockApiServer } from '@/features/app-data/mock/server.node'
 import { resetMonitoringForTests } from '@/features/app-data/monitoring'
 import { resetKeycloakRuntimeConfigForTests } from '@/features/auth/models/config'
-import { resetPushNotificationsRuntimeConfigForTests } from '@/features/notifications/models'
+import { resetPushNotificationsRuntimeConfigForTests } from '@/features/notifications/models/runtime'
 
 jest.mock('expo-constants', () => {
   const defaultExpoConfig = {
@@ -18,7 +16,7 @@ jest.mock('expo-constants', () => {
         scopes: ['openid', 'profile', 'email'],
       },
       api: {
-        mockingEnabled: true,
+        baseUrl: 'https://volta.be.dev.theloop.tech',
       },
       sentry: {},
     },
@@ -698,12 +696,6 @@ const originalError = console.error.bind(console)
 const originalInfo = console.info.bind(console)
 const originalWarn = console.warn.bind(console)
 
-beforeAll(() => {
-  mockApiServer.listen({
-    onUnhandledRequest: 'bypass',
-  })
-})
-
 beforeEach(() => {
   const { __resetAuthSessionMock } = jest.requireMock('expo-auth-session')
   const { __resetExpoDeviceMock } = jest.requireMock('expo-device')
@@ -729,20 +721,14 @@ beforeEach(() => {
   __resetSentryMock()
   __resetMMKVMock()
   __resetSecureStoreMock()
-  mockApiServer.resetHandlers()
   resetApiRuntimeConfigForTests()
   resetMonitoringForTests()
   resetKeycloakRuntimeConfigForTests()
   resetPushNotificationsRuntimeConfigForTests()
-  resetMockApiState()
 })
 
 afterEach(() => {
   cleanup()
-})
-
-afterAll(() => {
-  mockApiServer.close()
 })
 
 jest.mock('expo-localization', () => {

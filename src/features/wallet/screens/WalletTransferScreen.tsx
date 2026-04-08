@@ -1,4 +1,3 @@
-import { ArrowUpRight, Wallet } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
 import { Platform } from 'react-native'
 import { Controller, useForm } from 'react-hook-form'
@@ -15,7 +14,6 @@ import {
 } from '@/components/ui'
 import { useActionToast } from '@/features/app-shell/hooks/useActionToast'
 import { useProfileQuery } from '@/features/profile/hooks'
-import { WalletPayoutMethodCard } from '../components/WalletPayoutMethodCard'
 import { WalletReceiptCard } from '../components/WalletReceiptCard'
 import { WalletDetailScreenFrame } from '../components/WalletDetailScreenFrame'
 import {
@@ -28,7 +26,7 @@ import {
   type WalletTransferRequest,
   type WalletTransferFormValues,
 } from '../forms'
-import { formatWalletAmount } from '../models'
+import { formatWalletAmount, formatWalletPaymentAccount } from '../models'
 import {
   useRequestWalletTransferMutation,
   useWalletOverviewQuery,
@@ -91,8 +89,8 @@ function WalletTransferScreenContent({
 }: {
   payoutAccount: {
     ibanMasked: string
-    spinEnabled: boolean
-  }
+    rail: 'sepa' | 'spin'
+  } | null
   walletBalanceCents: number
 }) {
   const router = useRouter()
@@ -122,7 +120,6 @@ function WalletTransferScreenContent({
       ),
     })
   const transferAmount = watch('amount')
-  const usesSpin = watch('useSpin')
   const transferAmountError = getWalletTransferAmountError(
     transferAmount,
     walletBalanceCents,
@@ -139,12 +136,19 @@ function WalletTransferScreenContent({
     transferAmountCents !== null
       ? formatWalletAmount(transferAmountCents, i18n.language)
       : t('tabScreens.wallet.transfer.amountPendingValue')
-  const selectedPayoutMethodLabel = usesSpin
-    ? t('tabScreens.wallet.transfer.payoutMethodSpin')
-    : t('tabScreens.wallet.transfer.payoutMethodSepa')
-  const selectedPayoutMethodHelper = usesSpin
-    ? t('tabScreens.wallet.transfer.payoutOptionSpinCaption')
-    : t('tabScreens.wallet.transfer.payoutOptionSepaCaption')
+  const selectedPayoutMethodLabel = payoutAccount
+    ? payoutAccount.rail === 'spin'
+      ? t('tabScreens.wallet.transfer.payoutMethodSpin')
+      : t('tabScreens.wallet.transfer.payoutMethodSepa')
+    : '-'
+  const selectedPayoutMethodHelper = payoutAccount
+    ? payoutAccount.rail === 'spin'
+      ? t('tabScreens.wallet.transfer.payoutOptionSpinCaption')
+      : t('tabScreens.wallet.transfer.payoutOptionSepaCaption')
+    : undefined
+  const payoutDestination = payoutAccount
+    ? formatWalletPaymentAccount(payoutAccount)
+    : '-'
   const transferActionLabel =
     isTransferAmountValid && transferAmountCents !== null
       ? t('tabScreens.wallet.transfer.confirmActionAmountLabel', {
@@ -300,64 +304,24 @@ function WalletTransferScreenContent({
         </YStack>
       </SurfaceCard>
 
-      <YStack gap="$2.5">
-        <Text color="$color10" fontSize={13} fontWeight="800">
-          {t('tabScreens.wallet.transfer.payoutOptionsTitle')}
-        </Text>
-        <WalletPayoutMethodCard
-          badgeLabel={
-            payoutAccount.spinEnabled
-              ? undefined
-              : t('tabScreens.wallet.transfer.payoutOptionUnavailableBadge')
-          }
-          description={
-            payoutAccount.spinEnabled
-              ? t('tabScreens.wallet.transfer.payoutOptionSpinCaption')
-              : t('tabScreens.wallet.transfer.spinUnavailableHelper')
-          }
-          disabled={!payoutAccount.spinEnabled}
-          icon={<ArrowUpRight color="$accent11" size={18} />}
-          onPress={() =>
-            setValue('useSpin', true, {
-              shouldDirty: true,
-              shouldTouch: true,
-              shouldValidate: true,
-            })
-          }
-          selected={usesSpin}
-          testID="wallet-transfer-payout-option-spin"
-          title={t('tabScreens.wallet.transfer.payoutMethodSpin')}
-        />
-        <WalletPayoutMethodCard
-          description={t('tabScreens.wallet.transfer.payoutOptionSepaCaption')}
-          icon={<Wallet color="$accent11" size={18} />}
-          onPress={() =>
-            setValue('useSpin', false, {
-              shouldDirty: true,
-              shouldTouch: true,
-              shouldValidate: true,
-            })
-          }
-          selected={!usesSpin}
-          testID="wallet-transfer-payout-option-sepa"
-          title={t('tabScreens.wallet.transfer.payoutMethodSepa')}
-        />
-      </YStack>
-
       <WalletReceiptCard
         footer={
-          <YStack
-            bg="$accent2"
-            gap="$1.5"
-            p="$3.5"
-            rounded="$6"
-            testID="wallet-transfer-review-note"
-          >
-            <StatusBadge tone="accent">{selectedPayoutMethodLabel}</StatusBadge>
-            <Text color="$color11" fontSize={14} lineHeight={20}>
-              {selectedPayoutMethodHelper}
-            </Text>
-          </YStack>
+          selectedPayoutMethodHelper ? (
+            <YStack
+              bg="$accent2"
+              gap="$1.5"
+              p="$3.5"
+              rounded="$6"
+              testID="wallet-transfer-review-note"
+            >
+              <StatusBadge tone="accent">
+                {selectedPayoutMethodLabel}
+              </StatusBadge>
+              <Text color="$color11" fontSize={14} lineHeight={20}>
+                {selectedPayoutMethodHelper}
+              </Text>
+            </YStack>
+          ) : null
         }
         items={[
           {
@@ -366,7 +330,7 @@ function WalletTransferScreenContent({
           },
           {
             label: t('tabScreens.wallet.transfer.destinationLabel'),
-            value: payoutAccount.ibanMasked,
+            value: payoutDestination,
           },
           {
             label: t('tabScreens.wallet.transfer.payoutMethodLabel'),

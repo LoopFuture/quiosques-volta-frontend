@@ -14,6 +14,10 @@ import {
   type ProfileSummaryMetrics,
 } from './models'
 
+function getProfileDisplayValue(value: string | null | undefined) {
+  return value && value.trim().length > 0 ? value : '-'
+}
+
 export function getProfileValidationCopy(t: TFunction) {
   return {
     appSettings: {
@@ -132,7 +136,7 @@ export function getProfileHubSections(
       previewRows: [
         {
           label: t('tabScreens.profile.hub.rows.nameTitle'),
-          value: profile.personal.name,
+          value: getProfileDisplayValue(profile.personal.name),
         },
         {
           label: t('tabScreens.profile.hub.rows.emailTitle'),
@@ -140,11 +144,11 @@ export function getProfileHubSections(
         },
         {
           label: t('tabScreens.profile.hub.rows.phoneNumberTitle'),
-          value: profile.personal.phoneNumber,
+          value: getProfileDisplayValue(profile.personal.phoneNumber),
         },
         {
           label: t('tabScreens.profile.hub.rows.nifTitle'),
-          value: profile.personal.nif,
+          value: getProfileDisplayValue(profile.personal.nif),
         },
       ],
       summary: t('tabScreens.profile.hub.summaries.personal'),
@@ -155,13 +159,16 @@ export function getProfileHubSections(
       previewRows: [
         {
           label: t('tabScreens.profile.hub.rows.ibanTitle'),
-          value: profile.payoutAccount.ibanMasked,
+          value: getProfileDisplayValue(profile.payoutAccount?.ibanMasked),
         },
         {
           label: t('tabScreens.profile.hub.rows.spinTitle'),
-          value: profile.payoutAccount.spinEnabled
-            ? t('tabScreens.profile.hub.rows.spinEnabledHelper')
-            : t('tabScreens.profile.hub.rows.spinDisabledHelper'),
+          value:
+            profile.payoutAccount?.rail === 'spin'
+              ? t('tabScreens.profile.hub.rows.spinEnabledHelper')
+              : profile.payoutAccount
+                ? t('tabScreens.profile.hub.rows.spinDisabledHelper')
+                : '-',
         },
       ],
       summary: t('tabScreens.profile.hub.summaries.payments'),
@@ -172,7 +179,7 @@ export function getProfileHubSections(
       previewRows: [
         {
           label: t('tabScreens.profile.hub.rows.alertsEmailTitle'),
-          value: profile.preferences.alertsEnabled
+          value: profile.preferences?.alertsEnabled
             ? t('tabScreens.profile.hub.rows.alertsEmailEnabledHelper')
             : t('tabScreens.profile.hub.rows.alertsEmailDisabledHelper'),
         },
@@ -226,10 +233,11 @@ export function getProfileHubReadiness(
     profile: ProfileResponse
   },
 ) {
-  const paymentsReady = profile.payoutAccount.ibanMasked.length > 0
+  const paymentsReady = Boolean(profile.payoutAccount?.ibanMasked)
   const securityReady = !biometricsSupported || deviceSettings.biometricsEnabled
   const alertsReady =
-    profile.preferences.alertsEnabled || deviceSettings.pushNotificationsEnabled
+    (profile.preferences?.alertsEnabled ?? false) ||
+    deviceSettings.pushNotificationsEnabled
   const badgeTone =
     paymentsReady && securityReady && alertsReady ? 'success' : 'warning'
   const securityItems: {
@@ -265,13 +273,14 @@ export function getProfileHubReadiness(
         id: 'payments',
         label: t('tabScreens.profile.hub.readiness.paymentsLabel'),
         tone: paymentsReady ? 'success' : 'warning',
-        value: profile.payoutAccount.spinEnabled
-          ? t('tabScreens.profile.hub.readiness.paymentsEnabledValue', {
-              iban: profile.payoutAccount.ibanMasked,
-            })
-          : t('tabScreens.profile.hub.readiness.paymentsReviewValue', {
-              iban: profile.payoutAccount.ibanMasked,
-            }),
+        value:
+          profile.payoutAccount?.rail === 'spin'
+            ? t('tabScreens.profile.hub.readiness.paymentsEnabledValue', {
+                iban: getProfileDisplayValue(profile.payoutAccount?.ibanMasked),
+              })
+            : t('tabScreens.profile.hub.readiness.paymentsReviewValue', {
+                iban: getProfileDisplayValue(profile.payoutAccount?.ibanMasked),
+              }),
       },
       ...securityItems,
       {
@@ -279,10 +288,10 @@ export function getProfileHubReadiness(
         label: t('tabScreens.profile.hub.readiness.alertsLabel'),
         tone: alertsReady ? 'success' : 'warning',
         value:
-          profile.preferences.alertsEnabled &&
+          (profile.preferences?.alertsEnabled ?? false) &&
           deviceSettings.pushNotificationsEnabled
             ? t('tabScreens.profile.hub.readiness.alertsAllValue')
-            : profile.preferences.alertsEnabled
+            : profile.preferences?.alertsEnabled
               ? t('tabScreens.profile.hub.readiness.alertsEmailValue')
               : deviceSettings.pushNotificationsEnabled
                 ? t('tabScreens.profile.hub.readiness.alertsPushValue')

@@ -1,6 +1,6 @@
 import { z } from 'zod/v4'
 import {
-  payoutAccountInputSchema,
+  isSpinPayoutRail,
   type PayoutAccount,
   type PayoutAccountInput,
 } from '@/features/profile/models'
@@ -18,7 +18,10 @@ export const profilePaymentsRequestSchema = z.object({
   spinEnabled: z.boolean(),
 })
 
-export type ProfilePaymentsFormValues = PayoutAccountInput
+export type ProfilePaymentsFormValues = {
+  iban: string
+  spinEnabled: boolean
+}
 export type ProfilePaymentsRequest = z.infer<
   typeof profilePaymentsRequestSchema
 >
@@ -42,21 +45,21 @@ export function getProfilePaymentsFormSchema(
 }
 
 export function getProfilePaymentsFormDefaultValues(
-  payments: PayoutAccount,
+  payments: PayoutAccount | null,
 ): ProfilePaymentsFormValues {
   return {
     iban: '',
-    spinEnabled: payments.spinEnabled,
+    spinEnabled: isSpinPayoutRail(payments?.rail),
   }
 }
 
 export function toProfilePaymentsDraft(
   values: ProfilePaymentsFormValues,
 ): PayoutAccountInput {
-  return payoutAccountInputSchema.parse({
+  return {
     iban: normalizeIban(values.iban),
-    spinEnabled: values.spinEnabled,
-  })
+    rail: values.spinEnabled ? 'spin' : 'sepa',
+  }
 }
 
 export function serializeProfilePaymentsForm(

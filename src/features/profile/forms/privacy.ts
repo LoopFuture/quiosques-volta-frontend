@@ -34,7 +34,7 @@ export function getProfilePrivacyFormDefaultValues(
   values: ProfilePrivacyFormValues,
 ): ProfilePrivacyFormValues {
   return {
-    alertsEmail: values.alertsEmail,
+    alertsEmail: values.alertsEmail.trim(),
     alertsEnabled: values.alertsEnabled,
     biometricsEnabled: values.biometricsEnabled,
     pushNotificationsEnabled: values.pushNotificationsEnabled,

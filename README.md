@@ -18,7 +18,6 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - Expo Router for file-based navigation
 - Tamagui for UI primitives, themes, and compiler-based extraction
 - React Query for server-state and API-ready data flows
-- MSW native as a temporary emulator for app-facing Volta backend flows in development and Jest
 - EAS Update with fingerprint-based runtime compatibility
 - EAS Insights for cold-start metrics in built apps
 - Sentry for runtime diagnostics, breadcrumbs, and error capture
@@ -75,17 +74,14 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
   - `SENTRY_URL`
   - `SENTRY_DISABLE_AUTO_UPLOAD`
   - `SENTRY_ALLOW_FAILURE`
-- Optional app API envs:
+- Required app API envs:
   - `API_BASE_URL`
-  - `API_MOCKING_ENABLED`
 - Optional Android push envs:
   - `ANDROID_GOOGLE_SERVICES_FILE`
 - These values are injected at build time through `app.config.ts` and read at runtime from `expo-constants`.
 - App data requests go through the shared fetch client in `src/features/app-data/api`.
-- In development, API mocking defaults to enabled and requests are intercepted by the native MSW runtime.
-- In Jest, API mocking also defaults to enabled, but requests are intercepted by the Node MSW server setup in `src/features/app-data/mock/server.node.ts`.
-- The OpenAPI reference lives in `docs/volta-backend-api.openapi.yaml`. Treat the MSW layer as a temporary backend emulator for app flows, not as a guarantee that every documented backend endpoint is mocked in-app.
-- In production, API mocking defaults to disabled. If you disable mocking in any environment, `API_BASE_URL` must be set.
+- `API_BASE_URL` is required and is injected from env into `extra.api.baseUrl`.
+- The OpenAPI reference lives in `docs/volta-backend-api.openapi.yaml`.
 - EAS Update is configured through `app.config.ts` with a fixed `updates.url` and `runtimeVersion.policy = 'fingerprint'`.
 - `SENTRY_ENVIRONMENT` defaults to the active `EAS_BUILD_PROFILE` when available, otherwise `NODE_ENV`.
 - Sentry tracing defaults to `1.0` in development and `0.0` elsewhere. Set `SENTRY_TRACES_SAMPLE_RATE` explicitly to enable tracing outside development.
@@ -131,7 +127,7 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - `src/features/auth` owns the Keycloak screen, runtime config parsing, secure token storage, and session refresh logic.
 - Login and register both use Keycloak OIDC Authorization Code Flow with PKCE through `expo-auth-session`.
 - Register adds `prompt=create`, and both auth actions pass the app preference mode as the Keycloak theme query value: `system`, `light`, or `dark`.
-- Tokens are persisted in `expo-secure-store`. MMKV remains limited to non-sensitive client storage such as theme, language, onboarding, device privacy toggles, and push installation metadata. The shared MMKV store uses a neutral client-storage namespace rather than preference-specific naming. Profile setup completion comes from the authenticated profile/bootstrap API.
+- Tokens are persisted in `expo-secure-store`. MMKV remains limited to non-sensitive client storage such as theme, language, onboarding, and device privacy toggles. The shared MMKV store uses a neutral client-storage namespace rather than preference-specific naming. Profile setup completion comes from the authenticated profile/bootstrap API.
 
 ## Push Notifications
 
@@ -164,16 +160,15 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - `src/features`: Feature-owned screens, navigation helpers, feature-specific components, and feature-local presentation helpers.
 - `src/features/app-shell`: Shared shell navigation, tab chrome, not-found handling, and cross-feature app-shell helpers.
 - `src/features/auth`: Keycloak auth screen, session provider, runtime config, and SecureStore-backed token helpers.
-- `src/features/<feature>/models`: Feature-owned schemas, inferred types, mock builders, and API-ready view-model helpers.
+- `src/features/<feature>/models`: Feature-owned schemas, inferred types, and API-ready view-model helpers.
 - `src/features/<feature>/forms`: Feature-owned RHF/Zod form schemas, default-value builders, normalization helpers, and request serializers.
 - `src/features/<feature>/api.ts`: Feature-owned request helpers that talk to the shared app API client.
 - `src/features/<feature>/hooks`: Feature-owned React Query hooks and screen-facing async data access.
 - `src/features/app-data/api`: Shared app API runtime config, request client, and API error types.
 - `src/features/app-data/monitoring`: Shared diagnostics runtime config, Sentry bootstrap, redaction, and structured logging helpers.
 - `src/features/app-data/query`: Shared query client setup, keys, and invalidation helpers.
-- `src/features/app-data/mock`: Session-only MSW-backed backend emulator state, handlers, server bootstrap, delay helpers, and test reset utilities.
 - `src/hooks`: Shared app-wide hooks.
-- `src/features/app-data/storage`: Shared MMKV-backed client storage. App preferences live under `preferences/`, and broader device/client persistence such as onboarding, privacy toggles, and push installation metadata live under `device/`.
+- `src/features/app-data/storage`: Shared MMKV-backed client storage. App preferences live under `preferences/`, and broader device/client persistence such as onboarding and privacy toggles live under `device/`.
 - `src/i18n`: i18next setup, locale resources, and shared formatting helpers.
 - `src/components`: App-wide providers and shared UI support components.
 - `src/components/ui`: Shared UI primitives aligned with the Tamagui theme and token system.
@@ -197,13 +192,12 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - `src/app` should stay thin; prefer re-exporting or composing feature screens from `src/features`.
 - `src/features/app-shell` owns shared tab/navigation UI. Keep cross-feature shell behavior there instead of pushing it into route files.
 - Wire translations directly in the owning screen, navigation helper, or feature component with `useTranslation`.
-- Put raw API contracts, mock records, Zod schemas, serializers, and view-model shaping in the owning feature's `models/` or `forms/` folder. Keep translation and formatting decisions in UI or screen-local presentation helpers.
+- Put raw API contracts, Zod schemas, serializers, and view-model shaping in the owning feature's `models/` or `forms/` folder. Keep translation and formatting decisions in UI or screen-local presentation helpers.
 - For future API work, prefer updating the feature-owned serializer/model helpers before changing screen components directly.
 - Put feature request helpers in `src/features/<feature>/api.ts`. Keep React Query hooks in `src/features/<feature>/hooks`.
 - Place feature-specific hooks under `src/features/<feature>/hooks` and shared hooks under `src/hooks`.
-- React Query is the default layer for server-like reads and writes. Screens should consume feature hooks rather than calling mock/model builders directly.
+- React Query is the default layer for server-like reads and writes. Screens should consume feature hooks rather than calling model builders directly.
 - Shared diagnostics and Sentry logging are centralized. Prefer emitting app-wide runtime logs through `src/features/app-data/monitoring` instead of ad hoc `console.*` calls in features.
-- The MSW backend emulator is session-only and lives under `src/features/app-data/mock`. React Query should cache canonical backend-shaped HTTP state, and localized screen models should stay derived in feature hooks or feature helpers.
 - MMKV-backed client storage lives under `src/features/app-data/storage`. Keep true app preferences under `preferences/` and broader device/client state under `device/`. Authenticated profile/setup status should come from the API layer.
 - Prefer composing Tamagui UI components before creating new shared primitives, and keep shared UI styling inside the existing theme and token system.
 - Auth state is separate from MMKV client storage: Keycloak tokens live in `expo-secure-store`, and auth runtime values come from `app.config.ts` via Expo Constants.
@@ -216,7 +210,6 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - Prefer tests that exercise route entrypoints or production-mounted feature screens. If a component is only used by tests, either integrate it into the app immediately or remove it.
 - Local and CI runtime expectations are pinned to Node 22 through `.nvmrc`, `package.json`, and the CI image.
 - For Expo-managed native packages, prefer `pnpm exec expo install <package>` and use `pnpm exec expo install --check` before manual version bumps.
-- `msw` native support currently depends on the explicit Metro aliases in `metro.config.js`. Treat `msw` and `@mswjs/interceptors` upgrades as bundling-sensitive work and validate them with `pnpm validate:full`.
 - Tamagui is intentionally pinned to a single `2.0.0-rc.22` set across runtime, compiler, and plugin packages. Avoid piecemeal version bumps; update that line in one pass after Expo/React Native compatibility is confirmed.
 - The Tamagui compiler is enabled through both Babel and Metro. The build scripts additionally wrap Expo export with `tamagui build --target native`.
 - `AGENTS.md` defines the repo contract for autonomous coding agents.

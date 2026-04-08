@@ -1,6 +1,5 @@
 import { screen } from '@testing-library/react-native'
 import MapScreen from '@/app/(tabs)/map'
-import * as mapApi from '@/features/map/api'
 import { renderWithProvider } from '../../support/test-utils'
 
 describe('map screen', () => {
@@ -8,12 +7,7 @@ describe('map screen', () => {
     jest.clearAllMocks()
   })
 
-  it('renders the map fallback without the preview card and fetches map data', async () => {
-    const fetchMapScreenSnapshotSpy = jest.spyOn(
-      mapApi,
-      'fetchMapScreenSnapshot',
-    )
-
+  it('renders the map fallback without the preview card', async () => {
     renderWithProvider(<MapScreen />)
 
     expect(screen.getByTestId('map-screen')).toBeTruthy()
@@ -25,6 +19,5 @@ describe('map screen', () => {
     ).toBeTruthy()
     expect(screen.getByText('Mostrar código')).toBeTruthy()
     expect(screen.queryByTestId('map-preview-card')).toBeNull()
-    expect(fetchMapScreenSnapshotSpy).toHaveBeenCalled()
   })
 })

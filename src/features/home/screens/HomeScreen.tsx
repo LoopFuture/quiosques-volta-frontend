@@ -18,8 +18,6 @@ import {
 } from '@/components/ui'
 import { getAppToastDuration } from '@/features/app-shell/toast'
 import { TabTopBar } from '@/features/app-shell/navigation/tab-header'
-import { useNotificationsQuery } from '@/features/notifications/hooks'
-import { notificationsRoutes } from '@/features/notifications/routes'
 import { profileRoutes } from '@/features/profile/routes'
 import { WalletMovementIcon } from '@/features/wallet/components/WalletMovementIcon'
 import { walletRoutes } from '@/features/wallet/routes'
@@ -130,28 +128,9 @@ export default function HomeScreen() {
     isRefetching,
     refetch,
   } = useHomeScreenQuery()
-  const {
-    data: notificationsState,
-    isRefetching: isNotificationsRefetching,
-    refetch: refetchNotifications,
-  } = useNotificationsQuery()
-  const unreadNotificationsCount =
-    notificationsState?.pages[0]?.unreadCount ?? 0
-  const unreadNotificationsBadgeValue =
-    unreadNotificationsCount > 0
-      ? unreadNotificationsCount > 99
-        ? '99+'
-        : formatWalletCount(unreadNotificationsCount, i18n.language)
-      : undefined
-  const unreadNotificationsHint =
-    unreadNotificationsCount > 0
-      ? t('tabs.home.header.notificationUnreadHint', {
-          count: unreadNotificationsCount,
-        })
-      : undefined
 
   const handleRefresh = () => {
-    void Promise.all([refetch(), refetchNotifications()])
+    void refetch()
   }
 
   useEffect(() => {
@@ -200,15 +179,12 @@ export default function HomeScreen() {
     <ScreenContainer
       header={
         <TabTopBar
-          homeNotificationAccessibilityHint={unreadNotificationsHint}
-          homeNotificationBadgeValue={unreadNotificationsBadgeValue}
           homeTitle={homeScreenState?.greeting.displayName}
           routeName="index"
-          onHomeNotificationPress={() => router.push(notificationsRoutes.index)}
         />
       }
       onRefresh={handleRefresh}
-      refreshing={isRefetching || isNotificationsRefetching}
+      refreshing={isRefetching}
       scrollable
       testID="home-dashboard-screen"
     >

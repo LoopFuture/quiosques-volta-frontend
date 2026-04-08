@@ -391,8 +391,10 @@ export function ProfilePrivacyScreen() {
         <ProfilePrivacyScreenSkeleton />
       ) : (
         <ProfilePrivacyForm
-          alertsEnabled={profile.preferences.alertsEnabled}
-          currentEmail={profile.personal.email}
+          alertsEnabled={profile.preferences?.alertsEnabled ?? false}
+          currentEmail={
+            profile.preferences?.alertsEmail ?? profile.personal.email
+          }
         />
       )}
     </ProfileDetailScreenFrame>

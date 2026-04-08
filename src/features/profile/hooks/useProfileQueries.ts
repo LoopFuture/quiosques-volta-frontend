@@ -99,7 +99,13 @@ export function useCompleteProfileSetupMutation() {
     },
     mutationFn: async ({ snapshot }: { snapshot: ProfileSetupSnapshot }) =>
       patchProfile({
-        payoutAccount: snapshot.payments,
+        onboarding: {
+          status: 'completed',
+        },
+        payoutAccount: {
+          iban: snapshot.payments.iban,
+          rail: snapshot.payments.spinEnabled ? 'spin' : 'sepa',
+        },
         personal: snapshot.personal,
         preferences: {
           alertsEmail: snapshot.personal.email,
