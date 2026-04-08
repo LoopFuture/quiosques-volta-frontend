@@ -18,7 +18,7 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - Expo Router for file-based navigation
 - Tamagui for UI primitives, themes, and compiler-based extraction
 - React Query for server-state and API-ready data flows
-- MSW native as a temporary Volta Mobile API v1.1 emulator in development and Jest
+- MSW native as a temporary emulator for app-facing Volta backend flows in development and Jest
 - EAS Update with fingerprint-based runtime compatibility
 - EAS Insights for cold-start metrics in built apps
 - Sentry for runtime diagnostics, breadcrumbs, and error capture
@@ -84,7 +84,7 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - App data requests go through the shared fetch client in `src/features/app-data/api`.
 - In development, API mocking defaults to enabled and requests are intercepted by the native MSW runtime.
 - In Jest, API mocking also defaults to enabled, but requests are intercepted by the Node MSW server setup in `src/features/app-data/mock/server.node.ts`.
-- The MSW layer should mirror the Volta Mobile API v1.1 contract in `docs/volta-mobile-api-v1.1.openapi.yaml`. Treat it as a temporary backend emulator, not as a source of app-specific screen models.
+- The OpenAPI reference lives in `docs/volta-backend-api.openapi.yaml`. Treat the MSW layer as a temporary backend emulator for app flows, not as a guarantee that every documented backend endpoint is mocked in-app.
 - In production, API mocking defaults to disabled. If you disable mocking in any environment, `API_BASE_URL` must be set.
 - EAS Update is configured through `app.config.ts` with a fixed `updates.url` and `runtimeVersion.policy = 'fingerprint'`.
 - `SENTRY_ENVIRONMENT` defaults to the active `EAS_BUILD_PROFILE` when available, otherwise `NODE_ENV`.
@@ -253,5 +253,5 @@ Current stack:
 
 Project docs:
 
-- `docs/volta-mobile-api-v1.1.openapi.yaml`: canonical Volta Mobile API v1.1 OpenAPI contract used by the app and mirrored by MSW.
-- `docs/volta-mobile-api-v1.1.md`: implementation notes and design decisions for the same API contract.
+- `docs/volta-backend-api.openapi.yaml`: canonical Volta Backend API OpenAPI contract reference for this repo.
+- `docs/volta-backend-api.md`: companion summary of the current backend contract surface and integration notes.
