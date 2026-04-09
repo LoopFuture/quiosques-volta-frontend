@@ -308,6 +308,36 @@ describe('ProfileSetupScreen', () => {
     })
   })
 
+  it.each([
+    ['failed', 'tabScreens.profile.privacy.biometricFailedToast'],
+    ['not-available', 'tabScreens.profile.privacy.biometricNotAvailableToast'],
+  ] as const)(
+    'shows the mapped biometric error toast when the result is %s',
+    async (reason, messageKey) => {
+      mockAuthenticateWithAvailableBiometrics.mockResolvedValue({
+        reason,
+        success: false,
+      })
+
+      renderWithProvider(<ProfileSetupScreen />)
+
+      await advanceToSecurityStep()
+
+      fireEvent.press(
+        screen.getByLabelText(
+          i18n.t('tabScreens.profile.privacy.biometricLabel'),
+        ),
+      )
+
+      await waitFor(() => {
+        expect(mockShowError).toHaveBeenCalledWith(
+          i18n.t('tabScreens.profile.privacy.biometricLabel'),
+          i18n.t(messageKey),
+        )
+      })
+    },
+  )
+
   it('omits the biometric section without hardware and disables push without requesting permissions again', async () => {
     mockUseBiometricHardwareAvailability.mockReturnValue(false)
     mockUseDevicePrivacySettings.mockReturnValue({
@@ -339,6 +369,54 @@ describe('ProfileSetupScreen', () => {
     await waitFor(() => {
       expect(requestPushPermissionAndToken).not.toHaveBeenCalled()
     })
+  })
+
+  it('submits push notifications as disabled when permission is not granted on entry', async () => {
+    mockUseBiometricHardwareAvailability.mockReturnValue(false)
+    mockUseDevicePrivacySettings.mockReturnValue({
+      settings: {
+        biometricsEnabled: false,
+        pushNotificationsEnabled: true,
+      },
+      setSettings,
+    })
+    mockUsePushNotifications.mockReturnValue({
+      canAskAgain: false,
+      expoPushToken: null,
+      isPhysicalDevice: true,
+      isSyncing: false,
+      permissionStatus: 'denied',
+      registrationErrorCode: null,
+      requestPushPermissionAndToken,
+    })
+
+    renderWithProvider(<ProfileSetupScreen />)
+
+    await advanceToSecurityStep()
+    fireEvent.press(screen.getByTestId('profile-setup-finish-button'))
+
+    await waitFor(() => {
+      expect(mutateAsync).toHaveBeenCalledWith({
+        snapshot: {
+          payments: {
+            iban: 'PT50000201231234567890154',
+            spinEnabled: false,
+          },
+          personal: {
+            email: 'joao@volta.pt',
+            name: 'Joao Ferreira',
+            nif: '123456789',
+            phoneNumber: '+351912345678',
+          },
+          preferences: {
+            biometricsEnabled: false,
+            pushNotificationsEnabled: false,
+          },
+        },
+      })
+    })
+
+    expect(requestPushPermissionAndToken).not.toHaveBeenCalled()
   })
 
   it('lets the user disable biometrics after they were previously enabled', async () => {

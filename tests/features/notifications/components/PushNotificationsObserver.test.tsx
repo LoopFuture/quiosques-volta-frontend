@@ -18,6 +18,7 @@ jest.mock('expo-router', () => {
 const { __mockRouterPush: mockRouterPush } = jest.requireMock('expo-router')
 const { __setExpoConfig } = jest.requireMock('expo-constants')
 const {
+  __emitNotificationResponseReceived,
   __setLastNotificationResponse,
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
@@ -114,6 +115,63 @@ describe('push notifications observer', () => {
         message: 'notification-response.route.info',
       }),
     )
+  })
+
+  it('ignores notification actions that are not the default open action', async () => {
+    renderObserver()
+
+    __emitNotificationResponseReceived({
+      actionIdentifier: 'dismiss',
+      notification: {
+        request: {
+          content: {
+            data: {
+              url: '/profile/privacy',
+            },
+          },
+          identifier: 'response-ignored',
+        },
+      },
+    })
+
+    await waitFor(() => {
+      expect(addBreadcrumb).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'notification-response.route.info',
+        }),
+      )
+    })
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+    expect(clearLastNotificationResponseAsync).not.toHaveBeenCalled()
+  })
+
+  it('deduplicates repeated notification responses', async () => {
+    renderObserver()
+
+    const response = {
+      actionIdentifier: 'expo.modules.notifications.actions.DEFAULT',
+      notification: {
+        request: {
+          content: {
+            data: {
+              url: '/wallet',
+            },
+          },
+          identifier: 'response-duplicate',
+        },
+      },
+    }
+
+    __emitNotificationResponseReceived(response)
+    __emitNotificationResponseReceived(response)
+
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledWith('/wallet')
+    })
+
+    expect(mockRouterPush).toHaveBeenCalledTimes(1)
+    expect(clearLastNotificationResponseAsync).toHaveBeenCalledTimes(1)
   })
 
   it('cleans up notification listeners on unmount', () => {

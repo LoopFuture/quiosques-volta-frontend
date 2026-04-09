@@ -45,4 +45,31 @@ describe('app api runtime config', () => {
       resolvedBaseUrl: 'https://api.example.com',
     })
   })
+
+  it('throws when the configured backend url is blank or malformed', () => {
+    __setExpoConfig(
+      createMockExpoConfig({
+        api: {
+          baseUrl: '   ',
+        },
+      }),
+    )
+
+    expect(() => getApiRuntimeConfig()).toThrow(
+      'Missing or invalid API runtime config. Define API_BASE_URL in app config env.',
+    )
+
+    resetApiRuntimeConfigForTests()
+    __setExpoConfig(
+      createMockExpoConfig({
+        api: {
+          baseUrl: 'notaurl',
+        },
+      }),
+    )
+
+    expect(() => getApiRuntimeConfig()).toThrow(
+      'Missing or invalid API runtime config. Define API_BASE_URL in app config env.',
+    )
+  })
 })

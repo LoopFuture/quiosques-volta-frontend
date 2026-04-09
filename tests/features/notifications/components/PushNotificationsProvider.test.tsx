@@ -211,6 +211,36 @@ describe('push notifications provider', () => {
     })
   })
 
+  it('does not prompt again when notifications stay denied and the OS disallows another prompt', async () => {
+    __setNotificationPermissions({
+      canAskAgain: false,
+      granted: false,
+      ios: {
+        allowsAlert: false,
+        allowsBadge: false,
+        allowsSound: false,
+        status: 0,
+      },
+      status: 'denied',
+    })
+
+    render(
+      <PushNotificationsProvider>
+        <PushNotificationsHarness />
+      </PushNotificationsProvider>,
+    )
+
+    fireEvent.press(screen.getByText('Request notifications'))
+
+    await waitFor(() => {
+      expect(screen.getByText('status:denied')).toBeTruthy()
+      expect(screen.getByText('token:none')).toBeTruthy()
+      expect(screen.getByText('error:none')).toBeTruthy()
+    })
+
+    expect(requestPermissionsAsync).not.toHaveBeenCalled()
+  })
+
   it('keeps permission callbacks stable across sync state updates', async () => {
     render(
       <PushNotificationsProvider>
@@ -253,6 +283,26 @@ describe('push notifications provider', () => {
         message: 'push-token.register.info',
       }),
     )
+  })
+
+  it('falls back to the current provider state when requesting permissions throws', async () => {
+    requestPermissionsAsync.mockRejectedValueOnce(new Error('prompt failed'))
+
+    render(
+      <PushNotificationsProvider>
+        <PushNotificationsHarness />
+      </PushNotificationsProvider>,
+    )
+
+    fireEvent.press(screen.getByText('Request notifications'))
+
+    await waitFor(() => {
+      expect(screen.getByText('status:undetermined')).toBeTruthy()
+      expect(screen.getByText('token:none')).toBeTruthy()
+      expect(screen.getByText('error:none')).toBeTruthy()
+    })
+
+    expect(captureException).toHaveBeenCalledWith(expect.any(Error))
   })
 
   it('reports missing project id failures through diagnostics', async () => {
