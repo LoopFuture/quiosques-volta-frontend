@@ -112,26 +112,5 @@
   "engines": {
     "node": ">=22 <23"
   },
-  "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
-  "pnpm": {
-    "overrides": {
-      "react": "19.2.0",
-      "react-dom": "19.2.0",
-      "react-test-renderer": "19.2.0"
-    },
-    "allowedDeprecatedVersions": {
-      "abab": "2.0.6",
-      "domexception": "4.0.0",
-      "glob": "7.2.3 || 9.3.5",
-      "inflight": "1.0.6",
-      "rimraf": "3.0.2",
-      "text-encoding": "0.7.0",
-      "whatwg-encoding": "2.0.0"
-    },
-    "peerDependencyRules": {
-      "allowedVersions": {
-        "marked-terminal@5.2.0>marked": "14"
-      }
-    }
-  }
+  "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
 }

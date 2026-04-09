@@ -1,3 +1,21 @@
 allowBuilds:
   esbuild: true
   unrs-resolver: true
+
+allowedDeprecatedVersions:
+  abab: '2.0.6'
+  domexception: '4.0.0'
+  glob: '7.2.3 || 9.3.5'
+  inflight: '1.0.6'
+  rimraf: '3.0.2'
+  text-encoding: '0.7.0'
+  whatwg-encoding: '2.0.0'
+
+peerDependencyRules:
+  allowedVersions:
+    'marked-terminal@5.2.0>marked': '14'
+    'sonner@0.3.5>react': '19'
+    'sonner@0.3.5>react-dom': '19'
+    'zeego@3.0.6>@react-native-menu/menu': '2.0.0'
+    'zeego@3.0.6>react-native-ios-context-menu': '3.2.1'
+    'zeego@3.0.6>react-native-ios-utilities': '5.2.0'
