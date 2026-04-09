@@ -18,6 +18,7 @@ module.exports = {
   transformIgnorePatterns: [],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@tests/(.*)$': '<rootDir>/tests/$1',
     '\\.svg$': '<rootDir>/tests/support/svg-mock.tsx',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/support/jest.setup.ts'],

@@ -9,10 +9,17 @@ import {
   syncLocale,
 } from '@/i18n'
 
+const { __setMockLocales } = jest.requireMock('expo-localization')
 const t = i18n.t.bind(i18n)
 
 describe('localization setup', () => {
   afterEach(() => {
+    __setMockLocales([
+      {
+        languageCode: 'pt',
+        languageTag: 'pt-PT',
+      },
+    ])
     setLocaleOverrideForTests('pt-PT')
     syncLocale()
   })
@@ -83,5 +90,26 @@ describe('localization setup', () => {
   it('resolves system locale preferences from the device locale', () => {
     expect(resolveAppLocale('system', 'en-US')).toBe(fallbackLocale)
     expect(resolveAppLocale('system', 'fr-FR')).toBe(primaryLocale)
+  })
+
+  it('falls back from missing locale tags to language codes and primary defaults', () => {
+    setLocaleOverrideForTests(null)
+    __setMockLocales([
+      {
+        languageCode: 'en',
+        languageTag: undefined as unknown as string,
+      },
+    ])
+
+    expect(resolveAppLocale()).toBe(fallbackLocale)
+
+    __setMockLocales([
+      {
+        languageCode: undefined as unknown as string,
+        languageTag: undefined as unknown as string,
+      },
+    ])
+
+    expect(syncLocale()).toBe(primaryLocale)
   })
 })

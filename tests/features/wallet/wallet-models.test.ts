@@ -126,6 +126,18 @@ const completedTransferWithoutDetails = walletTransactionSchema.parse({
   transferDetails: undefined,
 })
 
+const failedTransferWithoutDetails = walletTransactionSchema.parse({
+  ...failedTransfer,
+  id: 'transfer-failed-fallbacks',
+  transferDetails: undefined,
+})
+
+const cancelledTransferWithoutDetails = walletTransactionSchema.parse({
+  ...cancelledTransfer,
+  id: 'transfer-cancelled-fallbacks',
+  transferDetails: undefined,
+})
+
 describe('wallet models, forms, and presentation', () => {
   beforeEach(() => {
     setLocaleOverrideForTests('pt-PT')
@@ -348,6 +360,36 @@ describe('wallet models, forms, and presentation', () => {
     )
 
     expect(
+      getWalletMovementDetailItems(t, 'pt', creditWithoutLocation),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.locationLabel'),
+          value: '-',
+        }),
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.packageCountLabel'),
+          value: formatWalletCount(0, 'pt'),
+        }),
+      ]),
+    )
+
+    expect(
+      getWalletMovementSummaryItems(t, 'pt', creditWithoutLocation),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.locationLabel'),
+          value: '-',
+        }),
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.packageCountLabel'),
+          value: formatWalletCount(0, 'pt'),
+        }),
+      ]),
+    )
+
+    expect(
       getWalletMovementSummaryItems(
         t,
         'pt',
@@ -367,7 +409,44 @@ describe('wallet models, forms, and presentation', () => {
     )
 
     expect(
+      getWalletMovementDetailItems(t, 'pt', completedTransferWithoutDetails),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.paymentAccountLabel'),
+          value: '-',
+        }),
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.requestedAtLabel'),
+          value: formatWalletDateTime('2026-03-14T13:10:00Z', 'pt'),
+        }),
+      ]),
+    )
+
+    expect(
       getWalletMovementSummaryItems(t, 'pt', completedTransferWithoutDetails),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.paymentAccountLabel'),
+          value: '-',
+        }),
+      ]),
+    )
+
+    expect(
+      getWalletMovementSummaryItems(t, 'pt', failedTransferWithoutDetails),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: t('tabScreens.wallet.detailLabels.paymentAccountLabel'),
+          value: '-',
+        }),
+      ]),
+    )
+
+    expect(
+      getWalletMovementSummaryItems(t, 'pt', cancelledTransferWithoutDetails),
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

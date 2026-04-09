@@ -7,7 +7,7 @@ import {
   getBiometricAvailability,
   useBiometricHardwareAvailability,
 } from '@/features/auth/biometrics'
-import { restorePlatformOS, setPlatformOS } from '../../support/react-native'
+import { restorePlatformOS, setPlatformOS } from '@tests/support/react-native'
 
 const {
   __resetLocalAuthenticationMock,
