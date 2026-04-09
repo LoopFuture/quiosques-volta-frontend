@@ -4,6 +4,7 @@ import {
   fetchWalletOverviewState,
   requestWalletTransfer,
 } from '@/features/wallet/api'
+import type { WalletTransferRequest } from '@/features/wallet/forms'
 
 jest.mock('@/features/app-data/api', () => ({
   request: jest.fn(),
@@ -217,7 +218,7 @@ describe('wallet api', () => {
   })
 
   it('adds an idempotency key when requesting a wallet transfer', async () => {
-    const requestBody = {
+    const requestBody: WalletTransferRequest = {
       amount: {
         amountMinor: 900,
         currency: 'EUR',

@@ -126,7 +126,7 @@ describe('profile api', () => {
     await patchProfile({
       payoutAccount: {
         iban: 'PT50000201231234567890154',
-        spinEnabled: true,
+        rail: 'spin',
       },
     })
 

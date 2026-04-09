@@ -5,13 +5,16 @@ import { PushNotificationsContext } from '@/features/notifications/components/Pu
 import { usePushNotifications } from '@/features/notifications/hooks/usePushNotifications'
 
 describe('usePushNotifications', () => {
+  const grantedPermissionStatus =
+    'granted' as unknown as PushNotificationsContextValue['permissionStatus']
+
   const contextValue: PushNotificationsContextValue = {
     canAskAgain: true,
     expoPushToken: 'ExponentPushToken[mock-token]',
     isPhysicalDevice: true,
     isSyncing: false,
     latestForegroundNotification: null,
-    permissionStatus: 'granted',
+    permissionStatus: grantedPermissionStatus,
     registrationErrorCode: null,
     requestPushPermissionAndToken: jest.fn(),
     syncExistingPushPermissionAndToken: jest.fn(),
@@ -47,6 +50,10 @@ describe('usePushNotifications', () => {
       </PushNotificationsContext.Provider>,
     )
 
-    expect(view.getByText('granted:ExponentPushToken[mock-token]')).toBeTruthy()
+    expect(
+      view.getByText(
+        `${grantedPermissionStatus}:ExponentPushToken[mock-token]`,
+      ),
+    ).toBeTruthy()
   })
 })
