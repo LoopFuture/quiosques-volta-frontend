@@ -10,7 +10,7 @@ const { __setExpoConfig } = jest.requireMock('expo-constants')
 const { __getNavigationIntegration, addBreadcrumb, captureException, init } =
   jest.requireMock('@sentry/react-native')
 
-describe('app diagnostics monitoring', () => {
+describe('app-data/monitoring index', () => {
   const originalNodeEnv = process.env.NODE_ENV
 
   function setNodeEnv(value: string | undefined) {

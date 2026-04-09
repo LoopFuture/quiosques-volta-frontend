@@ -12,7 +12,7 @@ import {
 const { __setMockLocales } = jest.requireMock('expo-localization')
 const t = i18n.t.bind(i18n)
 
-describe('localization setup', () => {
+describe('i18n index', () => {
   afterEach(() => {
     __setMockLocales([
       {
