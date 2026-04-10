@@ -107,6 +107,22 @@ describe('TopBar', () => {
     ).toBeTruthy()
   })
 
+  it('truncates long home titles to a single line with an ellipsis', () => {
+    const view = renderWithProvider(
+      <TopBar
+        variant="home"
+        title="Nome muito comprido que nao deve partir em duas linhas no topo"
+      />,
+    )
+
+    const title = view.getByText(
+      'Nome muito comprido que nao deve partir em duas linhas no topo',
+    )
+
+    expect(title.props.numberOfLines).toBe(1)
+    expect(title.props.ellipsizeMode).toBe('tail')
+  })
+
   it('renders an offline warning when connectivity is unavailable', async () => {
     getNetworkStateAsync.mockResolvedValueOnce({
       isConnected: false,

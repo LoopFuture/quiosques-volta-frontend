@@ -19,7 +19,7 @@ describe('home api', () => {
     const signal = new AbortController().signal
     const responseBody = {
       greeting: {
-        displayName: 'Joao',
+        displayName: 'Joao Filipe Ferreira',
         memberSince: '2023-04-01',
       },
       recentActivity: [
@@ -63,7 +63,13 @@ describe('home api', () => {
     }
     mockRequest.mockResolvedValue(responseBody)
 
-    await expect(fetchHomeScreenState(signal)).resolves.toEqual(responseBody)
+    await expect(fetchHomeScreenState(signal)).resolves.toEqual({
+      ...responseBody,
+      greeting: {
+        ...responseBody.greeting,
+        displayName: 'Joao Ferreira',
+      },
+    })
 
     expect(mockRequest).toHaveBeenCalledWith({
       meta: {
@@ -74,5 +80,49 @@ describe('home api', () => {
       path: '/api/v1/home',
       signal,
     })
+  })
+
+  it('keeps a single-word display name unchanged', async () => {
+    mockRequest.mockResolvedValue({
+      greeting: {
+        displayName: 'Joao',
+        memberSince: '2023-04-01',
+      },
+      recentActivity: [],
+      stats: {
+        completedTransfersCount: 0,
+        creditsEarned: {
+          amountMinor: 0,
+          currency: 'EUR',
+        },
+        processingTransfersCount: 0,
+        returnedPackagesCount: 0,
+      },
+      transferEligibility: {
+        canTransfer: false,
+        maximumTransfer: {
+          amountMinor: 0,
+          currency: 'EUR',
+        },
+        minimumTransfer: {
+          amountMinor: 100,
+          currency: 'EUR',
+        },
+        reason: 'below_minimum_balance',
+      },
+      unreadNotificationsCount: 0,
+      walletBalance: {
+        amountMinor: 0,
+        currency: 'EUR',
+      },
+    })
+
+    await expect(fetchHomeScreenState()).resolves.toEqual(
+      expect.objectContaining({
+        greeting: expect.objectContaining({
+          displayName: 'Joao',
+        }),
+      }),
+    )
   })
 })

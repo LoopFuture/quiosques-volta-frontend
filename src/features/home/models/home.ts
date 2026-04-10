@@ -28,3 +28,13 @@ export const homeResponseSchema = z.object({
 
 export type UserStats = z.infer<typeof userStatsSchema>
 export type HomeResponse = z.infer<typeof homeResponseSchema>
+
+export function getHomeGreetingDisplayName(name: string) {
+  const nameParts = name.trim().split(/\s+/).filter(Boolean)
+
+  if (nameParts.length <= 1) {
+    return nameParts[0] ?? ''
+  }
+
+  return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`
+}
