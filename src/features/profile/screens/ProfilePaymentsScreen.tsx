@@ -109,13 +109,12 @@ function ProfilePaymentsForm({
                 helperText={
                   fieldState.error
                     ? undefined
-                    : payments?.ibanMasked
-                      ? `${t('tabScreens.profile.payments.ibanHelper')} ${payments.ibanMasked}`
-                      : t('tabScreens.profile.payments.ibanHelper')
+                    : t('tabScreens.profile.payments.ibanHelper')
                 }
                 label={t('tabScreens.profile.payments.ibanLabel')}
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
+                placeholder={payments?.ibanMasked ?? undefined}
                 required
                 value={field.value}
               />
