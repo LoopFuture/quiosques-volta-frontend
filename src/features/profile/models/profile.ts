@@ -158,6 +158,7 @@ const profileHubPreviewRowSchema = z.object({
 })
 
 export const profileHubSectionIdSchema = z.enum([
+  'alerts',
   'personal',
   'privacy',
   'payments',

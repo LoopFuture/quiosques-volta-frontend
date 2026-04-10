@@ -126,11 +126,16 @@ describe('profile models and forms', () => {
       'en',
     ])
     expect(hubSections.map((section) => section.id)).toEqual([
+      'alerts',
       'personal',
       'payments',
       'privacy',
       'appSettings',
     ])
+    expect(
+      hubSections.find((section) => section.id === 'alerts')?.previewRows[0]
+        ?.value,
+    ).toBe('Ativados')
     expect(
       hubSections.find((section) => section.id === 'personal')?.previewRows[0]
         ?.value,
@@ -194,6 +199,12 @@ describe('profile models and forms', () => {
       },
     })
 
+    expect(
+      privacySection?.previewRows.find(
+        (row) =>
+          row.label === t('tabScreens.profile.hub.rows.pushNotificationsTitle'),
+      ),
+    ).toBeUndefined()
     expect(
       privacySection?.previewRows.find(
         (row) => row.label === t('tabScreens.profile.hub.rows.biometricsTitle'),

@@ -193,6 +193,9 @@ describe('ProfileScreen', () => {
       screen.getByLabelText(i18n.t('tabScreens.profile.hub.cards.personal')),
     )
     fireEvent.press(
+      screen.getByLabelText(i18n.t('tabScreens.profile.hub.cards.alerts')),
+    )
+    fireEvent.press(
       screen.getByLabelText(i18n.t('tabScreens.profile.hub.cards.privacy')),
     )
     fireEvent.press(
@@ -224,10 +227,11 @@ describe('ProfileScreen', () => {
     expect(mockRouterPush).toHaveBeenNthCalledWith(1, profileRoutes.payments)
     expect(mockRouterPush).toHaveBeenNthCalledWith(2, profileRoutes.privacy)
     expect(mockRouterPush).toHaveBeenNthCalledWith(3, profileRoutes.personal)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(4, profileRoutes.privacy)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(5, profileRoutes.payments)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(6, profileRoutes.appSettings)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(7, profileRoutes.help)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(4, profileRoutes.alerts)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(5, profileRoutes.privacy)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(6, profileRoutes.payments)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(7, profileRoutes.appSettings)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(8, profileRoutes.help)
     expect(openBrowserAsync).toHaveBeenNthCalledWith(
       1,
       `https://volta.example.com${PROFILE_LEGAL_LINK_PATHS.helpCenter}`,

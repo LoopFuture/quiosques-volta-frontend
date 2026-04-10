@@ -1,6 +1,7 @@
 import { useRouter, type Href } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import {
+  Bell,
   CreditCard,
   FileText,
   Info,
@@ -102,12 +103,14 @@ export default function ProfileScreen() {
     refetch,
   } = useProfileQuery()
   const hubIcons = {
+    alerts: <Bell color="$accent11" size={20} />,
     appSettings: <Palette color="$accent11" size={20} />,
     payments: <CreditCard color="$accent11" size={20} />,
     personal: <User color="$accent11" size={20} />,
     privacy: <LockKeyhole color="$accent11" size={20} />,
   } as const
   const hubRoutes = {
+    alerts: profileRoutes.alerts,
     appSettings: profileRoutes.appSettings,
     payments: profileRoutes.payments,
     personal: profileRoutes.personal,
@@ -149,13 +152,16 @@ export default function ProfileScreen() {
         item.id === 'security'
           ? t('tabScreens.profile.hub.actions.reviewSecurity')
           : t('tabScreens.profile.hub.actions.reviewAlerts'),
-      onPress: () => router.push(profileRoutes.privacy),
+      onPress: () =>
+        router.push(
+          item.id === 'security' ? profileRoutes.privacy : profileRoutes.alerts,
+        ),
     }
   })
   const orderedSections = hubSections
-    ? (['personal', 'payments', 'privacy', 'appSettings'] as const).flatMap(
-        (id) => hubSections.find((section) => section.id === id) ?? [],
-      )
+    ? (
+        ['personal', 'payments', 'alerts', 'privacy', 'appSettings'] as const
+      ).flatMap((id) => hubSections.find((section) => section.id === id) ?? [])
     : undefined
   const handleOpenPrivacyPolicy = () => {
     void WebBrowser.openBrowserAsync(

@@ -350,6 +350,7 @@
           },
           "accountDescription": "Confirma primeiro os pontos que afetam pagamentos, alertas e segurança antes da próxima devolução.",
           "cards": {
+            "alerts": "Alertas da conta",
             "appSettings": "Definições da app",
             "payments": "Pagamentos",
             "personal": "Dados do perfil",
@@ -387,10 +388,11 @@
             "securityReviewValue": "Ativa o PIN ou a biometria"
           },
           "summaries": {
+            "alerts": "E-mail e notificações push",
             "appSettings": "Idioma e aspeto",
             "payments": "IBAN para reembolsos",
             "personal": "Nome, telefone e NIF",
-            "privacy": "Alertas push e proteção do dispositivo"
+            "privacy": "PIN, biometria e acesso no dispositivo"
           },
           "rows": {
             "accountHolderNameTitle": "Titular da conta",
@@ -444,6 +446,19 @@
           "sessionLabel": "Sessão",
           "supportDescription": "Vê novamente a introdução curta se quiseres um lembrete rápido.",
           "supportLabel": "Precisas de rever?"
+        },
+        "alerts": {
+          "description": "Escolhe como a Volta envia atualizações sobre a tua conta e pagamentos.",
+          "emailAlertsErrorToast": "Não foi possível atualizar os alertas por e-mail agora.",
+          "emailAlertsHelper": "Recebe alertas de segurança de pagamentos no e-mail da conta.",
+          "emailAlertsLabel": "E-mails de segurança dos pagamentos",
+          "emailAlertsSuccessToast": "Os alertas por e-mail foram atualizados.",
+          "pushNotificationsLabel": "Notificações push",
+          "sectionHelper": "Estes canais mantêm-te a par da atividade da conta e dos reembolsos.",
+          "sectionTitle": "Preferências de entrega",
+          "securityPreferencesHelper": "Os e-mails de alertas de segurança serão enviados para o e-mail atual definido no teu perfil: {{email}}.",
+          "securityPreferencesTitle": "Preferências de segurança",
+          "title": "Alertas da conta"
         },
         "summary": {
           "description": "Vê os teus créditos, devoluções e transferências num só lugar.",
@@ -499,21 +514,15 @@
           "title": "Pagamentos"
         },
         "privacy": {
-          "accountSectionHelper": "Estes alertas seguem a tua conta Volta, não apenas este dispositivo.",
-          "accountSectionTitle": "Alertas da conta",
           "biometricCancelledToast": "A biometria não ficou ativada neste dispositivo.",
           "biometricFailedToast": "Não foi possível confirmar a tua biometria. Tenta novamente.",
           "biometricHelper": "Protege o acesso com Face ID ou impressão digital.",
-          "emailAlertsErrorToast": "Não foi possível atualizar os alertas por e-mail agora.",
           "biometricLabel": "Biometria",
           "biometricNotAvailableToast": "A biometria ainda não está disponível neste dispositivo.",
           "biometricNotEnrolledToast": "Configura Face ID ou impressão digital neste dispositivo primeiro.",
           "deviceSectionHelper": "Estes controlos só afetam o telemóvel que estás a usar agora.",
           "deviceSectionTitle": "Proteção do dispositivo",
-          "emailAlertsHelper": "Recebe alertas de segurança de pagamentos no e-mail da conta.",
-          "emailAlertsLabel": "E-mails de segurança dos pagamentos",
-          "emailAlertsSuccessToast": "Os alertas por e-mail foram atualizados.",
-          "description": "Controla os alertas da conta e as proteções neste dispositivo.",
+          "description": "Controla como este telemóvel protege o acesso à tua conta.",
           "pinCancelLabel": "Cancelar",
           "pinChangeLabel": "Alterar PIN",
           "pinConfirmLabel": "Confirmar PIN da app",
@@ -540,8 +549,6 @@
           "pushNotificationsTokenValue": "Token Expo: {{token}}",
           "pushNotificationsUnavailableToast": "As notificações push ainda não estão prontas neste dispositivo.",
           "savedOnThisDeviceToast": "Esta alteração foi guardada neste dispositivo.",
-          "securityPreferencesHelper": "Os e-mails de alertas de segurança serão enviados para o e-mail atual definido no teu perfil: {{email}}.",
-          "securityPreferencesTitle": "Preferências de segurança",
           "saveLabel": "Guardar segurança",
           "title": "Privacidade e segurança"
         },

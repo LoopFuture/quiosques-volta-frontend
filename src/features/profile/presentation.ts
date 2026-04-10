@@ -161,6 +161,25 @@ export function getProfileHubSections(
 ) {
   return profileHubSectionSchema.array().parse([
     {
+      id: 'alerts',
+      previewRows: [
+        {
+          label: t('tabScreens.profile.hub.rows.alertsEmailTitle'),
+          value: profile.preferences?.alertsEnabled
+            ? t('tabScreens.profile.hub.rows.alertsEmailEnabledHelper')
+            : t('tabScreens.profile.hub.rows.alertsEmailDisabledHelper'),
+        },
+        {
+          label: t('tabScreens.profile.hub.rows.pushNotificationsTitle'),
+          value: deviceSettings.pushNotificationsEnabled
+            ? t('tabScreens.profile.hub.rows.pushNotificationsEnabledHelper')
+            : t('tabScreens.profile.hub.rows.pushNotificationsDisabledHelper'),
+        },
+      ],
+      summary: t('tabScreens.profile.hub.summaries.alerts'),
+      title: t('tabScreens.profile.hub.cards.alerts'),
+    },
+    {
       id: 'personal',
       previewRows: [
         {
@@ -203,18 +222,6 @@ export function getProfileHubSections(
     {
       id: 'privacy',
       previewRows: [
-        {
-          label: t('tabScreens.profile.hub.rows.alertsEmailTitle'),
-          value: profile.preferences?.alertsEnabled
-            ? t('tabScreens.profile.hub.rows.alertsEmailEnabledHelper')
-            : t('tabScreens.profile.hub.rows.alertsEmailDisabledHelper'),
-        },
-        {
-          label: t('tabScreens.profile.hub.rows.pushNotificationsTitle'),
-          value: deviceSettings.pushNotificationsEnabled
-            ? t('tabScreens.profile.hub.rows.pushNotificationsEnabledHelper')
-            : t('tabScreens.profile.hub.rows.pushNotificationsDisabledHelper'),
-        },
         {
           label: t('tabScreens.profile.hub.rows.pinTitle'),
           value: deviceSettings.pinEnabled

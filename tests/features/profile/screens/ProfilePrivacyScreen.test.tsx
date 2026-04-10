@@ -1,15 +1,11 @@
-import { Linking } from 'react-native'
 import {
   mockAuthenticateWithAvailableBiometrics,
-  mockRequestPushPermissionAndToken,
   mockSetSettings,
   mockShowError,
   mockShowSuccess,
   mockUseBiometricHardwareAvailability,
   mockUseDevicePrivacySettings,
   mockUseProfileQuery,
-  mockUsePushNotifications,
-  mockUseUpdateProfilePreferencesMutation,
   resetProfileEditorScreenMocks,
   restoreProfileEditorScreenLocale,
 } from '@tests/support/profile-editor-screen-mocks'
@@ -59,58 +55,9 @@ describe('ProfilePrivacyScreen', () => {
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 
-  it('updates account alert preferences and shows the success toast', async () => {
-    const mutate = jest.fn(
-      (
-        _payload: unknown,
-        options?: { onSuccess?: () => void; onError?: () => void },
-      ) => {
-        options?.onSuccess?.()
-      },
-    )
-
-    mockUseUpdateProfilePreferencesMutation.mockReturnValue({
-      isPending: false,
-      mutate,
-    })
-
+  it('updates device settings for biometrics', async () => {
     renderWithProvider(<ProfilePrivacyScreen />)
 
-    fireEvent.press(
-      screen.getByLabelText(
-        i18n.t('tabScreens.profile.privacy.emailAlertsLabel'),
-      ),
-    )
-
-    await waitFor(() => {
-      expect(mutate).toHaveBeenCalledWith(
-        {
-          preferences: {
-            alertsEmail: 'joao@volta.pt',
-            alertsEnabled: false,
-          },
-        },
-        expect.objectContaining({
-          onError: expect.any(Function),
-          onSuccess: expect.any(Function),
-        }),
-      )
-    })
-
-    expect(mockShowSuccess).toHaveBeenCalledWith(
-      i18n.t('tabScreens.profile.privacy.emailAlertsLabel'),
-      i18n.t('tabScreens.profile.privacy.emailAlertsSuccessToast'),
-    )
-  })
-
-  it('updates device settings for push notifications and biometrics', async () => {
-    renderWithProvider(<ProfilePrivacyScreen />)
-
-    fireEvent.press(
-      screen.getByLabelText(
-        i18n.t('tabScreens.profile.privacy.pushNotificationsLabel'),
-      ),
-    )
     fireEvent.press(
       screen.getByLabelText(
         i18n.t('tabScreens.profile.privacy.biometricLabel'),
@@ -118,7 +65,6 @@ describe('ProfilePrivacyScreen', () => {
     )
 
     await waitFor(() => {
-      expect(mockRequestPushPermissionAndToken).toHaveBeenCalledTimes(1)
       expect(mockAuthenticateWithAvailableBiometrics).toHaveBeenCalledWith({
         cancelLabel: i18n.t('auth.lock.cancelLabel'),
         promptMessage: i18n.t('auth.lock.promptMessage'),
@@ -126,21 +72,13 @@ describe('ProfilePrivacyScreen', () => {
     })
 
     expect(mockSetSettings).toHaveBeenCalledWith({
-      biometricsEnabled: false,
-      pinEnabled: false,
-      pushNotificationsEnabled: true,
-    })
-    expect(mockSetSettings).toHaveBeenCalledWith({
       biometricsEnabled: true,
       pinEnabled: false,
       pushNotificationsEnabled: false,
     })
   })
 
-  it('shows unavailable push and failed biometric toasts', async () => {
-    mockRequestPushPermissionAndToken.mockResolvedValue({
-      isEnabled: false,
-    })
+  it('shows a failed biometric toast', async () => {
     mockAuthenticateWithAvailableBiometrics.mockResolvedValue({
       reason: 'failed',
       success: false,
@@ -150,20 +88,11 @@ describe('ProfilePrivacyScreen', () => {
 
     fireEvent.press(
       screen.getByLabelText(
-        i18n.t('tabScreens.profile.privacy.pushNotificationsLabel'),
-      ),
-    )
-    fireEvent.press(
-      screen.getByLabelText(
         i18n.t('tabScreens.profile.privacy.biometricLabel'),
       ),
     )
 
     await waitFor(() => {
-      expect(mockShowError).toHaveBeenCalledWith(
-        i18n.t('tabScreens.profile.privacy.pushNotificationsLabel'),
-        i18n.t('tabScreens.profile.privacy.pushNotificationsUnavailableToast'),
-      )
       expect(mockShowError).toHaveBeenCalledWith(
         i18n.t('tabScreens.profile.privacy.biometricLabel'),
         i18n.t('tabScreens.profile.privacy.biometricFailedToast'),
@@ -171,7 +100,7 @@ describe('ProfilePrivacyScreen', () => {
     })
   })
 
-  it('allows the user to disable previously enabled privacy toggles on the device', async () => {
+  it('allows the user to disable previously enabled device security toggles', async () => {
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: true,
@@ -185,31 +114,16 @@ describe('ProfilePrivacyScreen', () => {
 
     fireEvent.press(
       screen.getByLabelText(
-        i18n.t('tabScreens.profile.privacy.pushNotificationsLabel'),
-      ),
-    )
-    fireEvent.press(
-      screen.getByLabelText(
         i18n.t('tabScreens.profile.privacy.biometricLabel'),
       ),
     )
 
     await waitFor(() => {
       expect(mockSetSettings).toHaveBeenCalledWith({
-        biometricsEnabled: true,
-        pinEnabled: false,
-        pushNotificationsEnabled: false,
-      })
-      expect(mockSetSettings).toHaveBeenCalledWith({
         biometricsEnabled: false,
         pinEnabled: false,
         pushNotificationsEnabled: true,
       })
-      expect(mockRequestPushPermissionAndToken).not.toHaveBeenCalled()
-      expect(mockShowSuccess).toHaveBeenCalledWith(
-        i18n.t('tabScreens.profile.privacy.pushNotificationsLabel'),
-        i18n.t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
-      )
       expect(mockShowSuccess).toHaveBeenCalledWith(
         i18n.t('tabScreens.profile.privacy.biometricLabel'),
         i18n.t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
@@ -298,49 +212,5 @@ describe('ProfilePrivacyScreen', () => {
       ),
     ).toBeNull()
     expect(screen.getByTestId('profile-privacy-pin-set-button')).toBeTruthy()
-  })
-
-  it('resets blocked push notifications on mount and opens system settings', async () => {
-    const openSettingsSpy = jest
-      .spyOn(Linking, 'openSettings')
-      .mockResolvedValue()
-
-    mockUseDevicePrivacySettings.mockReturnValue({
-      settings: {
-        biometricsEnabled: false,
-        pinEnabled: false,
-        pushNotificationsEnabled: true,
-      },
-      setSettings: mockSetSettings,
-    })
-    mockUsePushNotifications.mockReturnValue({
-      canAskAgain: false,
-      expoPushToken: null,
-      isPhysicalDevice: true,
-      isSyncing: false,
-      permissionStatus: 'denied',
-      registrationErrorCode: null,
-      requestPushPermissionAndToken: mockRequestPushPermissionAndToken,
-    })
-
-    renderWithProvider(<ProfilePrivacyScreen />)
-
-    await waitFor(() => {
-      expect(mockSetSettings).toHaveBeenCalledWith({
-        biometricsEnabled: false,
-        pinEnabled: false,
-        pushNotificationsEnabled: false,
-      })
-    })
-
-    fireEvent.press(
-      screen.getByText(
-        i18n.t('tabScreens.profile.privacy.pushNotificationsOpenSettingsLabel'),
-      ),
-    )
-
-    expect(openSettingsSpy).toHaveBeenCalledTimes(1)
-
-    openSettingsSpy.mockRestore()
   })
 })

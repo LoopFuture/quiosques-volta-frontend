@@ -350,6 +350,7 @@
           },
           "accountDescription": "Check the items that affect payouts, alerts, and security before your next return.",
           "cards": {
+            "alerts": "Account alerts",
             "appSettings": "App settings",
             "payments": "Payments",
             "personal": "Profile data",
@@ -387,10 +388,11 @@
             "securityReviewValue": "Turn on PIN or biometrics"
           },
           "summaries": {
+            "alerts": "Email and push updates",
             "appSettings": "Language and appearance",
             "payments": "IBAN for refunds",
             "personal": "Name, phone, tax ID",
-            "privacy": "Push alerts and device protection"
+            "privacy": "PIN, biometrics, and device access"
           },
           "rows": {
             "accountHolderNameTitle": "Account holder",
@@ -444,6 +446,19 @@
           "sessionLabel": "Session",
           "supportDescription": "See the short introduction again if you want a quick refresher.",
           "supportLabel": "Need a refresher?"
+        },
+        "alerts": {
+          "description": "Choose how Volta sends account and payment updates.",
+          "emailAlertsErrorToast": "We couldn't update email alerts right now.",
+          "emailAlertsHelper": "Send payment security alerts to your account email.",
+          "emailAlertsLabel": "Payment security emails",
+          "emailAlertsSuccessToast": "Email alerts were updated.",
+          "pushNotificationsLabel": "Push notifications",
+          "sectionHelper": "These alert channels keep you updated about account activity and refunds.",
+          "sectionTitle": "Delivery preferences",
+          "securityPreferencesHelper": "Security alert emails will be sent to the current email set in your profile: {{email}}.",
+          "securityPreferencesTitle": "Security preferences",
+          "title": "Account alerts"
         },
         "summary": {
           "description": "See your credits, returns, and transfers in one place.",
@@ -499,21 +514,15 @@
           "title": "Payments"
         },
         "privacy": {
-          "accountSectionHelper": "These alerts follow your Volta account, not just this device.",
-          "accountSectionTitle": "Account alerts",
           "biometricCancelledToast": "Biometrics were not enabled on this device.",
           "biometricFailedToast": "We couldn't confirm your biometrics. Try again.",
           "biometricHelper": "Protect access with Face ID or fingerprint.",
-          "emailAlertsErrorToast": "We couldn't update email alerts right now.",
           "biometricLabel": "Biometrics",
           "biometricNotAvailableToast": "Biometrics are not available on this device yet.",
           "biometricNotEnrolledToast": "Set up Face ID or fingerprint on this device first.",
           "deviceSectionHelper": "These controls only affect the phone you are using now.",
           "deviceSectionTitle": "Device protection",
-          "emailAlertsHelper": "Send payment security alerts to your account email.",
-          "emailAlertsLabel": "Payment security emails",
-          "emailAlertsSuccessToast": "Email alerts were updated.",
-          "description": "Control account alerts and protections on this device.",
+          "description": "Control how this phone protects access to your account.",
           "pinCancelLabel": "Cancel",
           "pinChangeLabel": "Change PIN",
           "pinConfirmLabel": "Confirm app PIN",
@@ -540,8 +549,6 @@
           "pushNotificationsTokenValue": "Expo token: {{token}}",
           "pushNotificationsUnavailableToast": "Push notifications are not ready on this device yet.",
           "savedOnThisDeviceToast": "This change was saved on this device.",
-          "securityPreferencesHelper": "Security alert emails will be sent to the current email set in your profile: {{email}}.",
-          "securityPreferencesTitle": "Security preferences",
           "saveLabel": "Save security settings",
           "title": "Privacy & security"
         },
