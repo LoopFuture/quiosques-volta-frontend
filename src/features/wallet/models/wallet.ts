@@ -26,19 +26,41 @@ export const walletTransactionStatusSchema = z.enum([
   'cancelled',
 ])
 export const walletHistoryFilterSchema = z.enum(['all', 'credit', 'transfer'])
-export const payoutRailSchema = z.enum(['sepa', 'spin'])
+const rawPayoutRailSchema = z.enum(['sepa', 'spin'])
+export const payoutRailSchema = z.literal('sepa')
+
+function normalizeOptionalPayoutAccountName(value: string | null | undefined) {
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  const trimmedValue = value.trim()
+
+  return trimmedValue.length > 0 ? trimmedValue : undefined
+}
 
 const rawPayoutAccountSchema = z.object({
+  accountHolderName: z.string().nullable().optional(),
   ibanMasked: z.string(),
-  rail: payoutRailSchema,
+  rail: rawPayoutRailSchema,
   spinEnabled: z.boolean().optional(),
 })
 
 export const payoutAccountSchema = rawPayoutAccountSchema.transform(
-  ({ ibanMasked, rail }) => ({
-    ibanMasked,
-    rail,
-  }),
+  ({ accountHolderName, ibanMasked }) => {
+    const normalizedAccountHolderName =
+      normalizeOptionalPayoutAccountName(accountHolderName)
+
+    return {
+      ...(normalizedAccountHolderName
+        ? {
+            accountHolderName: normalizedAccountHolderName,
+          }
+        : {}),
+      ibanMasked,
+      rail: 'sepa' as const,
+    }
+  },
 )
 
 export const transferEligibilitySchema = z.object({
@@ -172,11 +194,12 @@ export function formatWalletDateTime(value: string, locale: string) {
 }
 
 export function formatWalletPaymentAccount(paymentAccount: {
+  accountHolderName?: string
   ibanMasked: string
   rail: z.infer<typeof payoutRailSchema>
 }) {
-  return paymentAccount.rail === 'spin'
-    ? `${paymentAccount.ibanMasked} • SPIN`
+  return paymentAccount.accountHolderName
+    ? `${paymentAccount.accountHolderName} · ${paymentAccount.ibanMasked}`
     : paymentAccount.ibanMasked
 }
 

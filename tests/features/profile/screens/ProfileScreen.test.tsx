@@ -77,6 +77,23 @@ const profileState = profileResponseSchema.parse({
   },
 })
 
+const profileStateWithPayoutAccount = profileResponseSchema.parse({
+  ...profileState,
+  payoutAccount: {
+    accountHolderName: 'Joao Ferreira',
+    ibanMasked: 'PT50************4321',
+    rail: 'sepa',
+  },
+})
+
+const readyProfileStateWithPayoutAccount = profileResponseSchema.parse({
+  ...profileStateWithPayoutAccount,
+  preferences: {
+    alertsEmail: 'joao@volta.pt',
+    alertsEnabled: true,
+  },
+})
+
 describe('ProfileScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -199,5 +216,33 @@ describe('ProfileScreen', () => {
       expect(signOut).toHaveBeenCalledTimes(1)
       expect(mockRouterReplace).toHaveBeenCalledWith(authRoutes.index)
     })
+  })
+
+  it('renders the account holder in the payments preview surfaces', () => {
+    mockUseDevicePrivacySettings.mockReturnValue({
+      settings: {
+        biometricsEnabled: true,
+        pushNotificationsEnabled: true,
+      },
+    })
+    mockUseProfileQuery.mockReturnValue({
+      data: readyProfileStateWithPayoutAccount,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<ProfileScreen />)
+
+    expect(
+      screen.getByText('Joao Ferreira · PT50************4321 associado'),
+    ).toBeTruthy()
+    expect(
+      screen.getAllByText(
+        i18n.t('tabScreens.profile.hub.rows.accountHolderNameTitle'),
+      ),
+    ).toHaveLength(1)
+    expect(screen.getAllByText('Joao Ferreira').length).toBeGreaterThan(0)
   })
 })

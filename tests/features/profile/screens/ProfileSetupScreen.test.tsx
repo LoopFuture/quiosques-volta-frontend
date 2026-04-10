@@ -203,8 +203,8 @@ describe('ProfileSetupScreen', () => {
       expect(mutateAsync).toHaveBeenCalledWith({
         snapshot: {
           payments: {
+            accountHolderName: 'Joao Ferreira',
             iban: 'PT50000201231234567890154',
-            spinEnabled: false,
           },
           personal: {
             email: 'joao@volta.pt',
@@ -399,8 +399,8 @@ describe('ProfileSetupScreen', () => {
       expect(mutateAsync).toHaveBeenCalledWith({
         snapshot: {
           payments: {
+            accountHolderName: 'Joao Ferreira',
             iban: 'PT50000201231234567890154',
-            spinEnabled: false,
           },
           personal: {
             email: 'joao@volta.pt',

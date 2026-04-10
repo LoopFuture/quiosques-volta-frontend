@@ -24,6 +24,7 @@ describe('profile api', () => {
         status: 'in_progress',
       },
       payoutAccount: {
+        accountHolderName: 'Joao Ferreira',
         ibanMasked: 'PT50************4321',
         rail: 'spin',
         spinEnabled: true,
@@ -56,8 +57,9 @@ describe('profile api', () => {
         status: 'in_progress',
       },
       payoutAccount: {
+        accountHolderName: 'Joao Ferreira',
         ibanMasked: 'PT50************4321',
-        rail: 'spin',
+        rail: 'sepa',
       },
       personal: {
         email: 'joao@volta.pt',
@@ -126,7 +128,7 @@ describe('profile api', () => {
     await patchProfile({
       payoutAccount: {
         iban: 'PT50000201231234567890154',
-        rail: 'spin',
+        rail: 'sepa',
       },
     })
 
@@ -134,7 +136,7 @@ describe('profile api', () => {
       body: {
         payoutAccount: {
           iban: 'PT50000201231234567890154',
-          rail: 'spin',
+          rail: 'sepa',
         },
       },
       meta: {

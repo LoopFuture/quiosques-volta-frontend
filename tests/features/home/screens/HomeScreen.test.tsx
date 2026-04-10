@@ -97,6 +97,11 @@ const homeScreenState = homeResponseSchema.parse({
   },
 })
 
+const homeScreenStateWithoutRecentActivity = homeResponseSchema.parse({
+  ...homeScreenState,
+  recentActivity: [],
+})
+
 describe('HomeScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -188,6 +193,35 @@ describe('HomeScreen', () => {
       4,
       walletRoutes.movementDetail(homeScreenState.recentActivity[1]!.id),
     )
+  })
+
+  it('renders an empty state when there is no recent activity', () => {
+    mockUseHomeScreenQuery.mockReturnValue({
+      data: homeScreenStateWithoutRecentActivity,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<HomeScreen />)
+
+    expect(screen.getByTestId('home-recent-activity-empty-state')).toBeTruthy()
+    expect(
+      screen.getByText(
+        i18n.t('tabScreens.home.recentActivity.emptyStateLabel'),
+      ),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(
+        i18n.t('tabScreens.home.recentActivity.emptyStateTitle'),
+      ),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(
+        i18n.t('tabScreens.home.recentActivity.emptyStateDescription'),
+      ),
+    ).toBeTruthy()
   })
 
   it('requires two Android back presses to exit from the home route', () => {

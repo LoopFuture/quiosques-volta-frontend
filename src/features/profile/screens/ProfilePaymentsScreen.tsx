@@ -13,10 +13,7 @@ import {
 } from '@/components/ui'
 import { useActionToast } from '@/features/app-shell/hooks/useActionToast'
 import { ProfileDetailScreenFrame } from '../components/ProfileDetailScreenFrame'
-import {
-  SettingsSectionHeader,
-  SettingsToggleRow,
-} from '../components/ProfilePreferenceControls'
+import { SettingsSectionHeader } from '../components/ProfilePreferenceControls'
 import {
   getProfilePaymentsFormDefaultValues,
   getProfilePaymentsFormSchema,
@@ -44,13 +41,22 @@ function ProfilePaymentsScreenSkeleton() {
   )
 }
 
-function ProfilePaymentsForm({ payments }: { payments: PayoutAccount | null }) {
+function ProfilePaymentsForm({
+  fallbackAccountHolderName,
+  payments,
+}: {
+  fallbackAccountHolderName?: string | null
+  payments: PayoutAccount | null
+}) {
   const updatePaymentsMutation = useUpdateProfilePaymentsMutation()
   const { showError, showSuccess } = useActionToast()
   const { t } = useTranslation()
   const validationCopy = getProfileValidationCopy(t)
   const { control, handleSubmit, reset } = useForm<ProfilePaymentsFormValues>({
-    defaultValues: getProfilePaymentsFormDefaultValues(payments),
+    defaultValues: getProfilePaymentsFormDefaultValues(
+      payments,
+      fallbackAccountHolderName,
+    ),
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     resolver: createZodResolver(
@@ -59,8 +65,10 @@ function ProfilePaymentsForm({ payments }: { payments: PayoutAccount | null }) {
   })
 
   useEffect(() => {
-    reset(getProfilePaymentsFormDefaultValues(payments))
-  }, [payments, reset])
+    reset(
+      getProfilePaymentsFormDefaultValues(payments, fallbackAccountHolderName),
+    )
+  }, [fallbackAccountHolderName, payments, reset])
 
   return (
     <YStack gap="$4">
@@ -71,6 +79,26 @@ function ProfilePaymentsForm({ payments }: { payments: PayoutAccount | null }) {
 
       <SurfaceCard>
         <SeparatedStack separatorSpacing="$3">
+          <Controller
+            control={control}
+            name="accountHolderName"
+            render={({ field, fieldState }) => (
+              <FormField
+                autoCapitalize="words"
+                errorText={fieldState.error?.message}
+                helperText={
+                  fieldState.error
+                    ? undefined
+                    : t('tabScreens.profile.payments.accountHolderNameHelper')
+                }
+                label={t('tabScreens.profile.payments.accountHolderNameLabel')}
+                onBlur={field.onBlur}
+                onChangeText={field.onChange}
+                required
+                value={field.value}
+              />
+            )}
+          />
           <Controller
             control={control}
             name="iban"
@@ -90,18 +118,6 @@ function ProfilePaymentsForm({ payments }: { payments: PayoutAccount | null }) {
                 onChangeText={field.onChange}
                 required
                 value={field.value}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="spinEnabled"
-            render={({ field }) => (
-              <SettingsToggleRow
-                checked={field.value}
-                helperText={t('tabScreens.profile.payments.spinHelper')}
-                label={t('tabScreens.profile.payments.spinLabel')}
-                onCheckedChange={field.onChange}
               />
             )}
           />
@@ -161,7 +177,10 @@ export function ProfilePaymentsScreen() {
       ) : !profile || isPending ? (
         <ProfilePaymentsScreenSkeleton />
       ) : (
-        <ProfilePaymentsForm payments={profile.payoutAccount} />
+        <ProfilePaymentsForm
+          fallbackAccountHolderName={profile.personal.name}
+          payments={profile.payoutAccount}
+        />
       )}
     </ProfileDetailScreenFrame>
   )

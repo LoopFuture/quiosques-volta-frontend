@@ -51,7 +51,7 @@ const setupStepFieldNames: Record<
   SetupStepId,
   (keyof ProfileSetupFormValues)[]
 > = {
-  payments: ['iban', 'spinEnabled'],
+  payments: ['accountHolderName', 'iban'],
   personal: ['email', 'name', 'phoneNumber', 'nif'],
   security: ['biometricsEnabled', 'pushNotificationsEnabled'],
 }
@@ -307,6 +307,18 @@ export function ProfileSetupScreen() {
       })()
 
       return
+    }
+
+    if (currentStepId === 'personal') {
+      const currentAccountHolderName = getValues('accountHolderName').trim()
+
+      if (currentAccountHolderName.length === 0) {
+        setValue('accountHolderName', getValues('name').trim(), {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+      }
     }
 
     setActiveStepIndex((currentIndex) =>
@@ -581,6 +593,30 @@ export function ProfileSetupScreen() {
                   </SetupSectionLabel>
                   <Controller
                     control={control}
+                    name="accountHolderName"
+                    render={({ field, fieldState }) => (
+                      <FormField
+                        autoCapitalize="words"
+                        errorText={fieldState.error?.message}
+                        helperText={
+                          fieldState.error
+                            ? undefined
+                            : t(
+                                'tabScreens.profile.payments.accountHolderNameHelper',
+                              )
+                        }
+                        label={t(
+                          'tabScreens.profile.payments.accountHolderNameLabel',
+                        )}
+                        onBlur={field.onBlur}
+                        onChangeText={field.onChange}
+                        required
+                        value={field.value}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
                     name="iban"
                     render={({ field, fieldState }) => (
                       <FormField
@@ -596,25 +632,6 @@ export function ProfileSetupScreen() {
                         onChangeText={field.onChange}
                         required
                         value={field.value}
-                      />
-                    )}
-                  />
-                </YStack>
-                <YStack gap="$3">
-                  <SetupSectionLabel>
-                    {t(
-                      'tabScreens.profile.setup.steps.payments.speedSectionLabel',
-                    )}
-                  </SetupSectionLabel>
-                  <Controller
-                    control={control}
-                    name="spinEnabled"
-                    render={({ field }) => (
-                      <SettingsToggleRow
-                        checked={field.value}
-                        helperText={t('tabScreens.profile.payments.spinHelper')}
-                        label={t('tabScreens.profile.payments.spinLabel')}
-                        onCheckedChange={field.onChange}
                       />
                     )}
                   />

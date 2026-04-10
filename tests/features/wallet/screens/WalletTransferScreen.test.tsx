@@ -334,7 +334,7 @@ describe('WalletTransferScreen', () => {
     ).toBeTruthy()
   })
 
-  it('renders SEPA payout review copy when the payout account is not SPIN', () => {
+  it('renders SEPA payout review copy when a payout account is configured', () => {
     mockUseWalletOverviewQuery.mockReturnValue({
       data: walletOverviewState,
       isError: false,

@@ -171,6 +171,7 @@ describe('wallet api', () => {
         status: 'completed',
         transferDetails: {
           payoutAccount: {
+            accountHolderName: 'Joao Ferreira',
             ibanMasked: 'PT50************4321',
             rail: 'spin',
             spinEnabled: true,
@@ -194,8 +195,9 @@ describe('wallet api', () => {
         status: 'completed',
         transferDetails: {
           payoutAccount: {
+            accountHolderName: 'Joao Ferreira',
             ibanMasked: 'PT50************4321',
-            rail: 'spin',
+            rail: 'sepa',
           },
           requestedAt: '2024-01-06T08:45:00.000Z',
         },

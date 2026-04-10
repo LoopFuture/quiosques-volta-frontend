@@ -3,7 +3,6 @@ import type { AppAuthIdentity } from '@/features/auth/models/identity'
 import {
   devicePrivacySettingsSchema,
   getDefaultDevicePrivacySettings,
-  isSpinPayoutRail,
   profileResponseSchema,
   type DevicePrivacySettings,
   type ProfileResponse,
@@ -36,8 +35,8 @@ export const profileSetupPreferencesSchema = z
 
 export const profileSetupSnapshotSchema = z.object({
   payments: z.object({
+    accountHolderName: z.string(),
     iban: z.string(),
-    spinEnabled: z.boolean(),
   }),
   personal: z.object({
     email: z.string().email(),
@@ -128,8 +127,9 @@ export function getProfileSetupSnapshotFromProfile(
 ): ProfileSetupSnapshot {
   return profileSetupSnapshotSchema.parse({
     payments: {
+      accountHolderName:
+        profile.payoutAccount?.accountHolderName ?? profile.personal.name ?? '',
       iban: '',
-      spinEnabled: isSpinPayoutRail(profile.payoutAccount?.rail),
     },
     personal: {
       email: profile.personal.email,

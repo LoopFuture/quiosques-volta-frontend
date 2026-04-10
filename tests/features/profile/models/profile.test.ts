@@ -23,7 +23,6 @@ import {
   getDefaultDevicePrivacySettings,
   getProfileSetupSeedState,
   getProfileSetupSnapshotFromProfile,
-  isSpinPayoutRail,
   payoutAccountInputSchema,
   profilePatchRequestSchema,
   profileResponseSchema,
@@ -52,9 +51,9 @@ const profile = profileResponseSchema.parse({
     status: 'completed',
   },
   payoutAccount: {
+    accountHolderName: 'Joao Ferreira',
     ibanMasked: 'PT50************90123',
     rail: 'spin',
-    spinEnabled: true,
   },
   personal: {
     email: 'joao.ferreira@volta.pt',
@@ -138,9 +137,16 @@ describe('profile models and forms', () => {
     expect(
       hubSections.find((section) => section.id === 'payments')?.previewRows[0]
         ?.value,
+    ).toBe('Joao Ferreira')
+    expect(
+      hubSections.find((section) => section.id === 'payments')?.previewRows[1]
+        ?.value,
     ).toBe('PT50************90123')
     expect(readiness.badgeTone).toBe('success')
     expect(readiness.items).toHaveLength(3)
+    expect(readiness.items.find((item) => item.id === 'payments')?.value).toBe(
+      'Joao Ferreira · PT50************90123 associado',
+    )
     expect(summarySections.hero.headlineValue).toContain('1,50')
     expect(summarySections.hero.supportingText).toContain('2023')
     expect(heroStats).toHaveLength(3)
@@ -171,8 +177,8 @@ describe('profile models and forms', () => {
     )
     const snapshot = profileSetupSnapshotSchema.parse({
       payments: {
+        accountHolderName: 'Legacy User',
         iban: 'PT50000700001111222233',
-        spinEnabled: false,
       },
       personal: {
         email: 'legacy@volta.pt',
@@ -211,8 +217,8 @@ describe('profile models and forms', () => {
       phoneNumber: '+351911223344',
     })
     expect(getProfilePaymentsFormDefaultValues(profile.payoutAccount)).toEqual({
+      accountHolderName: 'Joao Ferreira',
       iban: '',
-      spinEnabled: true,
     })
     expect(
       getProfilePrivacyFormDefaultValues({
@@ -237,6 +243,7 @@ describe('profile models and forms', () => {
       themeMode: 'dark',
     })
     expect(getProfileSetupFormDefaultValues(setupSnapshot)).toEqual({
+      accountHolderName: 'Joao Ferreira',
       biometricsEnabled: true,
       email: 'joao.ferreira@volta.pt',
       iban: '',
@@ -244,7 +251,6 @@ describe('profile models and forms', () => {
       nif: '123456789',
       phoneNumber: '+351911223344',
       pushNotificationsEnabled: false,
-      spinEnabled: true,
     })
     expect(
       serializeProfilePersonalForm({
@@ -261,12 +267,12 @@ describe('profile models and forms', () => {
     })
     expect(
       serializeProfilePaymentsForm({
+        accountHolderName: ' Conta Joao Ferreira ',
         iban: 'pt50 0007 0000 1111 2222 33',
-        spinEnabled: false,
       }),
     ).toEqual({
+      accountHolderName: 'Conta Joao Ferreira',
       iban: 'PT50000700001111222233',
-      spinEnabled: false,
     })
     expect(
       serializeProfilePrivacyForm({
@@ -290,6 +296,7 @@ describe('profile models and forms', () => {
     })
     expect(
       toProfileSetupSnapshot({
+        accountHolderName: ' Conta Joao Ferreira ',
         biometricsEnabled: true,
         email: ' joao.ferreira@volta.pt ',
         iban: 'pt50 0007 0000 1111 2222 33',
@@ -297,12 +304,11 @@ describe('profile models and forms', () => {
         nif: '123 456 789',
         phoneNumber: ' +351 911 223 344 ',
         pushNotificationsEnabled: false,
-        spinEnabled: true,
       }),
     ).toEqual({
       payments: {
+        accountHolderName: 'Conta Joao Ferreira',
         iban: 'PT50000700001111222233',
-        spinEnabled: true,
       },
       personal: {
         email: 'joao.ferreira@volta.pt',
@@ -315,8 +321,6 @@ describe('profile models and forms', () => {
         pushNotificationsEnabled: false,
       },
     })
-    expect(isSpinPayoutRail('spin')).toBe(true)
-    expect(isSpinPayoutRail('sepa')).toBe(false)
   })
 
   it('returns localized validation errors and validates payout account patch shapes', () => {
@@ -332,8 +336,8 @@ describe('profile models and forms', () => {
     ).toBe(false)
     expect(
       getProfilePaymentsFormSchema(validationCopy.payments).safeParse({
+        accountHolderName: '',
         iban: 'PT50 1234',
-        spinEnabled: true,
       }).success,
     ).toBe(false)
     expect(
@@ -355,6 +359,7 @@ describe('profile models and forms', () => {
         payments: validationCopy.payments,
         personal: validationCopy.personal,
       }).safeParse({
+        accountHolderName: '',
         biometricsEnabled: true,
         email: 'not-an-email',
         iban: 'PT50 1234',
@@ -362,7 +367,6 @@ describe('profile models and forms', () => {
         nif: '123',
         phoneNumber: '123',
         pushNotificationsEnabled: false,
-        spinEnabled: true,
       }).success,
     ).toBe(false)
     expect(
@@ -372,15 +376,18 @@ describe('profile models and forms', () => {
       }),
     ).toEqual({
       iban: 'PT50000700001111222233',
-      rail: 'spin',
+      rail: 'sepa',
     })
     expect(
-      payoutAccountInputSchema.safeParse({
+      payoutAccountInputSchema.parse({
         iban: 'PT50000700001111222233',
         rail: 'sepa',
         spinEnabled: true,
-      }).success,
-    ).toBe(false)
+      }),
+    ).toEqual({
+      iban: 'PT50000700001111222233',
+      rail: 'sepa',
+    })
     expect(profilePatchRequestSchema.safeParse({}).success).toBe(false)
   })
 
@@ -461,8 +468,8 @@ describe('profile models and forms', () => {
       }),
     ).toEqual({
       payments: {
+        accountHolderName: '',
         iban: '',
-        spinEnabled: false,
       },
       personal: {
         email: 'profile-email@volta.pt',

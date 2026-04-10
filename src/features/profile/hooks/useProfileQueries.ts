@@ -104,7 +104,7 @@ export function useCompleteProfileSetupMutation() {
         },
         payoutAccount: {
           iban: snapshot.payments.iban,
-          rail: snapshot.payments.spinEnabled ? 'spin' : 'sepa',
+          rail: 'sepa',
         },
         personal: snapshot.personal,
         preferences: {

@@ -192,6 +192,9 @@
         },
         "recentActivity": {
           "description": "Your latest credits and transfer requests.",
+          "emptyStateDescription": "As soon as you receive new credits or request a transfer, this list updates automatically.",
+          "emptyStateLabel": "No movements yet",
+          "emptyStateTitle": "Your next movements will show up here",
           "title": "Recent activity",
           "transactions": {
             "colomboTitle": "Continente - Colombo",
@@ -330,13 +333,6 @@
             "label": "Tax ID",
             "saveLabel": "Save tax ID",
             "title": "Update tax ID"
-          },
-          "spin": {
-            "description": "Enable or disable instant payouts for this account.",
-            "helperText": "Keep instant payouts enabled for this account.",
-            "label": "SPIN",
-            "saveLabel": "Save SPIN",
-            "title": "Manage SPIN"
           }
         },
         "hub": {
@@ -365,9 +361,10 @@
             "alertsLabel": "Alerts",
             "alertsPushValue": "Push on",
             "alertsReviewValue": "Turn on alerts",
-            "paymentsEnabledValue": "{{iban}} · SPIN on",
+            "paymentsEnabledValue": "{{iban}} linked",
+            "paymentsEnabledValueWithAccountHolder": "{{accountHolderName}} · {{iban}} linked",
             "paymentsLabel": "Payments",
-            "paymentsReviewValue": "{{iban}} · check SPIN",
+            "paymentsReviewValue": "Add an IBAN",
             "readyBadge": "Account ready",
             "readyDescription": "Payments, security, and alerts are set.",
             "readyTitle": "Ready for refunds",
@@ -380,11 +377,12 @@
           },
           "summaries": {
             "appSettings": "Language and appearance",
-            "payments": "IBAN and instant payouts",
+            "payments": "IBAN for refunds",
             "personal": "Name, phone, tax ID",
             "privacy": "Push alerts and biometrics"
           },
           "rows": {
+            "accountHolderNameTitle": "Account holder",
             "alertsEmailDisabledHelper": "Disabled",
             "alertsEmailEnabledHelper": "Enabled",
             "alertsEmailHelper": "Used for security alerts and refund updates.",
@@ -412,9 +410,6 @@
             "pushNotificationsEnabledHelper": "Push notifications active.",
             "pushNotificationsTitle": "Push notifications",
             "summaryHelper": "Activity, credits, and transfers",
-            "spinDisabledHelper": "Instant payments disabled",
-            "spinEnabledHelper": "Instant payments enabled",
-            "spinTitle": "SPIN",
             "termsHelper": "Usage and privacy conditions.",
             "termsTitle": "Terms and conditions"
           },
@@ -475,7 +470,9 @@
           "title": "Profile data"
         },
         "payments": {
-          "description": "Manage where refunds are paid and whether instant payout stays on.",
+          "accountHolderNameHelper": "Use the name registered on this bank account.",
+          "accountHolderNameLabel": "Account holder name",
+          "description": "Manage where refunds are paid.",
           "ibanHelper": "Used to send completed payments and refunds.",
           "ibanLabel": "Linked IBAN",
           "saveErrorToast": "We couldn't save your payment details right now.",
@@ -483,8 +480,6 @@
           "saveSuccessToast": "Your payment details were updated.",
           "sectionHelper": "Keep the payout account ready so refunds can arrive without delay.",
           "sectionTitle": "Refund destination",
-          "spinHelper": "Keep instant payments enabled for this account.",
-          "spinLabel": "SPIN",
           "title": "Payments"
         },
         "privacy": {
@@ -532,7 +527,7 @@
           "successToast": "Your setup is complete.",
           "steps": {
             "payments": {
-              "description": "Link your IBAN and choose whether SPIN should stay enabled for instant payouts.",
+              "description": "Add the bank account name and IBAN where your refunds should arrive.",
               "title": "Set up payments"
             },
             "personal": {
@@ -555,6 +550,7 @@
             "invalidThemeMode": "Choose a valid appearance option."
           },
           "payments": {
+            "accountHolderNameRequired": "Account holder name is required.",
             "ibanInvalid": "Enter a valid Portuguese IBAN.",
             "ibanRequired": "IBAN is required."
           },
@@ -705,7 +701,7 @@
           "confirmationBadge": "Transfer requested",
           "confirmationDescription": "Your transfer request for {{amount}} was sent to the linked account.",
           "confirmationTitle": "Transfer on the way",
-          "description": "Choose the amount and how you want to receive it.",
+          "description": "Choose the amount you want to transfer.",
           "destinationLabel": "Destination account",
           "errorToast": "We couldn't request the transfer right now.",
           "estimatedArrivalValue": "Today, within 24h",
@@ -715,17 +711,10 @@
           "newTransferActionLabel": "Request another transfer",
           "payoutOptionsTitle": "Choose how you want to receive it",
           "payoutOptionSepaCaption": "Available within 1 business day.",
-          "payoutOptionSpinCaption": "Receive it as soon as instant payout is available.",
           "payoutOptionUnavailableBadge": "Unavailable",
           "payoutMethodLabel": "Payout method",
           "payoutMethodSepa": "SEPA transfer",
-          "payoutMethodSpin": "SPIN instant payout",
           "reviewTitle": "Before you confirm",
-          "spinDisabledHelper": "SEPA for this transfer.",
-          "spinEnabledHelper": "Faster when SPIN is active.",
-          "spinHelper": "If you turn on SPIN, we will try to send it right away.",
-          "spinToggleTitle": "Receive with SPIN",
-          "spinUnavailableHelper": "We will use SEPA for this transfer.",
           "successToast": "Your transfer request was sent.",
           "title": "Transfer balance",
           "zeroAmountError": "Enter an amount above 0€."

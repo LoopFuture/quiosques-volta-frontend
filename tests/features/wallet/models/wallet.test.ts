@@ -66,6 +66,7 @@ const processingTransfer = walletTransactionSchema.parse({
   transferDetails: {
     expectedArrivalAt: '2026-03-16T13:10:00Z',
     payoutAccount: {
+      accountHolderName: 'Joao Ferreira',
       ibanMasked: 'PT50************90123',
       rail: 'spin',
     },
@@ -157,16 +158,11 @@ describe('wallet models, forms, and presentation', () => {
     expect(formatWalletDateTime('2026-03-14T13:10:00Z', 'pt')).toBeTruthy()
     expect(
       formatWalletPaymentAccount({
-        ibanMasked: 'PT50************90123',
-        rail: 'spin',
-      }),
-    ).toBe('PT50************90123 • SPIN')
-    expect(
-      formatWalletPaymentAccount({
+        accountHolderName: 'Joao Ferreira',
         ibanMasked: 'PT50************90123',
         rail: 'sepa',
       }),
-    ).toBe('PT50************90123')
+    ).toBe('Joao Ferreira · PT50************90123')
     expect(isTransferTransaction(creditMovement)).toBe(false)
     expect(isTransferTransaction(processingTransfer)).toBe(true)
     expect(getWalletTransactionAmountTone(creditMovement)).toBe('success')
@@ -254,7 +250,7 @@ describe('wallet models, forms, and presentation', () => {
       'Transferência para a conta',
     )
     expect(getWalletMovementSubtitle('pt', processingTransfer)).toContain(
-      'PT50************90123 • SPIN',
+      'Joao Ferreira · PT50************90123',
     )
     expect(getWalletMovementSubtitle('pt', creditMovement)).toBeTruthy()
     expect(getWalletMovementStateCopy(t, creditMovement)).toEqual(

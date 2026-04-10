@@ -69,6 +69,7 @@ describe('ProfilePaymentsScreen', () => {
 
     renderWithProvider(<ProfilePaymentsScreen />)
 
+    expect(screen.getByDisplayValue('Joao Ferreira')).toBeTruthy()
     fireEvent.changeText(
       screen.getByLabelText(i18n.t('tabScreens.profile.payments.ibanLabel')),
       'PT50000201231234567890154',
@@ -80,7 +81,7 @@ describe('ProfilePaymentsScreen', () => {
         {
           payoutAccount: {
             iban: 'PT50000201231234567890154',
-            rail: 'spin',
+            rail: 'sepa',
           },
         },
         expect.objectContaining({
@@ -113,6 +114,7 @@ describe('ProfilePaymentsScreen', () => {
 
     renderWithProvider(<ProfilePaymentsScreen />)
 
+    expect(screen.getByDisplayValue('Joao Ferreira')).toBeTruthy()
     fireEvent.changeText(
       screen.getByLabelText(i18n.t('tabScreens.profile.payments.ibanLabel')),
       'PT50000201231234567890154',

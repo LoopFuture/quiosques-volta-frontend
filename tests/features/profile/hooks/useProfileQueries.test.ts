@@ -219,8 +219,8 @@ describe('profile hooks', () => {
     await options.mutationFn({
       snapshot: {
         payments: {
+          accountHolderName: 'Joao Ferreira',
           iban: 'PT50000201231234567890154',
-          spinEnabled: true,
         },
         personal: {
           email: 'joao@volta.pt',
@@ -242,7 +242,7 @@ describe('profile hooks', () => {
       },
       payoutAccount: {
         iban: 'PT50000201231234567890154',
-        rail: 'spin',
+        rail: 'sepa',
       },
       personal: {
         email: 'joao@volta.pt',

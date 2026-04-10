@@ -1,6 +1,5 @@
 import { z } from 'zod/v4'
 import {
-  isSpinPayoutRail,
   type PayoutAccount,
   type PayoutAccountInput,
 } from '@/features/profile/models'
@@ -14,19 +13,20 @@ function isPracticalPtIban(value: string) {
 }
 
 export const profilePaymentsRequestSchema = z.object({
+  accountHolderName: z.string().trim().min(1).max(120),
   iban: z.string().regex(/^PT\d{19,23}$/),
-  spinEnabled: z.boolean(),
 })
 
 export type ProfilePaymentsFormValues = {
+  accountHolderName: string
   iban: string
-  spinEnabled: boolean
 }
 export type ProfilePaymentsRequest = z.infer<
   typeof profilePaymentsRequestSchema
 >
 
 export type ProfilePaymentsValidationCopy = {
+  accountHolderNameRequired: string
   ibanInvalid: string
   ibanRequired: string
 }
@@ -35,21 +35,27 @@ export function getProfilePaymentsFormSchema(
   validation: ProfilePaymentsValidationCopy,
 ) {
   return z.object({
+    accountHolderName: z
+      .string()
+      .trim()
+      .min(1, validation.accountHolderNameRequired)
+      .max(120),
     iban: z
       .string()
       .trim()
       .min(1, validation.ibanRequired)
       .refine((value) => isPracticalPtIban(value), validation.ibanInvalid),
-    spinEnabled: z.boolean(),
   })
 }
 
 export function getProfilePaymentsFormDefaultValues(
   payments: PayoutAccount | null,
+  fallbackAccountHolderName?: string | null,
 ): ProfilePaymentsFormValues {
   return {
+    accountHolderName:
+      payments?.accountHolderName ?? fallbackAccountHolderName ?? '',
     iban: '',
-    spinEnabled: isSpinPayoutRail(payments?.rail),
   }
 }
 
@@ -58,7 +64,7 @@ export function toProfilePaymentsDraft(
 ): PayoutAccountInput {
   return {
     iban: normalizeIban(values.iban),
-    rail: values.spinEnabled ? 'spin' : 'sepa',
+    rail: 'sepa',
   }
 }
 
@@ -66,7 +72,7 @@ export function serializeProfilePaymentsForm(
   values: ProfilePaymentsFormValues,
 ): ProfilePaymentsRequest {
   return profilePaymentsRequestSchema.parse({
+    accountHolderName: values.accountHolderName.trim(),
     iban: normalizeIban(values.iban),
-    spinEnabled: values.spinEnabled,
   })
 }

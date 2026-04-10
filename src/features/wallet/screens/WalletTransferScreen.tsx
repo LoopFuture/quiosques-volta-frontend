@@ -88,8 +88,9 @@ function WalletTransferScreenContent({
   walletBalanceCents,
 }: {
   payoutAccount: {
+    accountHolderName?: string
     ibanMasked: string
-    rail: 'sepa' | 'spin'
+    rail: 'sepa'
   } | null
   walletBalanceCents: number
 }) {
@@ -137,14 +138,10 @@ function WalletTransferScreenContent({
       ? formatWalletAmount(transferAmountCents, i18n.language)
       : t('tabScreens.wallet.transfer.amountPendingValue')
   const selectedPayoutMethodLabel = payoutAccount
-    ? payoutAccount.rail === 'spin'
-      ? t('tabScreens.wallet.transfer.payoutMethodSpin')
-      : t('tabScreens.wallet.transfer.payoutMethodSepa')
+    ? t('tabScreens.wallet.transfer.payoutMethodSepa')
     : '-'
   const selectedPayoutMethodHelper = payoutAccount
-    ? payoutAccount.rail === 'spin'
-      ? t('tabScreens.wallet.transfer.payoutOptionSpinCaption')
-      : t('tabScreens.wallet.transfer.payoutOptionSepaCaption')
+    ? t('tabScreens.wallet.transfer.payoutOptionSepaCaption')
     : undefined
   const payoutDestination = payoutAccount
     ? formatWalletPaymentAccount(payoutAccount)

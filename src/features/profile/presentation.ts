@@ -18,6 +18,32 @@ function getProfileDisplayValue(value: string | null | undefined) {
   return value && value.trim().length > 0 ? value : '-'
 }
 
+function getProfilePaymentsReadinessValue(
+  t: TFunction,
+  profile: ProfileResponse,
+) {
+  if (!profile.payoutAccount?.ibanMasked) {
+    return t('tabScreens.profile.hub.readiness.paymentsReviewValue')
+  }
+
+  const accountHolderName =
+    profile.payoutAccount.accountHolderName ?? profile.personal.name
+
+  if (accountHolderName) {
+    return t(
+      'tabScreens.profile.hub.readiness.paymentsEnabledValueWithAccountHolder',
+      {
+        accountHolderName: getProfileDisplayValue(accountHolderName),
+        iban: getProfileDisplayValue(profile.payoutAccount.ibanMasked),
+      },
+    )
+  }
+
+  return t('tabScreens.profile.hub.readiness.paymentsEnabledValue', {
+    iban: getProfileDisplayValue(profile.payoutAccount.ibanMasked),
+  })
+}
+
 export function getProfileValidationCopy(t: TFunction) {
   return {
     appSettings: {
@@ -29,6 +55,9 @@ export function getProfileValidationCopy(t: TFunction) {
       ),
     },
     payments: {
+      accountHolderNameRequired: t(
+        'tabScreens.profile.validation.payments.accountHolderNameRequired',
+      ),
       ibanInvalid: t('tabScreens.profile.validation.payments.ibanInvalid'),
       ibanRequired: t('tabScreens.profile.validation.payments.ibanRequired'),
     },
@@ -158,17 +187,14 @@ export function getProfileHubSections(
       id: 'payments',
       previewRows: [
         {
-          label: t('tabScreens.profile.hub.rows.ibanTitle'),
-          value: getProfileDisplayValue(profile.payoutAccount?.ibanMasked),
+          label: t('tabScreens.profile.hub.rows.accountHolderNameTitle'),
+          value: getProfileDisplayValue(
+            profile.payoutAccount?.accountHolderName ?? profile.personal.name,
+          ),
         },
         {
-          label: t('tabScreens.profile.hub.rows.spinTitle'),
-          value:
-            profile.payoutAccount?.rail === 'spin'
-              ? t('tabScreens.profile.hub.rows.spinEnabledHelper')
-              : profile.payoutAccount
-                ? t('tabScreens.profile.hub.rows.spinDisabledHelper')
-                : '-',
+          label: t('tabScreens.profile.hub.rows.ibanTitle'),
+          value: getProfileDisplayValue(profile.payoutAccount?.ibanMasked),
         },
       ],
       summary: t('tabScreens.profile.hub.summaries.payments'),
@@ -273,14 +299,7 @@ export function getProfileHubReadiness(
         id: 'payments',
         label: t('tabScreens.profile.hub.readiness.paymentsLabel'),
         tone: paymentsReady ? 'success' : 'warning',
-        value:
-          profile.payoutAccount?.rail === 'spin'
-            ? t('tabScreens.profile.hub.readiness.paymentsEnabledValue', {
-                iban: getProfileDisplayValue(profile.payoutAccount?.ibanMasked),
-              })
-            : t('tabScreens.profile.hub.readiness.paymentsReviewValue', {
-                iban: getProfileDisplayValue(profile.payoutAccount?.ibanMasked),
-              }),
+        value: getProfilePaymentsReadinessValue(t, profile),
       },
       ...securityItems,
       {

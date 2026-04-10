@@ -8,8 +8,19 @@ import { moneySchema, toneSchema } from '@/features/app-data/models'
 
 export const themeModeSchema = z.enum(['system', 'light', 'dark'])
 export const languageModeSchema = z.enum(['system', 'pt', 'en'])
-export const payoutRailSchema = z.enum(['sepa', 'spin'])
+const rawPayoutRailSchema = z.enum(['sepa', 'spin'])
+export const payoutRailSchema = z.literal('sepa')
 export const profilePhoneNumberSchema = z.string().regex(/^\+[1-9]\d{7,14}$/)
+
+function normalizeOptionalPayoutAccountName(value: string | null | undefined) {
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  const trimmedValue = value.trim()
+
+  return trimmedValue.length > 0 ? trimmedValue : undefined
+}
 
 export const profilePersonalSchema = z.object({
   email: z.string().email(),
@@ -19,43 +30,39 @@ export const profilePersonalSchema = z.object({
 })
 
 const rawPayoutAccountSchema = z.object({
+  accountHolderName: z.string().nullable().optional(),
   ibanMasked: z.string(),
-  rail: payoutRailSchema,
+  rail: rawPayoutRailSchema,
   spinEnabled: z.boolean().optional(),
 })
 
 export const payoutAccountSchema = rawPayoutAccountSchema.transform(
-  ({ ibanMasked, rail }) => ({
-    ibanMasked,
-    rail,
-  }),
+  ({ accountHolderName, ibanMasked }) => {
+    const normalizedAccountHolderName =
+      normalizeOptionalPayoutAccountName(accountHolderName)
+
+    return {
+      ...(normalizedAccountHolderName
+        ? {
+            accountHolderName: normalizedAccountHolderName,
+          }
+        : {}),
+      ibanMasked,
+      rail: 'sepa' as const,
+    }
+  },
 )
 
 export const payoutAccountInputSchema = z
   .object({
     iban: z.string().regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/),
-    rail: payoutRailSchema.optional(),
+    rail: rawPayoutRailSchema.optional(),
     spinEnabled: z.boolean().optional(),
   })
-  .transform((value, context) => {
-    const rail = value.rail ?? (value.spinEnabled === true ? 'spin' : 'sepa')
-
-    if (
-      typeof value.spinEnabled === 'boolean' &&
-      value.spinEnabled !== (rail === 'spin')
-    ) {
-      context.addIssue({
-        code: 'custom',
-        message: 'spinEnabled must match payout rail.',
-        path: ['spinEnabled'],
-      })
-
-      return z.NEVER
-    }
-
+  .transform((value) => {
     return {
       iban: value.iban,
-      rail,
+      rail: 'sepa' as const,
     }
   })
 
@@ -166,7 +173,3 @@ export const profileHubSectionSchema = z.object({
 
 export type ProfileSummaryStat = z.infer<typeof profileSummaryStatSchema>
 export type ProfileHubSection = z.infer<typeof profileHubSectionSchema>
-
-export function isSpinPayoutRail(rail: PayoutRail | null | undefined) {
-  return rail === 'spin'
-}
