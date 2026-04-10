@@ -361,6 +361,7 @@
             "memberSinceValue": "Oct 2023"
           },
           "helpRowLabel": "How Volta works",
+          "helpLinksDescription": "Open help, privacy, and terms without leaving the app.",
           "logoutLabel": "Log out",
           "readiness": {
             "alertsAllValue": "Email + push on",
@@ -419,6 +420,8 @@
             "pinEnabledHelper": "4-digit PIN active",
             "pinTitle": "App PIN",
             "phoneNumberTitle": "Phone number",
+            "privacyPolicyHelper": "How we handle your data and permissions.",
+            "privacyPolicyTitle": "Privacy policy",
             "pushNotificationsDisabledHelper": "Push notifications disabled.",
             "pushNotificationsEnabledHelper": "Push notifications active.",
             "pushNotificationsTitle": "Push notifications",

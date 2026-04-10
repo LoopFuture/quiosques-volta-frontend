@@ -1,7 +1,9 @@
+import * as WebBrowser from 'expo-web-browser'
 import { fireEvent, screen, waitFor } from '@testing-library/react-native'
 import ProfileScreen from '@/features/profile/screens/ProfileScreen'
 import { profileResponseSchema } from '@/features/profile/models'
 import { authRoutes } from '@/features/auth/routes'
+import { PROFILE_LEGAL_LINK_PATHS } from '@/features/profile/constants'
 import { profileRoutes } from '@/features/profile/routes'
 import { i18n, setLocaleOverrideForTests, syncLocale } from '@/i18n'
 import { renderWithProvider } from '@tests/support/test-utils'
@@ -161,6 +163,7 @@ describe('ProfileScreen', () => {
 
   it('renders the hub and routes readiness, section, help, and logout actions', async () => {
     const signOut = jest.fn().mockResolvedValue(undefined)
+    const openBrowserAsync = jest.spyOn(WebBrowser, 'openBrowserAsync')
 
     mockUseAuthSession.mockReturnValue({
       signOut,
@@ -203,6 +206,19 @@ describe('ProfileScreen', () => {
     fireEvent.press(
       screen.getByLabelText(i18n.t('tabScreens.profile.hub.helpRowLabel')),
     )
+    fireEvent.press(
+      screen.getByLabelText(
+        i18n.t('tabScreens.profile.hub.rows.helpCenterTitle'),
+      ),
+    )
+    fireEvent.press(
+      screen.getByLabelText(
+        i18n.t('tabScreens.profile.hub.rows.privacyPolicyTitle'),
+      ),
+    )
+    fireEvent.press(
+      screen.getByLabelText(i18n.t('tabScreens.profile.hub.rows.termsTitle')),
+    )
     fireEvent.press(screen.getByTestId('profile-logout-button'))
 
     expect(mockRouterPush).toHaveBeenNthCalledWith(1, profileRoutes.payments)
@@ -212,6 +228,18 @@ describe('ProfileScreen', () => {
     expect(mockRouterPush).toHaveBeenNthCalledWith(5, profileRoutes.payments)
     expect(mockRouterPush).toHaveBeenNthCalledWith(6, profileRoutes.appSettings)
     expect(mockRouterPush).toHaveBeenNthCalledWith(7, profileRoutes.help)
+    expect(openBrowserAsync).toHaveBeenNthCalledWith(
+      1,
+      `https://volta.example.com${PROFILE_LEGAL_LINK_PATHS.helpCenter}`,
+    )
+    expect(openBrowserAsync).toHaveBeenNthCalledWith(
+      2,
+      `https://volta.example.com${PROFILE_LEGAL_LINK_PATHS.privacyPolicy}`,
+    )
+    expect(openBrowserAsync).toHaveBeenNthCalledWith(
+      3,
+      `https://volta.example.com${PROFILE_LEGAL_LINK_PATHS.termsAndConditions}`,
+    )
 
     await waitFor(() => {
       expect(signOut).toHaveBeenCalledTimes(1)

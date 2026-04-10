@@ -76,11 +76,14 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
   - `SENTRY_ALLOW_FAILURE`
 - Required app API envs:
   - `API_BASE_URL`
+- Required web app envs:
+  - `WEB_APP_BASE_URL`
 - Optional Android push envs:
   - `ANDROID_GOOGLE_SERVICES_FILE`
 - These values are injected at build time through `app.config.ts` and read at runtime from `expo-constants`.
 - App data requests go through the shared fetch client in `src/features/app-data/api`.
 - `API_BASE_URL` is required and is injected from env into `extra.api.baseUrl`.
+- `WEB_APP_BASE_URL` is required and is injected from env into `extra.webApp.baseUrl`.
 - The OpenAPI reference lives in `docs/volta-backend-api.openapi.yaml`.
 - EAS Update is configured through `app.config.ts` with a fixed `updates.url` and `runtimeVersion.policy = 'fingerprint'`.
 - `SENTRY_ENVIRONMENT` defaults to the active `EAS_BUILD_PROFILE` when available, otherwise `NODE_ENV`.

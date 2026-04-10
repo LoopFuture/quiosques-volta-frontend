@@ -7,6 +7,9 @@ type MockExpoConfigOverrides = {
     issuerUrl?: string
     scopes?: string[]
   }
+  webApp?: {
+    baseUrl?: string
+  }
   sentry?: {
     dsn?: string
     environment?: string
@@ -30,6 +33,9 @@ export function createMockExpoConfig(overrides: MockExpoConfigOverrides = {}) {
       },
       api: {
         baseUrl: overrides.api?.baseUrl ?? 'https://volta.be.dev.theloop.tech',
+      },
+      webApp: {
+        baseUrl: overrides.webApp?.baseUrl ?? 'https://volta.example.com',
       },
       sentry: {
         ...(typeof overrides.sentry?.dsn === 'string'

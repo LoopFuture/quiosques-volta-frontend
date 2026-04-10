@@ -361,6 +361,7 @@
             "memberSinceValue": "Out 2023"
           },
           "helpRowLabel": "Como funciona a Volta",
+          "helpLinksDescription": "Abre apoio, privacidade e termos sem sair da app.",
           "logoutLabel": "Terminar sessão",
           "readiness": {
             "alertsAllValue": "E-mail + push ativos",
@@ -419,6 +420,8 @@
             "pinEnabledHelper": "PIN de 4 dígitos ativo",
             "pinTitle": "PIN da app",
             "phoneNumberTitle": "Telefone",
+            "privacyPolicyHelper": "Como tratamos os teus dados e permissões.",
+            "privacyPolicyTitle": "Política de privacidade",
             "pushNotificationsDisabledHelper": "Notificações push desativadas.",
             "pushNotificationsEnabledHelper": "Notificações push ativas.",
             "pushNotificationsTitle": "Notificações push",

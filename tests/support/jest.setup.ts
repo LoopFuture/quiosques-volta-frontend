@@ -2,6 +2,7 @@ import { cleanup } from '@testing-library/react-native'
 import { resetApiRuntimeConfigForTests } from '@/features/app-data/api'
 import { resetMonitoringForTests } from '@/features/app-data/monitoring'
 import { resetKeycloakRuntimeConfigForTests } from '@/features/auth/models/config'
+import { resetProfileWebAppRuntimeConfigForTests } from '@/features/profile/runtime'
 import { resetPushNotificationsRuntimeConfigForTests } from '@/features/notifications/models/runtime'
 
 jest.mock('expo-constants', () => {
@@ -17,6 +18,9 @@ jest.mock('expo-constants', () => {
       },
       api: {
         baseUrl: 'https://volta.be.dev.theloop.tech',
+      },
+      webApp: {
+        baseUrl: 'https://volta.example.com',
       },
       sentry: {},
     },
@@ -93,6 +97,23 @@ jest.mock('expo-crypto', () => {
     },
     digestStringAsync,
     randomUUID,
+  }
+})
+
+jest.mock('expo-web-browser', () => {
+  const openBrowserAsync = jest.fn(async () => ({
+    type: 'opened',
+  }))
+  const dismissBrowser = jest.fn(async () => {})
+
+  return {
+    __esModule: true,
+    __resetExpoWebBrowserMock: () => {
+      dismissBrowser.mockClear()
+      openBrowserAsync.mockClear()
+    },
+    dismissBrowser,
+    openBrowserAsync,
   }
 })
 
@@ -737,6 +758,7 @@ beforeEach(() => {
   }
   const { __resetExpoConstantsMock } = jest.requireMock('expo-constants')
   const { __resetExpoNetworkMock } = jest.requireMock('expo-network')
+  const { __resetExpoWebBrowserMock } = jest.requireMock('expo-web-browser')
   const { __resetFlashListMock } = jest.requireMock('@shopify/flash-list')
   const { __resetExpoNotificationsMock } =
     jest.requireMock('expo-notifications')
@@ -752,6 +774,7 @@ beforeEach(() => {
   __resetExpoDeviceMock()
   __resetExpoConstantsMock()
   __resetExpoNetworkMock()
+  __resetExpoWebBrowserMock()
   __resetFlashListMock()
   __resetExpoNotificationsMock()
   __resetLocalAuthenticationMock()
@@ -761,6 +784,7 @@ beforeEach(() => {
   resetApiRuntimeConfigForTests()
   resetMonitoringForTests()
   resetKeycloakRuntimeConfigForTests()
+  resetProfileWebAppRuntimeConfigForTests()
   resetPushNotificationsRuntimeConfigForTests()
 })
 

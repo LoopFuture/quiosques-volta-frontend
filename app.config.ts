@@ -240,6 +240,11 @@ const config: ExpoConfig = {
         required: true,
       }),
     },
+    webApp: {
+      baseUrl: getEnvironmentVariable('WEB_APP_BASE_URL', {
+        required: true,
+      }),
+    },
   },
 }
 

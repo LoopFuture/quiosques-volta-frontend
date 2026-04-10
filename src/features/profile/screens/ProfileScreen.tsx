@@ -1,9 +1,12 @@
 import { useRouter, type Href } from 'expo-router'
+import * as WebBrowser from 'expo-web-browser'
 import {
   CreditCard,
+  FileText,
   Info,
   LockKeyhole,
   Palette,
+  Shield,
   User,
 } from '@tamagui/lucide-icons'
 import { useTranslation } from 'react-i18next'
@@ -26,6 +29,8 @@ import { ProfileSectionCard } from '../components/ProfileSectionCard'
 import { useDevicePrivacySettings, useProfileQuery } from '../hooks'
 import { getProfileHubReadiness, getProfileHubSections } from '../presentation'
 import { profileRoutes } from '../routes'
+import { PROFILE_LEGAL_LINK_PATHS } from '../constants'
+import { getProfileLegalLinkUrl } from '../runtime'
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -152,6 +157,21 @@ export default function ProfileScreen() {
         (id) => hubSections.find((section) => section.id === id) ?? [],
       )
     : undefined
+  const handleOpenPrivacyPolicy = () => {
+    void WebBrowser.openBrowserAsync(
+      getProfileLegalLinkUrl(PROFILE_LEGAL_LINK_PATHS.privacyPolicy),
+    )
+  }
+  const handleOpenHelpCenter = () => {
+    void WebBrowser.openBrowserAsync(
+      getProfileLegalLinkUrl(PROFILE_LEGAL_LINK_PATHS.helpCenter),
+    )
+  }
+  const handleOpenTermsAndConditions = () => {
+    void WebBrowser.openBrowserAsync(
+      getProfileLegalLinkUrl(PROFILE_LEGAL_LINK_PATHS.termsAndConditions),
+    )
+  }
 
   return (
     <ScreenContainer
@@ -212,28 +232,70 @@ export default function ProfileScreen() {
             ))}
           </YStack>
 
-          <YStack gap="$2">
-            <XStack items="center" justify="space-between">
+          <YStack gap="$4">
+            <YStack gap="$2">
+              <XStack items="center" justify="space-between">
+                <YStack gap="$1">
+                  <Text color="$color10" fontSize={12} fontWeight="800">
+                    {t('tabScreens.profile.hub.supportLabel')}
+                  </Text>
+                  <Text color="$color11" fontSize={14}>
+                    {t('tabScreens.profile.hub.supportDescription')}
+                  </Text>
+                </YStack>
+              </XStack>
+              <ProfileMenuCard
+                rows={[
+                  {
+                    icon: <Info color="$accent11" size={18} />,
+                    onPress: () => router.push(profileRoutes.help),
+                    summary: t('tabScreens.profile.hub.rows.onboardingTitle'),
+                    helper: t('tabScreens.profile.hub.rows.onboardingHelper'),
+                    title: t('tabScreens.profile.hub.helpRowLabel'),
+                  },
+                ]}
+              />
+            </YStack>
+
+            <YStack gap="$2" pt="$1">
               <YStack gap="$1">
                 <Text color="$color10" fontSize={12} fontWeight="800">
-                  {t('tabScreens.profile.hub.supportLabel')}
+                  {t('tabScreens.profile.hub.sections.help')}
                 </Text>
                 <Text color="$color11" fontSize={14}>
-                  {t('tabScreens.profile.hub.supportDescription')}
+                  {t('tabScreens.profile.hub.helpLinksDescription')}
                 </Text>
               </YStack>
-            </XStack>
-            <ProfileMenuCard
-              rows={[
-                {
-                  icon: <Info color="$accent11" size={18} />,
-                  onPress: () => router.push(profileRoutes.help),
-                  summary: t('tabScreens.profile.hub.rows.onboardingTitle'),
-                  helper: t('tabScreens.profile.hub.rows.onboardingHelper'),
-                  title: t('tabScreens.profile.hub.helpRowLabel'),
-                },
-              ]}
-            />
+              <ProfileMenuCard
+                rows={[
+                  {
+                    icon: <Info color="$accent11" size={18} />,
+                    onPress: handleOpenHelpCenter,
+                    summary: t('tabScreens.profile.hub.rows.helpCenterTitle'),
+                    helper: t('tabScreens.profile.hub.rows.helpCenterHelper'),
+                    title: t('tabScreens.profile.hub.rows.helpCenterTitle'),
+                  },
+                  {
+                    icon: <Shield color="$accent11" size={18} />,
+                    onPress: handleOpenPrivacyPolicy,
+                    summary: t(
+                      'tabScreens.profile.hub.rows.privacyPolicyTitle',
+                    ),
+                    helper: t(
+                      'tabScreens.profile.hub.rows.privacyPolicyHelper',
+                    ),
+                    title: t('tabScreens.profile.hub.rows.privacyPolicyTitle'),
+                  },
+                  {
+                    icon: <FileText color="$accent11" size={18} />,
+                    onPress: handleOpenTermsAndConditions,
+                    summary: t('tabScreens.profile.hub.rows.termsTitle'),
+                    helper: t('tabScreens.profile.hub.rows.termsHelper'),
+                    title: t('tabScreens.profile.hub.rows.termsTitle'),
+                  },
+                ]}
+              />
+            </YStack>
           </YStack>
 
           <SurfaceCard gap="$3">
