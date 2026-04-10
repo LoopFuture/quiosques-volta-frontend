@@ -5,6 +5,7 @@ import {
   mockSetSettings,
   mockShowError,
   mockShowSuccess,
+  mockUseBiometricHardwareAvailability,
   mockUseDevicePrivacySettings,
   mockUseProfileQuery,
   mockUsePushNotifications,
@@ -126,10 +127,12 @@ describe('ProfilePrivacyScreen', () => {
 
     expect(mockSetSettings).toHaveBeenCalledWith({
       biometricsEnabled: false,
+      pinEnabled: false,
       pushNotificationsEnabled: true,
     })
     expect(mockSetSettings).toHaveBeenCalledWith({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
   })
@@ -172,6 +175,7 @@ describe('ProfilePrivacyScreen', () => {
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: true,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       },
       setSettings: mockSetSettings,
@@ -193,10 +197,12 @@ describe('ProfilePrivacyScreen', () => {
     await waitFor(() => {
       expect(mockSetSettings).toHaveBeenCalledWith({
         biometricsEnabled: true,
+        pinEnabled: false,
         pushNotificationsEnabled: false,
       })
       expect(mockSetSettings).toHaveBeenCalledWith({
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       })
       expect(mockRequestPushPermissionAndToken).not.toHaveBeenCalled()
@@ -233,6 +239,67 @@ describe('ProfilePrivacyScreen', () => {
     })
   })
 
+  it('lets the user set and remove a PIN from privacy settings', async () => {
+    renderWithProvider(<ProfilePrivacyScreen />)
+
+    fireEvent.press(screen.getByTestId('profile-privacy-pin-set-button'))
+    fireEvent.changeText(
+      screen.getByTestId('profile-privacy-pin-pin-input'),
+      '1234',
+    )
+    fireEvent.changeText(
+      screen.getByTestId('profile-privacy-pin-confirm-pin-input'),
+      '1234',
+    )
+    fireEvent.press(screen.getByTestId('profile-privacy-pin-save-button'))
+
+    await waitFor(() => {
+      expect(mockSetSettings).toHaveBeenCalledWith({
+        biometricsEnabled: false,
+        pinEnabled: true,
+        pushNotificationsEnabled: false,
+      })
+      expect(mockShowSuccess).toHaveBeenCalledWith(
+        i18n.t('tabScreens.profile.privacy.pinLabel'),
+        i18n.t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
+      )
+    })
+
+    mockUseDevicePrivacySettings.mockReturnValue({
+      settings: {
+        biometricsEnabled: false,
+        pinEnabled: true,
+        pushNotificationsEnabled: false,
+      },
+      setSettings: mockSetSettings,
+    })
+
+    renderWithProvider(<ProfilePrivacyScreen />)
+
+    fireEvent.press(screen.getByTestId('profile-privacy-pin-remove-button'))
+
+    await waitFor(() => {
+      expect(mockSetSettings).toHaveBeenCalledWith({
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      })
+    })
+  })
+
+  it('hides biometrics but keeps PIN controls available when the device has no biometric hardware', () => {
+    mockUseBiometricHardwareAvailability.mockReturnValue(false)
+
+    renderWithProvider(<ProfilePrivacyScreen />)
+
+    expect(
+      screen.queryByLabelText(
+        i18n.t('tabScreens.profile.privacy.biometricLabel'),
+      ),
+    ).toBeNull()
+    expect(screen.getByTestId('profile-privacy-pin-set-button')).toBeTruthy()
+  })
+
   it('resets blocked push notifications on mount and opens system settings', async () => {
     const openSettingsSpy = jest
       .spyOn(Linking, 'openSettings')
@@ -241,6 +308,7 @@ describe('ProfilePrivacyScreen', () => {
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       },
       setSettings: mockSetSettings,
@@ -260,6 +328,7 @@ describe('ProfilePrivacyScreen', () => {
     await waitFor(() => {
       expect(mockSetSettings).toHaveBeenCalledWith({
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: false,
       })
     })

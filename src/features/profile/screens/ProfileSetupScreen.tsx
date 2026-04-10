@@ -21,6 +21,7 @@ import {
   authenticateWithAvailableBiometrics,
   useBiometricHardwareAvailability,
 } from '@/features/auth/biometrics'
+import { clearStoredAppPin, saveStoredAppPin } from '@/features/auth/pin'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { homeRoutes } from '@/features/home/routes'
 import { PushNotificationsPreferenceCard } from '@/features/notifications/components/PushNotificationsPreferenceCard'
@@ -41,6 +42,7 @@ import {
   getProfileSetupSnapshotFromProfile,
 } from '../models'
 import { SettingsToggleRow } from '../components/ProfilePreferenceControls'
+import { PinPreferenceCard } from '../components/PinPreferenceCard'
 import { getProfileValidationCopy } from '../presentation'
 
 const totalSteps = 3
@@ -53,7 +55,7 @@ const setupStepFieldNames: Record<
 > = {
   payments: ['accountHolderName', 'iban'],
   personal: ['email', 'name', 'phoneNumber', 'nif'],
-  security: ['biometricsEnabled', 'pushNotificationsEnabled'],
+  security: ['biometricsEnabled', 'pinEnabled', 'pushNotificationsEnabled'],
 }
 
 const setupStepOrder: SetupStepId[] = ['personal', 'payments', 'security']
@@ -213,6 +215,20 @@ export function ProfileSetupScreen() {
         token,
       }),
   } as const
+  const pinCopy = {
+    cancelLabel: t('tabScreens.profile.privacy.pinCancelLabel'),
+    changeLabel: t('tabScreens.profile.privacy.pinChangeLabel'),
+    confirmPinLabel: t('tabScreens.profile.privacy.pinConfirmLabel'),
+    enabledHelper: t('tabScreens.profile.privacy.pinEnabledHelper'),
+    invalidPinError: t('tabScreens.profile.privacy.pinInvalidError'),
+    label: t('tabScreens.profile.privacy.pinLabel'),
+    mismatchError: t('tabScreens.profile.privacy.pinMismatchError'),
+    pinHelper: t('tabScreens.profile.setup.steps.security.pinHelper'),
+    pinLabel: t('tabScreens.profile.privacy.pinInputLabel'),
+    removeLabel: t('tabScreens.profile.privacy.pinRemoveLabel'),
+    saveLabel: t('tabScreens.profile.privacy.pinSaveLabel'),
+    setLabel: t('tabScreens.profile.privacy.pinSetLabel'),
+  } as const
 
   async function handlePushNotificationsToggleChange(
     nextValue: boolean,
@@ -270,6 +286,47 @@ export function ProfileSetupScreen() {
     )
   }
 
+  async function handleSavePin(pin: string) {
+    try {
+      await saveStoredAppPin(pin)
+      setValue('pinEnabled', true)
+      setSettings({
+        ...settings,
+        pinEnabled: true,
+      })
+      showSuccess(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
+      )
+    } catch {
+      showError(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.pinSaveErrorToast'),
+      )
+      throw new Error('pin-save-failed')
+    }
+  }
+
+  async function handleRemovePin() {
+    try {
+      await clearStoredAppPin()
+      setValue('pinEnabled', false)
+      setSettings({
+        ...settings,
+        pinEnabled: false,
+      })
+      showSuccess(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
+      )
+    } catch {
+      showError(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.pinRemoveErrorToast'),
+      )
+    }
+  }
+
   async function handleAdvance() {
     const isValid = await trigger(setupStepFieldNames[currentStepId])
 
@@ -290,6 +347,7 @@ export function ProfileSetupScreen() {
           )
           setSettings({
             biometricsEnabled: values.biometricsEnabled,
+            pinEnabled: values.pinEnabled,
             pushNotificationsEnabled: values.pushNotificationsEnabled,
           })
           router.replace(homeRoutes.index)
@@ -660,38 +718,49 @@ export function ProfileSetupScreen() {
               </Text>
             </YStack>
 
-            {hasBiometricHardware ? (
-              <SurfaceCard>
-                <SeparatedStack>
-                  <YStack gap="$3">
-                    <SetupSectionLabel>
-                      {t(
-                        'tabScreens.profile.setup.steps.security.deviceSectionLabel',
-                      )}
-                    </SetupSectionLabel>
-                    <Controller
-                      control={control}
-                      name="biometricsEnabled"
-                      render={({ field }) => (
-                        <SettingsToggleRow
-                          checked={field.value}
-                          helperText={t(
-                            'tabScreens.profile.setup.steps.security.biometricsHelper',
-                          )}
-                          label={t('tabScreens.profile.privacy.biometricLabel')}
-                          onCheckedChange={(checked) => {
-                            void handleBiometricsToggleChange(
-                              checked,
-                              field.onChange,
-                            )
-                          }}
-                        />
-                      )}
-                    />
-                  </YStack>
-                </SeparatedStack>
-              </SurfaceCard>
-            ) : null}
+            <YStack gap="$3">
+              <SetupSectionLabel>
+                {t(
+                  'tabScreens.profile.setup.steps.security.deviceSectionLabel',
+                )}
+              </SetupSectionLabel>
+              {hasBiometricHardware ? (
+                <SurfaceCard>
+                  <SeparatedStack>
+                    <YStack gap="$3">
+                      <Controller
+                        control={control}
+                        name="biometricsEnabled"
+                        render={({ field }) => (
+                          <SettingsToggleRow
+                            checked={field.value}
+                            helperText={t(
+                              'tabScreens.profile.setup.steps.security.biometricsHelper',
+                            )}
+                            label={t(
+                              'tabScreens.profile.privacy.biometricLabel',
+                            )}
+                            onCheckedChange={(checked) => {
+                              void handleBiometricsToggleChange(
+                                checked,
+                                field.onChange,
+                              )
+                            }}
+                          />
+                        )}
+                      />
+                    </YStack>
+                  </SeparatedStack>
+                </SurfaceCard>
+              ) : null}
+              <PinPreferenceCard
+                copy={pinCopy}
+                enabled={settings.pinEnabled}
+                onRemovePin={() => handleRemovePin()}
+                onSavePin={handleSavePin}
+                testIDPrefix="profile-setup-pin"
+              />
+            </YStack>
 
             <YStack gap="$3">
               <SetupSectionLabel>

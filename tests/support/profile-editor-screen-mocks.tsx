@@ -140,6 +140,7 @@ export function resetProfileEditorScreenMocks() {
   mockUseDevicePrivacySettings.mockReturnValue({
     settings: {
       biometricsEnabled: false,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     },
     setSettings: mockSetSettings,

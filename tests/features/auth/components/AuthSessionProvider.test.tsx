@@ -12,9 +12,11 @@ import { TokenResponse } from 'expo-auth-session'
 import { Provider } from '@/components/Provider'
 import { AuthSessionProvider } from '@/features/auth/components/AuthSessionProvider'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
+import { saveStoredAppPin } from '@/features/auth/pin'
 import { useThemePreference } from '@/hooks/useAppPreferences'
 import {
   BIOMETRICS_ENABLED_STORAGE_KEY,
+  PIN_ENABLED_STORAGE_KEY,
   privacyPreferenceStorage,
   setStoredDevicePrivacySettings,
 } from '@/features/app-data/storage/device/privacy'
@@ -35,6 +37,7 @@ const { refreshAsync } = jest.requireMock('expo-auth-session')
 const { __setExpoConfig } = jest.requireMock('expo-constants')
 const { authenticateAsync, __setNextLocalAuthenticationResult } =
   jest.requireMock('expo-local-authentication')
+const { __setBiometricHardware } = jest.requireMock('expo-local-authentication')
 const { __getSecureStoreItem, __setSecureStoreItem } =
   jest.requireMock('expo-secure-store')
 const { addBreadcrumb, captureException } = jest.requireMock(
@@ -60,14 +63,17 @@ function AuthSessionHarness() {
     canAccessProtectedApp,
     completeSignIn,
     consumePendingBiometricPrompt,
+    isPinUnlockEnabled,
     isAppLocked,
     isAuthenticated,
     session,
     signOut,
     status,
     unlockWithBiometrics,
+    unlockWithPin,
   } = useAuthSession()
   const [pendingPromptResult, setPendingPromptResult] = useState('unknown')
+  const [pinUnlockResult, setPinUnlockResult] = useState('idle')
   const [signInResult, setSignInResult] = useState('idle')
   const [unlockResult, setUnlockResult] = useState('idle')
 
@@ -78,7 +84,9 @@ function AuthSessionHarness() {
       <Text>{`access:${session?.accessToken ?? 'none'}`}</Text>
       <Text>{`locked:${isAppLocked}`}</Text>
       <Text>{`can-access:${canAccessProtectedApp}`}</Text>
+      <Text>{`pin-enabled:${isPinUnlockEnabled}`}</Text>
       <Text>{`sign-in-result:${signInResult}`}</Text>
+      <Text>{`pin-unlock-result:${pinUnlockResult}`}</Text>
       <Text>{`unlock-result:${unlockResult}`}</Text>
       <Text>{`pending-prompt:${pendingPromptResult}`}</Text>
       <Text
@@ -104,6 +112,24 @@ function AuthSessionHarness() {
         }}
       >
         Unlock
+      </Text>
+      <Text
+        onPress={() => {
+          void unlockWithPin('1234').then((result) => {
+            setPinUnlockResult(result.success ? 'success' : result.reason)
+          })
+        }}
+      >
+        Unlock with PIN 1234
+      </Text>
+      <Text
+        onPress={() => {
+          void unlockWithPin('9999').then((result) => {
+            setPinUnlockResult(result.success ? 'success' : result.reason)
+          })
+        }}
+      >
+        Unlock with PIN 9999
       </Text>
       <Text
         onPress={() => {
@@ -256,6 +282,7 @@ describe('auth session provider', () => {
     })
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
@@ -269,6 +296,37 @@ describe('auth session provider', () => {
       expect(screen.getByText('status:authenticated')).toBeTruthy()
       expect(screen.getByText('locked:true')).toBeTruthy()
       expect(screen.getByText('can-access:false')).toBeTruthy()
+    })
+  })
+
+  it('restores a valid stored session in a locked state when only PIN unlock is enabled', async () => {
+    await saveStoredAuthSession({
+      accessToken: 'persisted-access-token',
+      expiresIn: 3600,
+      idToken: 'persisted-id-token',
+      issuedAt: Math.floor(Date.now() / 1000),
+      refreshToken: 'persisted-refresh-token',
+      scope: 'openid profile email',
+      tokenType: 'bearer',
+    })
+    await saveStoredAppPin('1234')
+    setStoredDevicePrivacySettings({
+      biometricsEnabled: false,
+      pinEnabled: true,
+      pushNotificationsEnabled: false,
+    })
+
+    render(
+      <AuthSessionProvider>
+        <AuthSessionHarness />
+      </AuthSessionProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('status:authenticated')).toBeTruthy()
+      expect(screen.getByText('locked:true')).toBeTruthy()
+      expect(screen.getByText('can-access:false')).toBeTruthy()
+      expect(screen.getByText('pin-enabled:true')).toBeTruthy()
     })
   })
 
@@ -322,7 +380,7 @@ describe('auth session provider', () => {
     })
   })
 
-  it('returns a successful biometric unlock result when biometrics are disabled', async () => {
+  it('returns a not-available biometric unlock result when biometric unlock is not configured', async () => {
     render(
       <AuthSessionProvider>
         <AuthSessionHarness />
@@ -347,8 +405,115 @@ describe('auth session provider', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText('unlock-result:success')).toBeTruthy()
+      expect(screen.getByText('unlock-result:not-available')).toBeTruthy()
     })
+  })
+
+  it('unlocks a restored PIN-only session after a valid PIN entry', async () => {
+    await saveStoredAuthSession({
+      accessToken: 'persisted-access-token',
+      expiresIn: 3600,
+      idToken: 'persisted-id-token',
+      issuedAt: Math.floor(Date.now() / 1000),
+      refreshToken: 'persisted-refresh-token',
+      scope: 'openid profile email',
+      tokenType: 'bearer',
+    })
+    await saveStoredAppPin('1234')
+    setStoredDevicePrivacySettings({
+      biometricsEnabled: false,
+      pinEnabled: true,
+      pushNotificationsEnabled: false,
+    })
+
+    render(
+      <AuthSessionProvider>
+        <AuthSessionHarness />
+      </AuthSessionProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('locked:true')).toBeTruthy()
+    })
+
+    await act(async () => {
+      fireEvent.press(screen.getByText('Unlock with PIN 1234'))
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('pin-unlock-result:success')).toBeTruthy()
+      expect(screen.getByText('locked:false')).toBeTruthy()
+      expect(screen.getByText('can-access:true')).toBeTruthy()
+    })
+  })
+
+  it('clears stale PIN protection when the stored PIN credential is missing', async () => {
+    await saveStoredAuthSession({
+      accessToken: 'persisted-access-token',
+      expiresIn: 3600,
+      idToken: 'persisted-id-token',
+      issuedAt: Math.floor(Date.now() / 1000),
+      refreshToken: 'persisted-refresh-token',
+      scope: 'openid profile email',
+      tokenType: 'bearer',
+    })
+    setStoredDevicePrivacySettings({
+      biometricsEnabled: false,
+      pinEnabled: true,
+      pushNotificationsEnabled: false,
+    })
+
+    render(
+      <AuthSessionProvider>
+        <AuthSessionHarness />
+      </AuthSessionProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('status:authenticated')).toBeTruthy()
+      expect(screen.getByText('locked:false')).toBeTruthy()
+      expect(screen.getByText('can-access:true')).toBeTruthy()
+      expect(screen.getByText('pin-enabled:false')).toBeTruthy()
+    })
+
+    expect(privacyPreferenceStorage.getString(PIN_ENABLED_STORAGE_KEY)).toBe(
+      'false',
+    )
+  })
+
+  it('clears stale biometric protection when hardware is unavailable', async () => {
+    __setBiometricHardware(false)
+
+    await saveStoredAuthSession({
+      accessToken: 'persisted-access-token',
+      expiresIn: 3600,
+      idToken: 'persisted-id-token',
+      issuedAt: Math.floor(Date.now() / 1000),
+      refreshToken: 'persisted-refresh-token',
+      scope: 'openid profile email',
+      tokenType: 'bearer',
+    })
+    setStoredDevicePrivacySettings({
+      biometricsEnabled: true,
+      pinEnabled: false,
+      pushNotificationsEnabled: false,
+    })
+
+    render(
+      <AuthSessionProvider>
+        <AuthSessionHarness />
+      </AuthSessionProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('status:authenticated')).toBeTruthy()
+      expect(screen.getByText('locked:false')).toBeTruthy()
+      expect(screen.getByText('can-access:true')).toBeTruthy()
+    })
+
+    expect(
+      privacyPreferenceStorage.getString(BIOMETRICS_ENABLED_STORAGE_KEY),
+    ).toBe('false')
   })
 
   it('consumes pending biometric prompts only once', async () => {
@@ -363,6 +528,7 @@ describe('auth session provider', () => {
     })
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
@@ -618,6 +784,7 @@ describe('auth session provider', () => {
     })
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
@@ -666,6 +833,7 @@ describe('auth session provider', () => {
     act(() => {
       setStoredDevicePrivacySettings({
         biometricsEnabled: true,
+        pinEnabled: false,
         pushNotificationsEnabled: false,
       })
     })
@@ -692,6 +860,7 @@ describe('auth session provider', () => {
     })
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
     __setNextLocalAuthenticationResult({
@@ -731,6 +900,7 @@ describe('auth session provider', () => {
     })
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
@@ -785,6 +955,7 @@ describe('auth session provider', () => {
     })
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
@@ -839,6 +1010,7 @@ describe('auth session provider', () => {
     })
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
@@ -882,6 +1054,7 @@ describe('auth session provider', () => {
   it('keeps the first sign-in unlocked when biometrics are enabled and preferences change', async () => {
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
@@ -925,6 +1098,7 @@ describe('auth session provider', () => {
   it('keeps the first sign-in unlocked after the app remounts from the auth browser redirect', async () => {
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
@@ -1124,6 +1298,7 @@ describe('auth session provider', () => {
     })
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
     authenticateAsync.mockRejectedValueOnce(new Error('biometric failed'))
@@ -1152,6 +1327,53 @@ describe('auth session provider', () => {
         message: 'app-lock.unlock.error',
       }),
     )
+  })
+
+  it('signs out after five consecutive invalid PIN attempts in one locked session', async () => {
+    await saveStoredAuthSession({
+      accessToken: 'persisted-access-token',
+      expiresIn: 3600,
+      idToken: 'persisted-id-token',
+      issuedAt: Math.floor(Date.now() / 1000),
+      refreshToken: 'persisted-refresh-token',
+      scope: 'openid profile email',
+      tokenType: 'bearer',
+    })
+    await saveStoredAppPin('1234')
+    setStoredDevicePrivacySettings({
+      biometricsEnabled: false,
+      pinEnabled: true,
+      pushNotificationsEnabled: false,
+    })
+
+    render(
+      <AuthSessionProvider>
+        <AuthSessionHarness />
+      </AuthSessionProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('locked:true')).toBeTruthy()
+    })
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await act(async () => {
+        fireEvent.press(screen.getByText('Unlock with PIN 9999'))
+      })
+    }
+
+    await waitFor(async () => {
+      expect(
+        screen.getByText('pin-unlock-result:too-many-attempts'),
+      ).toBeTruthy()
+      expect(screen.getByText('status:anonymous')).toBeTruthy()
+      expect(await readStoredAuthSession()).toBeNull()
+    })
+
+    expect(privacyPreferenceStorage.getString(PIN_ENABLED_STORAGE_KEY)).toBe(
+      'false',
+    )
+    expect(__getSecureStoreItem('auth.pinCredential')).toBeNull()
   })
 
   it('clears local session artifacts when Keycloak logout fails', async () => {
@@ -1286,7 +1508,7 @@ describe('auth session provider', () => {
     )
   })
 
-  it('resets the legacy placeholder biometrics preference during migration', () => {
+  it('preserves stored biometric preferences and adds the pin preference during migration', () => {
     privacyPreferenceStorage.set(BIOMETRICS_ENABLED_STORAGE_KEY, 'true')
 
     render(
@@ -1297,6 +1519,9 @@ describe('auth session provider', () => {
 
     expect(
       privacyPreferenceStorage.getString(BIOMETRICS_ENABLED_STORAGE_KEY),
-    ).toBe('false')
+    ).toBe('true')
+    expect(privacyPreferenceStorage.getString(PIN_ENABLED_STORAGE_KEY)).toBe(
+      'false',
+    )
   })
 })

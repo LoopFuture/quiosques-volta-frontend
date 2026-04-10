@@ -15,12 +15,18 @@ import {
   consumeStoredInitialBiometricLockBypass,
   markNextInitialBiometricLockToBeSkipped,
 } from '@/features/app-data/storage/device/auth'
-import { useDevicePrivacySettings } from '@/features/app-data/storage/device/privacy'
+import {
+  isDeviceProtectionEnabled,
+  useDevicePrivacySettings,
+} from '@/features/app-data/storage/device/privacy'
 import {
   createDiagnosticTimer,
   recordDiagnosticEvent,
 } from '@/features/app-data/monitoring'
-import { authenticateWithAvailableBiometrics } from '@/features/auth/biometrics'
+import {
+  authenticateWithAvailableBiometrics,
+  getBiometricHardwareAvailability,
+} from '@/features/auth/biometrics'
 import {
   createKeycloakDiscoveryDocument,
   getKeycloakRuntimeConfig,
@@ -44,6 +50,11 @@ import {
   readStoredAuthSession,
   saveStoredAuthSession,
 } from '@/features/auth/storage'
+import {
+  clearStoredAppPin,
+  hasStoredAppPin,
+  verifyStoredAppPin,
+} from '@/features/auth/pin'
 
 export type BiometricUnlockResult =
   | {
@@ -55,18 +66,30 @@ export type BiometricUnlockResult =
       success: false
     }
 
+export type PinUnlockResult =
+  | {
+      success: true
+    }
+  | {
+      reason: 'failed' | 'invalid-pin' | 'not-configured' | 'too-many-attempts'
+      success: false
+    }
+
 export type AuthSessionContextValue = {
   appLockRevision: number
   canAccessProtectedApp: boolean
   completeSignIn: (tokenResponse: TokenResponse) => Promise<void>
   consumePendingBiometricPrompt: () => boolean
   identity: AppAuthIdentity | null
+  isBiometricUnlockEnabled: boolean
   isAppLocked: boolean
   isAuthenticated: boolean
+  isPinUnlockEnabled: boolean
   session: AppAuthSession | null
   signOut: () => Promise<void>
   status: AuthSessionStatus
   unlockWithBiometrics: () => Promise<BiometricUnlockResult>
+  unlockWithPin: (pin: string) => Promise<PinUnlockResult>
 }
 export const AuthSessionContext = createContext<AuthSessionContextValue | null>(
   null,
@@ -75,6 +98,8 @@ type AuthSessionProviderProps = {
   children: ReactNode
   onSessionCleared?: () => void | Promise<void>
 }
+
+const MAX_PIN_UNLOCK_ATTEMPTS = 5
 
 function describeStoredSession(session: StoredAuthSession | null | undefined) {
   return {
@@ -93,27 +118,80 @@ export function AuthSessionProvider({
   onSessionCleared,
 }: AuthSessionProviderProps) {
   const { t } = useTranslation()
-  const { settings } = useDevicePrivacySettings()
+  const { settings, setSettings } = useDevicePrivacySettings()
   const runtimeConfig = getKeycloakRuntimeConfig()
   const discovery = createKeycloakDiscoveryDocument(runtimeConfig.issuerUrl)
   const [status, setStatus] = useState<AuthSessionStatus>('hydrating')
   const [session, setSession] = useState<AppAuthSession | null>(null)
   const [isAppLocked, setIsAppLocked] = useState(false)
+  const [hasBiometricHardware, setHasBiometricHardware] = useState<
+    boolean | null
+  >(null)
+  const [hasStoredPinCredential, setHasStoredPinCredential] = useState<
+    boolean | null
+  >(null)
   const [appLockRevision, setAppLockRevision] = useState(0)
   const appLockRef = useRef(false)
   const isMountedRef = useRef(false)
   const hasHydratedSessionRef = useRef(false)
   const pendingBiometricPromptRef = useRef(false)
-  const shouldLockOnInitialHydrationRef = useRef(settings.biometricsEnabled)
+  const pinUnlockAttemptsRef = useRef(0)
   const storedSessionRef = useRef<StoredAuthSession | null>(null)
+  const reconcileLocalProtectionSettings = useCallback(
+    async (currentSettings = settings) => {
+      const [resolvedHasBiometricHardware, resolvedHasStoredPinCredential] =
+        await Promise.all([
+          currentSettings.biometricsEnabled
+            ? getBiometricHardwareAvailability().catch(() => false)
+            : Promise.resolve(hasBiometricHardware),
+          currentSettings.pinEnabled
+            ? hasStoredAppPin().catch(() => false)
+            : Promise.resolve(false),
+        ])
+
+      if (isMountedRef.current) {
+        if (typeof resolvedHasBiometricHardware === 'boolean') {
+          setHasBiometricHardware(resolvedHasBiometricHardware)
+        }
+
+        setHasStoredPinCredential(resolvedHasStoredPinCredential)
+      }
+
+      const nextSettings = {
+        ...currentSettings,
+        biometricsEnabled:
+          currentSettings.biometricsEnabled &&
+          resolvedHasBiometricHardware === true,
+        pinEnabled:
+          currentSettings.pinEnabled && resolvedHasStoredPinCredential === true,
+      }
+
+      if (
+        nextSettings.biometricsEnabled !== currentSettings.biometricsEnabled ||
+        nextSettings.pinEnabled !== currentSettings.pinEnabled
+      ) {
+        setSettings(nextSettings)
+      }
+
+      return nextSettings
+    },
+    [hasBiometricHardware, setSettings, settings],
+  )
+  const isBiometricUnlockEnabled =
+    settings.biometricsEnabled && hasBiometricHardware === true
+  const isPinUnlockEnabled =
+    settings.pinEnabled && hasStoredPinCredential === true
+  const hasLocalProtection = isBiometricUnlockEnabled || isPinUnlockEnabled
   const setAppLockState = useCallback((nextValue: boolean) => {
     if (nextValue && !appLockRef.current) {
       setAppLockRevision((currentValue) => currentValue + 1)
       pendingBiometricPromptRef.current = true
+      pinUnlockAttemptsRef.current = 0
     }
 
     if (!nextValue) {
       pendingBiometricPromptRef.current = false
+      pinUnlockAttemptsRef.current = 0
     }
 
     appLockRef.current = nextValue
@@ -395,10 +473,10 @@ export function AuthSessionProvider({
         }
       }
 
-      if (!settings.biometricsEnabled) {
-        setAppLockState(false)
+      if (!isBiometricUnlockEnabled) {
         return {
-          success: true,
+          reason: 'not-available',
+          success: false,
         }
       }
 
@@ -465,7 +543,123 @@ export function AuthSessionProvider({
           success: false,
         }
       }
-    }, [setAppLockState, settings.biometricsEnabled, t])
+    }, [isBiometricUnlockEnabled, setAppLockState, t])
+  const unlockWithPin = useCallback(
+    async (pin: string): Promise<PinUnlockResult> => {
+      if (!storedSessionRef.current) {
+        return {
+          reason: 'failed',
+          success: false,
+        }
+      }
+
+      if (!isPinUnlockEnabled) {
+        return {
+          reason: 'not-configured',
+          success: false,
+        }
+      }
+
+      const getDurationMs = createDiagnosticTimer()
+
+      recordDiagnosticEvent({
+        details: {
+          method: 'pin',
+        },
+        domain: 'auth',
+        operation: 'app-lock',
+        phase: 'unlock',
+        status: 'start',
+      })
+
+      try {
+        const isPinValid = await verifyStoredAppPin(pin)
+
+        if (isPinValid) {
+          setAppLockState(false)
+          recordDiagnosticEvent({
+            details: {
+              method: 'pin',
+            },
+            domain: 'auth',
+            durationMs: getDurationMs(),
+            operation: 'app-lock',
+            phase: 'unlock',
+            status: 'success',
+          })
+
+          return {
+            success: true,
+          }
+        }
+
+        pinUnlockAttemptsRef.current += 1
+
+        if (pinUnlockAttemptsRef.current >= MAX_PIN_UNLOCK_ATTEMPTS) {
+          await clearStoredAppPin()
+          setSettings({
+            ...settings,
+            pinEnabled: false,
+          })
+          await signOut()
+          recordDiagnosticEvent({
+            details: {
+              attempts: pinUnlockAttemptsRef.current,
+              method: 'pin',
+              reason: 'too-many-attempts',
+            },
+            domain: 'auth',
+            durationMs: getDurationMs(),
+            operation: 'app-lock',
+            phase: 'unlock',
+            status: 'info',
+          })
+
+          return {
+            reason: 'too-many-attempts',
+            success: false,
+          }
+        }
+
+        recordDiagnosticEvent({
+          details: {
+            attempts: pinUnlockAttemptsRef.current,
+            method: 'pin',
+            reason: 'invalid-pin',
+          },
+          domain: 'auth',
+          durationMs: getDurationMs(),
+          operation: 'app-lock',
+          phase: 'unlock',
+          status: 'info',
+        })
+
+        return {
+          reason: 'invalid-pin',
+          success: false,
+        }
+      } catch (error) {
+        recordDiagnosticEvent({
+          captureError: true,
+          details: {
+            method: 'pin',
+          },
+          domain: 'auth',
+          durationMs: getDurationMs(),
+          error,
+          operation: 'app-lock',
+          phase: 'unlock',
+          status: 'error',
+        })
+
+        return {
+          reason: 'failed',
+          success: false,
+        }
+      }
+    },
+    [isPinUnlockEnabled, setAppLockState, setSettings, settings, signOut],
+  )
   const refreshSessionIfNeeded = useCallback(
     async ({
       allowRefreshingStatus,
@@ -532,22 +726,25 @@ export function AuthSessionProvider({
     ],
   )
   useEffect(() => {
-    if (!session || !settings.biometricsEnabled) {
+    if (!session || !hasLocalProtection) {
       setAppLockState(false)
     }
-  }, [session, setAppLockState, settings.biometricsEnabled])
+  }, [hasLocalProtection, session, setAppLockState])
   useEffect(() => {
     isMountedRef.current = true
+
+    void reconcileLocalProtectionSettings()
+
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [reconcileLocalProtectionSettings])
+  useEffect(() => {
     if (hasHydratedSessionRef.current) {
-      return () => {
-        isMountedRef.current = false
-      }
+      return
     }
 
     hasHydratedSessionRef.current = true
-    const shouldLockOnHydrate =
-      shouldLockOnInitialHydrationRef.current &&
-      !consumeStoredInitialBiometricLockBypass()
 
     async function hydrateSession() {
       const getDurationMs = createDiagnosticTimer()
@@ -560,6 +757,11 @@ export function AuthSessionProvider({
       })
 
       try {
+        const nextLocalProtectionSettings =
+          await reconcileLocalProtectionSettings()
+        const shouldLockOnHydrate =
+          isDeviceProtectionEnabled(nextLocalProtectionSettings) &&
+          !consumeStoredInitialBiometricLockBypass()
         const storedSession = await readStoredAuthSession()
         if (!isMountedRef.current || !storedSession) {
           if (isMountedRef.current) {
@@ -649,10 +851,7 @@ export function AuthSessionProvider({
       }
     }
     void hydrateSession()
-    return () => {
-      isMountedRef.current = false
-    }
-  }, [])
+  }, [reconcileLocalProtectionSettings])
   useEffect(() => {
     const subscription = AppState.addEventListener(
       'change',
@@ -670,9 +869,9 @@ export function AuthSessionProvider({
     return () => {
       subscription.remove()
     }
-  }, [refreshSessionIfNeeded, setAppLockState, settings.biometricsEnabled])
+  }, [refreshSessionIfNeeded])
   const canAccessProtectedApp =
-    Boolean(session) && (!settings.biometricsEnabled || !isAppLocked)
+    Boolean(session) && (!hasLocalProtection || !isAppLocked)
   const value = useMemo<AuthSessionContextValue>(
     () => ({
       appLockRevision,
@@ -680,23 +879,29 @@ export function AuthSessionProvider({
       completeSignIn,
       consumePendingBiometricPrompt,
       identity: getAuthSessionIdentity(session),
+      isBiometricUnlockEnabled,
       isAppLocked,
       isAuthenticated: Boolean(session),
+      isPinUnlockEnabled,
       session,
       signOut,
       status,
       unlockWithBiometrics,
+      unlockWithPin,
     }),
     [
       appLockRevision,
       canAccessProtectedApp,
       completeSignIn,
       consumePendingBiometricPrompt,
+      isBiometricUnlockEnabled,
       isAppLocked,
+      isPinUnlockEnabled,
       session,
       signOut,
       status,
       unlockWithBiometrics,
+      unlockWithPin,
     ],
   )
   return (

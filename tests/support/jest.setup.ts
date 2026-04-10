@@ -63,6 +63,39 @@ jest.mock('expo-secure-store', () => {
   }
 })
 
+jest.mock('expo-crypto', () => {
+  const { createHash } = jest.requireActual('node:crypto') as {
+    createHash: (algorithm: string) => {
+      digest: (encoding: 'hex') => string
+      update: (value: string) => { digest: (encoding: 'hex') => string }
+    }
+  }
+  let randomUuidCounter = 0
+
+  const digestStringAsync = jest.fn(async (_algorithm: string, value: string) =>
+    createHash('sha256').update(value).digest('hex'),
+  )
+  const randomUUID = jest.fn(() => {
+    randomUuidCounter += 1
+
+    return `00000000-0000-4000-8000-${String(randomUuidCounter).padStart(12, '0')}`
+  })
+
+  return {
+    __esModule: true,
+    __resetExpoCryptoMock: () => {
+      randomUuidCounter = 0
+      digestStringAsync.mockClear()
+      randomUUID.mockClear()
+    },
+    CryptoDigestAlgorithm: {
+      SHA256: 'SHA-256',
+    },
+    digestStringAsync,
+    randomUUID,
+  }
+})
+
 jest.mock('react-native-mmkv', () => {
   const React = jest.requireActual('react')
   const instances: Map<string, any> = new Map()
@@ -699,6 +732,9 @@ const originalWarn = console.warn.bind(console)
 beforeEach(() => {
   const { __resetAuthSessionMock } = jest.requireMock('expo-auth-session')
   const { __resetExpoDeviceMock } = jest.requireMock('expo-device')
+  const expoCryptoMock = jest.requireMock('expo-crypto') as {
+    __resetExpoCryptoMock?: () => void
+  }
   const { __resetExpoConstantsMock } = jest.requireMock('expo-constants')
   const { __resetExpoNetworkMock } = jest.requireMock('expo-network')
   const { __resetFlashListMock } = jest.requireMock('@shopify/flash-list')
@@ -712,6 +748,7 @@ beforeEach(() => {
   const { __resetSecureStoreMock } = jest.requireMock('expo-secure-store')
 
   __resetAuthSessionMock()
+  expoCryptoMock.__resetExpoCryptoMock?.()
   __resetExpoDeviceMock()
   __resetExpoConstantsMock()
   __resetExpoNetworkMock()

@@ -10,6 +10,7 @@ import {
 
 const currentProfileSetupPreferencesSchema = z.object({
   biometricsEnabled: z.boolean(),
+  pinEnabled: z.boolean(),
   pushNotificationsEnabled: z.boolean(),
 })
 
@@ -27,6 +28,7 @@ export const profileSetupPreferencesSchema = z
   ])
   .transform((preferences) => ({
     biometricsEnabled: preferences.biometricsEnabled,
+    pinEnabled: 'pinEnabled' in preferences ? preferences.pinEnabled : false,
     pushNotificationsEnabled:
       'pushNotificationsEnabled' in preferences
         ? preferences.pushNotificationsEnabled
@@ -139,6 +141,7 @@ export function getProfileSetupSnapshotFromProfile(
     },
     preferences: {
       biometricsEnabled: deviceSettings.biometricsEnabled,
+      pinEnabled: deviceSettings.pinEnabled,
       pushNotificationsEnabled: deviceSettings.pushNotificationsEnabled,
     },
   })

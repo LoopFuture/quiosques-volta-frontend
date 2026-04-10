@@ -7,6 +7,7 @@ import {
   authenticateWithAvailableBiometrics,
   useBiometricHardwareAvailability,
 } from '@/features/auth/biometrics'
+import { clearStoredAppPin, saveStoredAppPin } from '@/features/auth/pin'
 import { Text, YStack } from 'tamagui'
 import {
   QueryErrorState,
@@ -34,6 +35,7 @@ import {
   SettingsSectionHeader,
   SettingsToggleRow,
 } from '../components/ProfilePreferenceControls'
+import { PinPreferenceCard } from '../components/PinPreferenceCard'
 
 function getBiometricErrorToast(
   reason: 'cancelled' | 'failed' | 'not-available' | 'not-enrolled',
@@ -164,6 +166,20 @@ function ProfilePrivacyForm({
         token,
       }),
   } as const
+  const pinCopy = {
+    cancelLabel: t('tabScreens.profile.privacy.pinCancelLabel'),
+    changeLabel: t('tabScreens.profile.privacy.pinChangeLabel'),
+    confirmPinLabel: t('tabScreens.profile.privacy.pinConfirmLabel'),
+    enabledHelper: t('tabScreens.profile.privacy.pinEnabledHelper'),
+    invalidPinError: t('tabScreens.profile.privacy.pinInvalidError'),
+    label: t('tabScreens.profile.privacy.pinLabel'),
+    mismatchError: t('tabScreens.profile.privacy.pinMismatchError'),
+    pinHelper: t('tabScreens.profile.privacy.pinHelper'),
+    pinLabel: t('tabScreens.profile.privacy.pinInputLabel'),
+    removeLabel: t('tabScreens.profile.privacy.pinRemoveLabel'),
+    saveLabel: t('tabScreens.profile.privacy.pinSaveLabel'),
+    setLabel: t('tabScreens.profile.privacy.pinSetLabel'),
+  } as const
 
   async function handlePushNotificationsToggleChange(nextValue: boolean) {
     if (!nextValue) {
@@ -246,6 +262,47 @@ function ProfilePrivacyForm({
     )
   }
 
+  async function handleSavePin(pin: string) {
+    try {
+      await saveStoredAppPin(pin)
+      setValue('pinEnabled', true)
+      setSettings({
+        ...settings,
+        pinEnabled: true,
+      })
+      showSuccess(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
+      )
+    } catch {
+      showError(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.pinSaveErrorToast'),
+      )
+      throw new Error('pin-save-failed')
+    }
+  }
+
+  async function handleRemovePin() {
+    try {
+      await clearStoredAppPin()
+      setValue('pinEnabled', false)
+      setSettings({
+        ...settings,
+        pinEnabled: false,
+      })
+      showSuccess(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
+      )
+    } catch {
+      showError(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.pinRemoveErrorToast'),
+      )
+    }
+  }
+
   function handleEmailAlertsToggleChange(nextValue: boolean) {
     setValue('alertsEnabled', nextValue)
     updatePreferencesMutation.mutate(
@@ -275,12 +332,12 @@ function ProfilePrivacyForm({
 
   return (
     <YStack gap="$4">
-      {hasBiometricHardware ? (
-        <YStack gap="$3">
-          <SettingsSectionHeader
-            helperText={t('tabScreens.profile.privacy.deviceSectionHelper')}
-            title={t('tabScreens.profile.privacy.deviceSectionTitle')}
-          />
+      <YStack gap="$3">
+        <SettingsSectionHeader
+          helperText={t('tabScreens.profile.privacy.deviceSectionHelper')}
+          title={t('tabScreens.profile.privacy.deviceSectionTitle')}
+        />
+        {hasBiometricHardware ? (
           <SurfaceCard>
             <Controller
               control={control}
@@ -297,8 +354,15 @@ function ProfilePrivacyForm({
               )}
             />
           </SurfaceCard>
-        </YStack>
-      ) : null}
+        ) : null}
+        <PinPreferenceCard
+          copy={pinCopy}
+          enabled={settings.pinEnabled}
+          onRemovePin={() => handleRemovePin()}
+          onSavePin={handleSavePin}
+          testIDPrefix="profile-privacy-pin"
+        />
+      </YStack>
 
       <YStack gap="$3">
         <SettingsSectionHeader

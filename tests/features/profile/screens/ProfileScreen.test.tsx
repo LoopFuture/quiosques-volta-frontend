@@ -115,6 +115,7 @@ describe('ProfileScreen', () => {
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: false,
       },
     })
@@ -222,6 +223,7 @@ describe('ProfileScreen', () => {
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: true,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       },
     })

@@ -130,6 +130,7 @@ describe('ProfileSetupScreen', () => {
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: false,
       },
       setSettings,
@@ -214,6 +215,7 @@ describe('ProfileSetupScreen', () => {
           },
           preferences: {
             biometricsEnabled: true,
+            pinEnabled: false,
             pushNotificationsEnabled: true,
           },
         },
@@ -223,6 +225,7 @@ describe('ProfileSetupScreen', () => {
 
     expect(setSettings).toHaveBeenLastCalledWith({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: true,
     })
     expect(mockShowSuccess).toHaveBeenCalledWith(
@@ -239,6 +242,7 @@ describe('ProfileSetupScreen', () => {
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       },
       setSettings,
@@ -343,6 +347,7 @@ describe('ProfileSetupScreen', () => {
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       },
       setSettings,
@@ -357,6 +362,7 @@ describe('ProfileSetupScreen', () => {
         i18n.t('tabScreens.profile.privacy.biometricLabel'),
       ),
     ).toBeNull()
+    expect(screen.getByTestId('profile-setup-pin-set-button')).toBeTruthy()
 
     fireEvent.press(
       screen.getByLabelText(
@@ -371,11 +377,90 @@ describe('ProfileSetupScreen', () => {
     })
   })
 
+  it('lets the user set a PIN during setup and submits it in the snapshot', async () => {
+    renderWithProvider(<ProfileSetupScreen />)
+
+    await advanceToSecurityStep()
+
+    fireEvent.press(screen.getByTestId('profile-setup-pin-set-button'))
+    fireEvent.changeText(
+      screen.getByTestId('profile-setup-pin-pin-input'),
+      '1234',
+    )
+    fireEvent.changeText(
+      screen.getByTestId('profile-setup-pin-confirm-pin-input'),
+      '1234',
+    )
+    fireEvent.press(screen.getByTestId('profile-setup-pin-save-button'))
+
+    await waitFor(() => {
+      expect(setSettings).toHaveBeenCalledWith({
+        biometricsEnabled: false,
+        pinEnabled: true,
+        pushNotificationsEnabled: false,
+      })
+    })
+
+    fireEvent.press(screen.getByTestId('profile-setup-finish-button'))
+
+    await waitFor(() => {
+      expect(mutateAsync).toHaveBeenCalledWith({
+        snapshot: {
+          payments: {
+            accountHolderName: 'Joao Ferreira',
+            iban: 'PT50000201231234567890154',
+          },
+          personal: {
+            email: 'joao@volta.pt',
+            name: 'Joao Ferreira',
+            nif: '123456789',
+            phoneNumber: '+351912345678',
+          },
+          preferences: {
+            biometricsEnabled: false,
+            pinEnabled: true,
+            pushNotificationsEnabled: false,
+          },
+        },
+      })
+    })
+  })
+
+  it('lets the user remove an existing PIN during setup', async () => {
+    mockUseDevicePrivacySettings.mockReturnValue({
+      settings: {
+        biometricsEnabled: false,
+        pinEnabled: true,
+        pushNotificationsEnabled: false,
+      },
+      setSettings,
+    })
+
+    renderWithProvider(<ProfileSetupScreen />)
+
+    await advanceToSecurityStep()
+
+    fireEvent.press(screen.getByTestId('profile-setup-pin-remove-button'))
+
+    await waitFor(() => {
+      expect(setSettings).toHaveBeenCalledWith({
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      })
+      expect(mockShowSuccess).toHaveBeenCalledWith(
+        i18n.t('tabScreens.profile.privacy.pinLabel'),
+        i18n.t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
+      )
+    })
+  })
+
   it('submits push notifications as disabled when permission is not granted on entry', async () => {
     mockUseBiometricHardwareAvailability.mockReturnValue(false)
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       },
       setSettings,
@@ -410,6 +495,7 @@ describe('ProfileSetupScreen', () => {
           },
           preferences: {
             biometricsEnabled: false,
+            pinEnabled: false,
             pushNotificationsEnabled: false,
           },
         },
@@ -423,6 +509,7 @@ describe('ProfileSetupScreen', () => {
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: true,
+        pinEnabled: false,
         pushNotificationsEnabled: false,
       },
       setSettings,
@@ -441,6 +528,7 @@ describe('ProfileSetupScreen', () => {
     await waitFor(() => {
       expect(setSettings).toHaveBeenCalledWith({
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: false,
       })
       expect(mockShowSuccess).toHaveBeenCalledWith(

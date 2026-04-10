@@ -31,6 +31,7 @@ export type ProfileSetupFormValues = {
   iban: string
   name: string
   nif: string
+  pinEnabled: boolean
   phoneNumber: string
   pushNotificationsEnabled: boolean
 }
@@ -95,6 +96,7 @@ export function getProfileSetupFormSchema(
         (value) => normalizeNif(value).length === 9,
         validation.personal.nifInvalid,
       ),
+    pinEnabled: z.boolean(),
     pushNotificationsEnabled: z.boolean(),
   })
 }
@@ -109,6 +111,7 @@ export function getProfileSetupFormDefaultValues(
     iban: snapshot.payments.iban,
     name: snapshot.personal.name,
     nif: snapshot.personal.nif,
+    pinEnabled: snapshot.preferences.pinEnabled,
     phoneNumber: snapshot.personal.phoneNumber,
     pushNotificationsEnabled: snapshot.preferences.pushNotificationsEnabled,
   }
@@ -130,6 +133,7 @@ export function toProfileSetupSnapshot(
     },
     preferences: {
       biometricsEnabled: values.biometricsEnabled,
+      pinEnabled: values.pinEnabled,
       pushNotificationsEnabled: values.pushNotificationsEnabled,
     },
   })

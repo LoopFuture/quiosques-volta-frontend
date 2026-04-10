@@ -11,12 +11,15 @@ describe('useAuthSession', () => {
     completeSignIn: jest.fn(),
     consumePendingBiometricPrompt: jest.fn(),
     identity: null,
+    isBiometricUnlockEnabled: false,
     isAppLocked: false,
     isAuthenticated: true,
+    isPinUnlockEnabled: false,
     session: null,
     signOut: jest.fn(),
     status: 'authenticated',
     unlockWithBiometrics: jest.fn(),
+    unlockWithPin: jest.fn(),
   }
 
   beforeEach(() => {

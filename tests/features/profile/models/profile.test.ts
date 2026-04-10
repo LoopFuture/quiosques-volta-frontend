@@ -90,6 +90,7 @@ describe('profile models and forms', () => {
   it('builds localized profile hub, readiness, and summary sections', () => {
     const deviceSettings = {
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: true,
     }
     const hubSections = getProfileHubSections(t, {
@@ -158,6 +159,7 @@ describe('profile models and forms', () => {
   it('omits biometric review rows when the device does not support biometrics and normalizes legacy setup preferences', () => {
     const deviceSettings = {
       biometricsEnabled: false,
+      pinEnabled: false,
       pushNotificationsEnabled: true,
     }
     const hubSections = getProfileHubSections(t, {
@@ -197,16 +199,17 @@ describe('profile models and forms', () => {
         (row) => row.label === t('tabScreens.profile.hub.rows.biometricsTitle'),
       ),
     ).toBeUndefined()
-    expect(readiness.badgeTone).toBe('success')
-    expect(
-      readiness.items.find((item) => item.id === 'security'),
-    ).toBeUndefined()
+    expect(readiness.badgeTone).toBe('warning')
+    expect(readiness.items.find((item) => item.id === 'security')?.value).toBe(
+      t('tabScreens.profile.hub.readiness.securityReviewPinValue'),
+    )
     expect(snapshot.preferences.pushNotificationsEnabled).toBe(false)
   })
 
   it('builds defaults and normalizes personal, payments, privacy, app settings, and setup payloads', () => {
     const setupSnapshot = getProfileSetupSnapshotFromProfile(profile, {
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
@@ -225,12 +228,14 @@ describe('profile models and forms', () => {
         alertsEmail: ' joao.ferreira@volta.pt ',
         alertsEnabled: true,
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       }),
     ).toEqual({
       alertsEmail: 'joao.ferreira@volta.pt',
       alertsEnabled: true,
       biometricsEnabled: false,
+      pinEnabled: false,
       pushNotificationsEnabled: true,
     })
     expect(
@@ -249,6 +254,7 @@ describe('profile models and forms', () => {
       iban: '',
       name: 'Joao Ferreira',
       nif: '123456789',
+      pinEnabled: false,
       phoneNumber: '+351911223344',
       pushNotificationsEnabled: false,
     })
@@ -279,6 +285,7 @@ describe('profile models and forms', () => {
         alertsEmail: ' alerts@volta.pt ',
         alertsEnabled: true,
         biometricsEnabled: true,
+        pinEnabled: false,
         pushNotificationsEnabled: false,
       }),
     ).toEqual({
@@ -302,6 +309,7 @@ describe('profile models and forms', () => {
         iban: 'pt50 0007 0000 1111 2222 33',
         name: ' Joao Ferreira ',
         nif: '123 456 789',
+        pinEnabled: false,
         phoneNumber: ' +351 911 223 344 ',
         pushNotificationsEnabled: false,
       }),
@@ -318,6 +326,7 @@ describe('profile models and forms', () => {
       },
       preferences: {
         biometricsEnabled: true,
+        pinEnabled: false,
         pushNotificationsEnabled: false,
       },
     })
@@ -345,6 +354,7 @@ describe('profile models and forms', () => {
         alertsEmail: 'not-an-email',
         alertsEnabled: true,
         biometricsEnabled: true,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       }).success,
     ).toBe(false)
@@ -402,16 +412,19 @@ describe('profile models and forms', () => {
 
     expect(getDefaultDevicePrivacySettings()).toEqual({
       biometricsEnabled: false,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
     setStoredDevicePrivacySettings({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
 
     expect(getStoredDevicePrivacySettings()).toEqual({
       biometricsEnabled: true,
+      pinEnabled: false,
       pushNotificationsEnabled: false,
     })
     expect(seedState.profile.onboarding.status).toBe('in_progress')
@@ -464,6 +477,7 @@ describe('profile models and forms', () => {
     expect(
       getProfileSetupSnapshotFromProfile(nullableProfile, {
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       }),
     ).toEqual({
@@ -479,6 +493,7 @@ describe('profile models and forms', () => {
       },
       preferences: {
         biometricsEnabled: false,
+        pinEnabled: false,
         pushNotificationsEnabled: true,
       },
     })

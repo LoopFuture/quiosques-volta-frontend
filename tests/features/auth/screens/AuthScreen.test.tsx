@@ -19,6 +19,7 @@ import { createMockExpoConfig } from '@tests/support/expo-config'
 const mockCompleteSignIn = jest.fn()
 const mockSignOut = jest.fn()
 const mockUnlockWithBiometrics = jest.fn()
+const mockUnlockWithPin = jest.fn()
 
 jest.mock('expo-router', () => {
   const { createExpoRouterMock } = jest.requireActual(
@@ -53,12 +54,17 @@ function createAuthSessionMock(overrides: Record<string, unknown> = {}) {
     appLockRevision: 0,
     completeSignIn: mockCompleteSignIn.mockResolvedValue(undefined),
     consumePendingBiometricPrompt: jest.fn(() => false),
+    isBiometricUnlockEnabled: false,
     isAppLocked: false,
     isAuthenticated: false,
+    isPinUnlockEnabled: false,
     session: null,
     signOut: mockSignOut.mockResolvedValue(undefined),
     status: 'anonymous',
     unlockWithBiometrics: mockUnlockWithBiometrics.mockResolvedValue({
+      success: true,
+    }),
+    unlockWithPin: mockUnlockWithPin.mockResolvedValue({
       success: true,
     }),
     ...overrides,
@@ -270,6 +276,7 @@ describe('auth screen', () => {
       createAuthSessionMock({
         appLockRevision: 1,
         consumePendingBiometricPrompt: jest.fn(() => true),
+        isBiometricUnlockEnabled: true,
         isAppLocked: true,
         isAuthenticated: true,
         session: { accessToken: 'token', expiresAt: null },
@@ -289,6 +296,85 @@ describe('auth screen', () => {
     })
   })
 
+  it('renders the PIN unlock controls on the shared auth surface when the session is locked', () => {
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        consumePendingBiometricPrompt: jest.fn(() => false),
+        isAppLocked: true,
+        isAuthenticated: true,
+        isPinUnlockEnabled: true,
+        session: { accessToken: 'token', expiresAt: null },
+        status: 'authenticated',
+      }),
+    )
+
+    renderWithProvider(<AuthScreen />)
+
+    expect(screen.getByTestId('auth-pin-input')).toBeTruthy()
+    expect(screen.getByTestId('auth-pin-button')).toBeTruthy()
+    expect(screen.queryByTestId('auth-biometric-button')).toBeNull()
+  })
+
+  it('renders both biometric and PIN unlock controls when both unlock methods are enabled', () => {
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        consumePendingBiometricPrompt: jest.fn(() => false),
+        isAppLocked: true,
+        isAuthenticated: true,
+        isBiometricUnlockEnabled: true,
+        isPinUnlockEnabled: true,
+        session: { accessToken: 'token', expiresAt: null },
+        status: 'authenticated',
+      }),
+    )
+
+    renderWithProvider(<AuthScreen />)
+
+    expect(screen.getByTestId('auth-biometric-button')).toBeTruthy()
+    expect(screen.getByTestId('auth-pin-input')).toBeTruthy()
+    expect(screen.getByTestId('auth-pin-button')).toBeTruthy()
+  })
+
+  it.each([
+    ['invalid-pin', 'auth.lock.invalidPinError'],
+    ['too-many-attempts', 'auth.lock.tooManyPinAttemptsError'],
+  ] as const)(
+    'shows the translated PIN unlock error for %s',
+    async (reason, translationKey) => {
+      const unlockWithPin = jest.fn().mockResolvedValue({
+        reason,
+        success: false,
+      })
+
+      mockUseAuthSession.mockReturnValue(
+        createAuthSessionMock({
+          consumePendingBiometricPrompt: jest.fn(() => false),
+          isAppLocked: true,
+          isAuthenticated: true,
+          isPinUnlockEnabled: true,
+          session: { accessToken: 'token', expiresAt: null },
+          status: 'authenticated',
+          unlockWithPin,
+        }),
+      )
+
+      renderWithProvider(<AuthScreen />)
+
+      await act(async () => {
+        fireEvent.changeText(screen.getByTestId('auth-pin-input'), '9999')
+      })
+
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('auth-pin-button'))
+      })
+
+      await waitFor(() => {
+        expect(unlockWithPin).toHaveBeenCalledWith('9999')
+        expect(screen.getByText(i18n.t(translationKey))).toBeTruthy()
+      })
+    },
+  )
+
   it.each([
     ['not-available', 'auth.lock.notAvailableError'],
     ['not-enrolled', 'auth.lock.notEnrolledError'],
@@ -305,6 +391,7 @@ describe('auth screen', () => {
       mockUseAuthSession.mockReturnValue(
         createAuthSessionMock({
           consumePendingBiometricPrompt: jest.fn(() => false),
+          isBiometricUnlockEnabled: true,
           isAppLocked: true,
           isAuthenticated: true,
           session: { accessToken: 'token', expiresAt: null },
@@ -337,6 +424,7 @@ describe('auth screen', () => {
       createAuthSessionMock({
         appLockRevision: 1,
         consumePendingBiometricPrompt,
+        isBiometricUnlockEnabled: true,
         isAppLocked: true,
         isAuthenticated: true,
         session: { accessToken: 'token', expiresAt: null },

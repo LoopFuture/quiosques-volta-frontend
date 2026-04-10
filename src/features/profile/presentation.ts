@@ -215,6 +215,12 @@ export function getProfileHubSections(
             ? t('tabScreens.profile.hub.rows.pushNotificationsEnabledHelper')
             : t('tabScreens.profile.hub.rows.pushNotificationsDisabledHelper'),
         },
+        {
+          label: t('tabScreens.profile.hub.rows.pinTitle'),
+          value: deviceSettings.pinEnabled
+            ? t('tabScreens.profile.hub.rows.pinEnabledHelper')
+            : t('tabScreens.profile.hub.rows.pinDisabledHelper'),
+        },
         ...(biometricsSupported
           ? [
               {
@@ -260,7 +266,9 @@ export function getProfileHubReadiness(
   },
 ) {
   const paymentsReady = Boolean(profile.payoutAccount?.ibanMasked)
-  const securityReady = !biometricsSupported || deviceSettings.biometricsEnabled
+  const securityReady =
+    deviceSettings.pinEnabled ||
+    (biometricsSupported && deviceSettings.biometricsEnabled)
   const alertsReady =
     (profile.preferences?.alertsEnabled ?? false) ||
     deviceSettings.pushNotificationsEnabled
@@ -271,18 +279,25 @@ export function getProfileHubReadiness(
     label: string
     tone: 'success' | 'warning'
     value: string
-  }[] = biometricsSupported
-    ? [
-        {
-          id: 'security',
-          label: t('tabScreens.profile.hub.readiness.securityLabel'),
-          tone: securityReady ? 'success' : 'warning',
-          value: deviceSettings.biometricsEnabled
-            ? t('tabScreens.profile.hub.readiness.securityBiometricsValue')
-            : t('tabScreens.profile.hub.readiness.securityReviewValue'),
-        },
-      ]
-    : []
+  }[] = [
+    {
+      id: 'security',
+      label: t('tabScreens.profile.hub.readiness.securityLabel'),
+      tone: securityReady ? 'success' : 'warning',
+      value:
+        deviceSettings.pinEnabled && deviceSettings.biometricsEnabled
+          ? t('tabScreens.profile.hub.readiness.securityAllValue')
+          : deviceSettings.pinEnabled
+            ? t('tabScreens.profile.hub.readiness.securityPinValue')
+            : deviceSettings.biometricsEnabled
+              ? t('tabScreens.profile.hub.readiness.securityBiometricsValue')
+              : t(
+                  biometricsSupported
+                    ? 'tabScreens.profile.hub.readiness.securityReviewValue'
+                    : 'tabScreens.profile.hub.readiness.securityReviewPinValue',
+                ),
+    },
+  ]
 
   return {
     badgeLabel:

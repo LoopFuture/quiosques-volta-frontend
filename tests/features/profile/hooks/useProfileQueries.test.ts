@@ -230,6 +230,7 @@ describe('profile hooks', () => {
         },
         preferences: {
           biometricsEnabled: true,
+          pinEnabled: false,
           pushNotificationsEnabled: true,
         },
       },
