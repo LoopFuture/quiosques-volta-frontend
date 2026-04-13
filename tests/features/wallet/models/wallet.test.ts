@@ -26,8 +26,12 @@ import {
 } from '@/features/wallet/models'
 import {
   getWalletHistoryFilterOptions,
+  getWalletMovementAccessibilityHint,
+  getWalletMovementAccessibilityLabel,
+  getWalletMovementDateHeading,
   getWalletMovementBadgeLabel,
   getWalletMovementDetailItems,
+  getWalletMovementReceiptShareMessage,
   getWalletMovementStateCopy,
   getWalletMovementSubtitle,
   getWalletMovementSummaryItems,
@@ -253,6 +257,13 @@ describe('wallet models, forms, and presentation', () => {
       'Joao Ferreira · PT50************90123',
     )
     expect(getWalletMovementSubtitle('pt', creditMovement)).toBeTruthy()
+    expect(getWalletMovementAccessibilityHint(t)).toBe(
+      'Abre este movimento para veres os detalhes.',
+    )
+    expect(
+      getWalletMovementAccessibilityLabel(t, 'pt', processingTransfer),
+    ).toContain('Transferência em curso')
+    expect(getWalletMovementDateHeading('pt', processingTransfer)).toBeTruthy()
     expect(getWalletMovementStateCopy(t, creditMovement)).toEqual(
       expect.objectContaining({
         stateLabel: 'Crédito recebido',
@@ -321,6 +332,9 @@ describe('wallet models, forms, and presentation', () => {
         state: 'upcoming',
       }),
     ])
+    expect(
+      getWalletMovementReceiptShareMessage(t, 'pt', completedTransfer),
+    ).toContain(completedTransfer.id)
   })
 
   it('falls back when credit and transfer detail fields are missing', () => {

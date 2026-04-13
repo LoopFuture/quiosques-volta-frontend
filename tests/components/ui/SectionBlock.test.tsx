@@ -54,4 +54,20 @@ describe('SectionBlock', () => {
 
     windowSpy.mockRestore()
   })
+
+  it('keeps the regular header layout when no action or description is provided', () => {
+    const windowSpy = mockWindowDimensions({ width: 320 })
+    const view = renderWithProvider(
+      <SectionBlock title="Pagamentos">
+        <Text>Conteudo simples</Text>
+      </SectionBlock>,
+    )
+
+    expect(view.getByText('Pagamentos')).toBeTruthy()
+    expect(view.getByText('Conteudo simples')).toBeTruthy()
+    expect(view.queryByText('Resumo do estado atual.')).toBeNull()
+    expect(view.queryByText('Editar')).toBeNull()
+
+    windowSpy.mockRestore()
+  })
 })

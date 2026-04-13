@@ -1,13 +1,12 @@
 import { ArrowUpRight, Check, X } from '@tamagui/lucide-icons'
 import { Text, YStack } from 'tamagui'
-import { StatusBadge, SurfaceCard } from '@/components/ui'
+import { SurfaceCard } from '@/components/ui'
 import type { Tone } from '@/components/ui/types'
 import type { WalletTransactionStatus } from '../models'
 
 type WalletMovementSummaryCardProps = {
   amount: string
   description: string
-  stateLabel: string
   status: WalletTransactionStatus
   title: string
   tone: Tone
@@ -28,7 +27,6 @@ function getMovementStatusIcon(status: WalletTransactionStatus) {
 export function WalletMovementSummaryCard({
   amount,
   description,
-  stateLabel,
   status,
   title,
   tone,
@@ -39,39 +37,35 @@ export function WalletMovementSummaryCard({
     <SurfaceCard items="center" gap="$4.5" p="$5" tone={tone}>
       <YStack items="center" justify="center">
         <YStack
-          pointerEvents="none"
-          position="absolute"
-          rounded={60}
-          bg="$accent4"
-          opacity={0.24}
-          style={{ width: 120, height: 120 }}
-        />
-        <YStack
-          bg="$accent2"
-          borderColor="$accent7"
+          bg="$accent3"
+          borderColor="$accent6"
           borderWidth={1}
-          height={84}
+          height={76}
           items="center"
           justify="center"
-          rounded={42}
-          width={84}
+          rounded={38}
+          width={76}
         >
           <Icon color="$accent11" size={34} />
         </YStack>
       </YStack>
 
-      <YStack items="center" gap="$2.5" style={{ maxWidth: 320 }}>
+      <YStack items="center" gap="$2" style={{ maxWidth: 320 }}>
         <Text
-          adjustsFontSizeToFit
-          fontSize={42}
+          fontSize={38}
           fontWeight="900"
-          minimumFontScale={0.82}
-          numberOfLines={1}
+          lineHeight={44}
+          numberOfLines={2}
+          style={{ textAlign: 'center' }}
         >
           {amount}
         </Text>
-        <StatusBadge tone={tone}>{stateLabel}</StatusBadge>
-        <Text fontSize={26} fontWeight="800" style={{ textAlign: 'center' }}>
+        <Text
+          accessibilityRole="header"
+          fontSize={24}
+          fontWeight="800"
+          style={{ textAlign: 'center' }}
+        >
           {title}
         </Text>
         <Text

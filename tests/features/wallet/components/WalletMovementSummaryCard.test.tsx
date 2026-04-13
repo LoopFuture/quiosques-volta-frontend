@@ -23,7 +23,6 @@ describe('WalletMovementSummaryCard', () => {
       <WalletMovementSummaryCard
         amount="4,70 €"
         description="Descrição"
-        stateLabel="Concluída"
         status="completed"
         title="Transferência"
         tone="accent"
@@ -31,7 +30,7 @@ describe('WalletMovementSummaryCard', () => {
     )
 
     expect(screen.getByText('Check')).toBeTruthy()
-    expect(screen.getByText('Concluída')).toBeTruthy()
+    expect(screen.queryByText('Concluída')).toBeNull()
 
     view.unmount()
 
@@ -39,7 +38,6 @@ describe('WalletMovementSummaryCard', () => {
       <WalletMovementSummaryCard
         amount="4,70 €"
         description="Descrição"
-        stateLabel="Em processo"
         status="processing"
         title="Transferência"
         tone="warning"
@@ -52,7 +50,6 @@ describe('WalletMovementSummaryCard', () => {
       <WalletMovementSummaryCard
         amount="4,70 €"
         description="Descrição"
-        stateLabel="Falhou"
         status="failed"
         title="Transferência"
         tone="error"

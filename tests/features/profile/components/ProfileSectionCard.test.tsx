@@ -54,4 +54,28 @@ describe('ProfileSectionCard', () => {
 
     compactSpy.mockRestore()
   })
+
+  it('renders preview rows on compact layouts with the leading icon omitted', () => {
+    const compactSpy = mockWindowDimensions({ width: 320 })
+    const onPress = jest.fn()
+    const view = renderWithProvider(
+      <ProfileSectionCard
+        onPress={onPress}
+        previewRows={[
+          {
+            label: 'Email',
+            value: 'joao@volta.pt',
+          },
+        ]}
+        title="Compact card"
+      />,
+    )
+
+    expect(view.getByText('Compact card')).toBeTruthy()
+    expect(view.getByText('Email')).toBeTruthy()
+    expect(view.getByText('joao@volta.pt')).toBeTruthy()
+    expect(view.queryByText('lead')).toBeNull()
+
+    compactSpy.mockRestore()
+  })
 })

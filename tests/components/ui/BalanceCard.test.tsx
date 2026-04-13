@@ -80,4 +80,14 @@ describe('BalanceCard', () => {
       themes.dark_accent.color,
     )
   })
+
+  it('renders the optional title without requiring a button', () => {
+    const view = renderWithProvider(
+      <BalanceCard amount="4,70€" title="Saldo atual" />,
+    )
+
+    expect(view.getByText('Saldo atual')).toBeTruthy()
+    expect(view.getByText('4,70€')).toBeTruthy()
+    expect(view.queryByText('Receber')).toBeNull()
+  })
 })

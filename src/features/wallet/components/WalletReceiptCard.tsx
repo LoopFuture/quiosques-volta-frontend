@@ -29,7 +29,7 @@ function renderValue(
           color="$color"
           fontSize={15}
           fontWeight="800"
-          style={{ textAlign: align }}
+          style={{ flexShrink: 1, textAlign: align }}
         >
           {value}
         </Text>
@@ -52,6 +52,7 @@ export function WalletReceiptCard({
   return (
     <SurfaceCard gap="$3.5" p="$4.5" testID={testID}>
       <Text
+        accessibilityRole="header"
         color="$color10"
         fontSize={13}
         fontWeight="800"

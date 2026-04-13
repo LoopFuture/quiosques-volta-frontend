@@ -1,6 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react-native'
 import WalletScreen from '@/features/wallet/screens/WalletScreen'
 import { walletResponseSchema } from '@/features/wallet/models'
+import { getWalletMovementAccessibilityLabel } from '@/features/wallet/presentation'
 import { walletRoutes } from '@/features/wallet/routes'
 import { i18n, setLocaleOverrideForTests, syncLocale } from '@/i18n'
 import { renderWithProvider } from '@tests/support/test-utils'
@@ -175,7 +176,15 @@ describe('WalletScreen', () => {
         i18n.t('tabScreens.wallet.overview.latestMovements.actionLabel'),
       ),
     )
-    fireEvent.press(screen.getByLabelText('Pingo Doce - Afragide'))
+    fireEvent.press(
+      screen.getByLabelText(
+        getWalletMovementAccessibilityLabel(
+          i18n.t.bind(i18n),
+          i18n.language,
+          walletOverviewState.recentTransactions[0]!,
+        ),
+      ),
+    )
 
     expect(mockRouterPush).toHaveBeenNthCalledWith(1, walletRoutes.transfer)
     expect(mockRouterPush).toHaveBeenNthCalledWith(2, walletRoutes.movements)

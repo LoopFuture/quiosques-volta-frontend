@@ -37,4 +37,29 @@ describe('ProfileMenuCard', () => {
 
     expect(onPress).toHaveBeenCalledTimes(1)
   })
+
+  it('renders custom summary nodes without requiring helper text', () => {
+    const onPress = jest.fn()
+    const view = renderWithProvider(
+      <ProfileMenuCard
+        rows={[
+          {
+            icon: <Text>Bell</Text>,
+            onPress,
+            summary: <Text>Avisos por email</Text>,
+            title: 'Alertas',
+          },
+        ]}
+      />,
+    )
+
+    expect(view.getByText('Bell')).toBeTruthy()
+    expect(view.getByText('Alertas')).toBeTruthy()
+    expect(view.getByText('Avisos por email')).toBeTruthy()
+    expect(view.queryByText('Pagamentos instantaneos ativos')).toBeNull()
+
+    fireEvent.press(view.getByLabelText('Alertas'))
+
+    expect(onPress).toHaveBeenCalledTimes(1)
+  })
 })

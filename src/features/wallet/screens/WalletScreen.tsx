@@ -19,6 +19,8 @@ import {
   getWalletTransactionBadgeTone,
 } from '../models'
 import {
+  getWalletMovementAccessibilityHint,
+  getWalletMovementAccessibilityLabel,
   getWalletMovementBadgeLabel,
   getWalletMovementSubtitle,
   getWalletMovementTitle,
@@ -212,7 +214,12 @@ export default function WalletScreen() {
                 {walletOverviewState.recentTransactions.map((movement) => (
                   <TransactionListItem
                     key={movement.id}
-                    accessibilityLabel={getWalletMovementTitle(t, movement)}
+                    accessibilityHint={getWalletMovementAccessibilityHint(t)}
+                    accessibilityLabel={getWalletMovementAccessibilityLabel(
+                      t,
+                      i18n.language,
+                      movement,
+                    )}
                     amount={formatWalletAmount(
                       movement.amount.amountMinor,
                       i18n.language,

@@ -623,7 +623,8 @@
         "common": {
           "backLabel": "Back",
           "notFoundDescription": "We could not load this history item.",
-          "notFoundTitle": "History item unavailable"
+          "notFoundTitle": "History item unavailable",
+          "openMovementHint": "Open this movement to review the details."
         },
         "badges": {
           "credit": "Received",
@@ -653,13 +654,17 @@
         },
         "movementDetail": {
           "detailSectionTitle": "Movement details",
+          "errorDescription": "We could not load the details for this movement right now.",
+          "errorRecoveryHint": "Try again to confirm the status, linked account, and reference for this movement.",
+          "errorTitle": "Details unavailable",
+          "loadingDescription": "We are preparing the status, reference, and details for this movement.",
+          "loadingTitle": "Loading movement",
           "credit": {
             "description": "Credit received after the machine return.",
             "stateCardTitle": "Credit added",
             "stateLabel": "Credit received"
           },
           "transfer": {
-            "retryActionLabel": "Request another transfer",
             "cancelled": {
               "description": "This transfer was cancelled before reaching the linked account.",
               "stateCardTitle": "Transfer cancelled",
@@ -673,6 +678,8 @@
             },
             "failed": {
               "description": "We could not complete this transfer to the linked account.",
+              "reasonFallback": "Review the linked account before you try again.",
+              "reasonTitle": "What blocked this transfer",
               "stateCardTitle": "Transfer failed",
               "stateLabel": "Failed"
             },
@@ -698,6 +705,11 @@
                   "description": "The amount is on its way to the linked account.",
                   "label": "Sending to account"
                 }
+              },
+              "timelineStates": {
+                "current": "Current step",
+                "done": "Completed step",
+                "upcoming": "Upcoming step"
               },
               "timelineTitle": "Transfer status"
             }

@@ -101,4 +101,15 @@ describe('ScreenContainer', () => {
     ).toBe(18)
     expect(view.getByText('Inset header')).toBeTruthy()
   })
+
+  it('wraps the screen body in a keyboard avoiding view when requested', () => {
+    const view = renderWithProvider(
+      <ScreenContainer keyboardAware testID="keyboard-shell">
+        <Text>Keyboard body</Text>
+      </ScreenContainer>,
+    )
+
+    expect(view.getByTestId('keyboard-shell')).toBeTruthy()
+    expect(view.getByText('Keyboard body')).toBeTruthy()
+  })
 })

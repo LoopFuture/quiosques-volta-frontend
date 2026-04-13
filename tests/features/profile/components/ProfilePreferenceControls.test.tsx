@@ -50,4 +50,29 @@ describe('ProfilePreferenceControls', () => {
     expect(onCheckedChange).toHaveBeenCalledWith(true)
     expect(onValueChange).toHaveBeenCalledWith('dark')
   })
+
+  it('renders optional sections without helper or supporting labels', () => {
+    renderWithProvider(
+      <>
+        <SettingsSectionHeader title="Privacidade" />
+        <PreferenceCard
+          description="Partilha limitada"
+          label="Visibilidade"
+          onValueChange={jest.fn()}
+          options={[
+            { label: 'Ligado', value: 'on' },
+            { label: 'Desligado', value: 'off' },
+          ]}
+          supportingValue="Estado atual"
+          value="on"
+        />
+      </>,
+    )
+
+    expect(screen.getByText('Privacidade')).toBeTruthy()
+    expect(screen.queryByText('Helper')).toBeNull()
+    expect(screen.getByText('Visibilidade')).toBeTruthy()
+    expect(screen.getByText('Estado atual')).toBeTruthy()
+    expect(screen.queryByText('Atual')).toBeNull()
+  })
 })

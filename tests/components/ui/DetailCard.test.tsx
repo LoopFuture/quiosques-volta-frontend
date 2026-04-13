@@ -52,4 +52,29 @@ describe('DetailCard', () => {
 
     windowSpy.mockRestore()
   })
+
+  it('renders regular rows without helper text and preserves custom footer absence', () => {
+    const items: DetailItem[] = [
+      {
+        label: 'Referencia',
+        value: 'ABC-123',
+      },
+      {
+        label: 'Conta',
+        value: <Text>Nó em linha</Text>,
+      },
+    ]
+
+    const view = renderWithProvider(
+      <DetailCard items={items} title="Detalhes" />,
+    )
+
+    expect(view.getByText('Detalhes')).toBeTruthy()
+    expect(view.getByText('Referencia')).toBeTruthy()
+    expect(view.getByText('ABC-123')).toBeTruthy()
+    expect(view.getByText('Conta')).toBeTruthy()
+    expect(view.getByText('Nó em linha')).toBeTruthy()
+    expect(view.queryByText('Pagamento instantaneo')).toBeNull()
+    expect(view.queryByText('Aviso')).toBeNull()
+  })
 })

@@ -9,6 +9,7 @@ import {
 import {
   formatCompactNumber,
   formatCurrencyFromCents,
+  formatLongDate,
   formatNumber,
   formatShortDateTime,
 } from '@/i18n/format'
@@ -191,6 +192,10 @@ export function formatWalletCompactCount(value: number, locale: string) {
 
 export function formatWalletDateTime(value: string, locale: string) {
   return formatShortDateTime(value, locale)
+}
+
+export function formatWalletLongDate(value: string, locale: string) {
+  return formatLongDate(value, locale)
 }
 
 export function formatWalletPaymentAccount(paymentAccount: {

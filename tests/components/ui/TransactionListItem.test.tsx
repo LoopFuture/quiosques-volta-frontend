@@ -28,6 +28,7 @@ describe('TransactionListItem', () => {
     const onPress = jest.fn()
     const view = renderWithProvider(
       <TransactionListItem
+        accessibilityHint="Abre os detalhes"
         accessibilityLabel="Abrir Cafe Central"
         amount="+0,50€"
         badgeLabel="Pago"
@@ -42,6 +43,7 @@ describe('TransactionListItem', () => {
     fireEvent.press(view.getByLabelText('Abrir Cafe Central'))
 
     expect(view.getByText('Cafe Central')).toBeTruthy()
+    expect(view.getByHintText('Abre os detalhes')).toBeTruthy()
     expect(onPress).toHaveBeenCalledTimes(1)
   })
 

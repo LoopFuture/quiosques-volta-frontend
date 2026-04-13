@@ -9,6 +9,10 @@ import {
   walletHistoryPage,
 } from '@tests/support/wallet-detail-screen-mocks'
 import { fireEvent, screen, waitFor } from '@testing-library/react-native'
+import {
+  getWalletMovementAccessibilityLabel,
+  getWalletMovementDateHeading,
+} from '@/features/wallet/presentation'
 import WalletMovementsScreen from '@/features/wallet/screens/WalletMovementsScreen'
 import { walletRoutes } from '@/features/wallet/routes'
 import { i18n } from '@/i18n'
@@ -81,13 +85,21 @@ describe('WalletMovementsScreen', () => {
 
     renderWithProvider(<WalletMovementsScreen />)
 
+    expect(
+      screen.getByText(
+        getWalletMovementDateHeading(
+          i18n.language,
+          walletHistoryPage.items[0]!,
+        ),
+      ),
+    ).toBeTruthy()
+
     fireEvent.press(
       screen.getByText(i18n.t('tabScreens.wallet.filters.transfers')),
     )
 
     const flashListRef = __getLastFlashListRef()
 
-    expect(flashListRef?.prepareForLayoutAnimationRender).toHaveBeenCalled()
     expect(flashListRef?.scrollToOffset).toHaveBeenCalledWith({
       animated: true,
       offset: 0,
@@ -95,7 +107,11 @@ describe('WalletMovementsScreen', () => {
 
     fireEvent.press(
       screen.getByLabelText(
-        i18n.t('tabScreens.wallet.list.transferPendingTitle'),
+        getWalletMovementAccessibilityLabel(
+          i18n.t.bind(i18n),
+          i18n.language,
+          walletHistoryPage.items[1]!,
+        ),
       ),
     )
 

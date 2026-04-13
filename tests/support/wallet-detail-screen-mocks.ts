@@ -20,6 +20,7 @@ jest.mock('@/features/wallet/hooks', () => ({
 export const {
   __mockRouterBack: mockRouterBack,
   __mockRouterPush: mockRouterPush,
+  __mockRouterReplace: mockRouterReplace,
   __mockUseLocalSearchParams: mockUseLocalSearchParams,
 } = jest.requireMock('expo-router')
 export const {
@@ -60,6 +61,22 @@ export const failedTransferMovement = walletTransactionResponseSchema.parse({
       ...transferMovement.transaction.transferDetails,
       failureReason: 'Conta indisponivel',
     },
+  },
+})
+
+export const cancelledTransferMovement = walletTransactionResponseSchema.parse({
+  transaction: {
+    ...transferMovement.transaction,
+    id: 'movement-transfer-3',
+    status: 'cancelled',
+  },
+})
+
+export const completedTransferMovement = walletTransactionResponseSchema.parse({
+  transaction: {
+    ...transferMovement.transaction,
+    id: 'movement-transfer-4',
+    status: 'completed',
   },
 })
 

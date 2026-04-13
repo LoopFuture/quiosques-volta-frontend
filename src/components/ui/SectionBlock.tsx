@@ -23,7 +23,12 @@ export function SectionBlock({
       {shouldStackHeader ? (
         <YStack gap="$2">
           <YStack flex={1} gap="$1.5" style={{ minWidth: 0 }}>
-            <Text color="$color" fontSize={18} fontWeight="800">
+            <Text
+              accessibilityRole="header"
+              color="$color"
+              fontSize={18}
+              fontWeight="800"
+            >
               {title}
             </Text>
             {description ? (
@@ -37,7 +42,12 @@ export function SectionBlock({
       ) : (
         <XStack items="center" justify="space-between" gap="$3">
           <YStack flex={1} gap="$1.5" style={{ minWidth: 0 }}>
-            <Text color="$color" fontSize={18} fontWeight="800">
+            <Text
+              accessibilityRole="header"
+              color="$color"
+              fontSize={18}
+              fontWeight="800"
+            >
               {title}
             </Text>
             {description ? (

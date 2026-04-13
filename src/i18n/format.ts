@@ -51,6 +51,14 @@ export function formatMonthYear(value: string, locale: string) {
   }).format(getDate(value))
 }
 
+export function formatLongDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(getSafeLocale(locale), {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(getDate(value))
+}
+
 export function formatShortDateTime(value: string, locale: string) {
   return new Intl.DateTimeFormat(getSafeLocale(locale), {
     day: 'numeric',

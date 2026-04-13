@@ -25,26 +25,12 @@ import { authRoutes } from '@/features/auth/routes'
 import { TabTopBar } from '@/features/app-shell/navigation/tab-header'
 import { useAppPreferences } from '@/hooks/useAppPreferences'
 import { ProfileMenuCard } from '../components/ProfileMenuCard'
-import { ProfileReadinessCard } from '../components/ProfileReadinessCard'
 import { ProfileSectionCard } from '../components/ProfileSectionCard'
 import { useDevicePrivacySettings, useProfileQuery } from '../hooks'
-import { getProfileHubReadiness, getProfileHubSections } from '../presentation'
+import { getProfileHubSections } from '../presentation'
 import { profileRoutes } from '../routes'
 import { PROFILE_LEGAL_LINK_PATHS } from '../constants'
 import { getProfileLegalLinkUrl } from '../runtime'
-
-function SectionLabel({ children }: { children: string }) {
-  return (
-    <Text
-      color="$color10"
-      fontSize={14}
-      fontWeight="800"
-      textTransform="uppercase"
-    >
-      {children}
-    </Text>
-  )
-}
 
 function ProfileScreenSkeleton() {
   return (
@@ -130,39 +116,13 @@ export default function ProfileScreen() {
         themeMode,
       })
     : undefined
-  const readiness = profile
-    ? getProfileHubReadiness(t, {
-        biometricsSupported: hasBiometricHardware !== false,
-        deviceSettings: settings,
-        profile,
-      })
-    : undefined
-  const readinessItems =
-    readiness?.items.filter((item) => item.tone === 'warning') ?? []
-  const readinessActions = readinessItems.slice(0, 2).map((item) => {
-    if (item.id === 'payments') {
-      return {
-        label: t('tabScreens.profile.hub.actions.reviewPayments'),
-        onPress: () => router.push(profileRoutes.payments),
-      }
-    }
-
-    return {
-      label:
-        item.id === 'security'
-          ? t('tabScreens.profile.hub.actions.reviewSecurity')
-          : t('tabScreens.profile.hub.actions.reviewAlerts'),
-      onPress: () =>
-        router.push(
-          item.id === 'security' ? profileRoutes.privacy : profileRoutes.alerts,
-        ),
-    }
-  })
   const orderedSections = hubSections
     ? (
         ['personal', 'payments', 'alerts', 'privacy', 'appSettings'] as const
       ).flatMap((id) => hubSections.find((section) => section.id === id) ?? [])
     : undefined
+  const isLoadingProfileHub =
+    !profile || !hubSections || !orderedSections || isPending
   const handleOpenPrivacyPolicy = () => {
     void WebBrowser.openBrowserAsync(
       getProfileLegalLinkUrl(PROFILE_LEGAL_LINK_PATHS.privacyPolicy),
@@ -196,36 +156,10 @@ export default function ProfileScreen() {
           testID="profile-screen-error-state"
           title={t('tabScreens.profile.errors.title')}
         />
-      ) : !profile ||
-        !hubSections ||
-        !readiness ||
-        !orderedSections ||
-        isPending ? (
+      ) : isLoadingProfileHub ? (
         <ProfileScreenSkeleton />
       ) : (
         <>
-          <ProfileReadinessCard
-            actions={readinessActions}
-            badgeLabel={readiness.badgeLabel}
-            badgeTone={readiness.badgeTone}
-            description={readiness.description}
-            items={
-              readinessItems.length > 0
-                ? readinessItems.slice(0, 2)
-                : readiness.items.slice(0, 2)
-            }
-            title={readiness.title}
-          />
-
-          <YStack gap="$3">
-            <SectionLabel>
-              {t('tabScreens.profile.hub.sections.primary')}
-            </SectionLabel>
-            <Text color="$color11" fontSize={15}>
-              {t('tabScreens.profile.hub.accountDescription')}
-            </Text>
-          </YStack>
-
           <YStack gap="$3">
             {orderedSections.map((section) => (
               <ProfileSectionCard

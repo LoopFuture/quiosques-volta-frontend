@@ -112,4 +112,24 @@ describe('SurfaceCard', () => {
       minHeight: 120,
     })
   })
+
+  it('renders the decorative accent background for toned cards only', () => {
+    const tonedView = renderWithProvider(
+      <SurfaceCard decorativeAccent testID="accent-surface-card" tone="accent">
+        <Text>Accent with decoration</Text>
+      </SurfaceCard>,
+    )
+
+    expect(tonedView.getByTestId('accent-surface-card')).toBeTruthy()
+    expect(tonedView.UNSAFE_getAllByType(Card.Background)).toHaveLength(1)
+
+    const neutralView = renderWithProvider(
+      <SurfaceCard decorativeAccent testID="neutral-surface-card">
+        <Text>Neutral without decoration</Text>
+      </SurfaceCard>,
+    )
+
+    expect(neutralView.getByTestId('neutral-surface-card')).toBeTruthy()
+    expect(neutralView.UNSAFE_queryAllByType(Card.Background)).toHaveLength(0)
+  })
 })

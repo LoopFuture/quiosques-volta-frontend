@@ -630,7 +630,8 @@
         "common": {
           "backLabel": "Voltar",
           "notFoundDescription": "Não foi possível carregar este registo do histórico.",
-          "notFoundTitle": "Registo indisponível"
+          "notFoundTitle": "Registo indisponível",
+          "openMovementHint": "Abre este movimento para veres os detalhes."
         },
         "badges": {
           "credit": "Recebido",
@@ -660,13 +661,17 @@
         },
         "movementDetail": {
           "detailSectionTitle": "Detalhes do movimento",
+          "errorDescription": "Não foi possível carregar os detalhes deste movimento agora.",
+          "errorRecoveryHint": "Tenta novamente para confirmar o estado, a conta associada e a referência deste movimento.",
+          "errorTitle": "Detalhes indisponíveis",
+          "loadingDescription": "Estamos a preparar o estado, a referência e os detalhes deste movimento.",
+          "loadingTitle": "A carregar movimento",
           "credit": {
             "description": "Crédito recebido depois da devolução na máquina.",
             "stateCardTitle": "Crédito adicionado",
             "stateLabel": "Crédito recebido"
           },
           "transfer": {
-            "retryActionLabel": "Pedir nova transferência",
             "cancelled": {
               "description": "Esta transferência foi cancelada antes de chegar à conta associada.",
               "stateCardTitle": "Transferência cancelada",
@@ -680,6 +685,8 @@
             },
             "failed": {
               "description": "Não foi possível concluir esta transferência para a conta associada.",
+              "reasonFallback": "Confirma a conta associada antes de tentares novamente.",
+              "reasonTitle": "O que bloqueou esta transferência",
               "stateCardTitle": "Transferência falhada",
               "stateLabel": "Falhou"
             },
@@ -705,6 +712,11 @@
                   "description": "O montante está a caminho da conta associada.",
                   "label": "A enviar para a conta"
                 }
+              },
+              "timelineStates": {
+                "current": "Etapa atual",
+                "done": "Etapa concluída",
+                "upcoming": "Próxima etapa"
               },
               "timelineTitle": "Estado da transferência"
             }

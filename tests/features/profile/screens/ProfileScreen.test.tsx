@@ -180,15 +180,12 @@ describe('ProfileScreen', () => {
 
     expect(screen.getByTestId('profile-screen')).toBeTruthy()
     expect(
-      screen.getByText(i18n.t('tabScreens.profile.hub.readiness.reviewTitle')),
+      screen.getByText(i18n.t('tabScreens.profile.hub.supportLabel')),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(i18n.t('tabScreens.profile.hub.helpLinksDescription')),
     ).toBeTruthy()
 
-    fireEvent.press(
-      screen.getByText(i18n.t('tabScreens.profile.hub.actions.reviewPayments')),
-    )
-    fireEvent.press(
-      screen.getByText(i18n.t('tabScreens.profile.hub.actions.reviewSecurity')),
-    )
     fireEvent.press(
       screen.getByLabelText(i18n.t('tabScreens.profile.hub.cards.personal')),
     )
@@ -224,14 +221,12 @@ describe('ProfileScreen', () => {
     )
     fireEvent.press(screen.getByTestId('profile-logout-button'))
 
-    expect(mockRouterPush).toHaveBeenNthCalledWith(1, profileRoutes.payments)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(2, profileRoutes.privacy)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(3, profileRoutes.personal)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(4, profileRoutes.alerts)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(5, profileRoutes.privacy)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(6, profileRoutes.payments)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(7, profileRoutes.appSettings)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(8, profileRoutes.help)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(1, profileRoutes.personal)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(2, profileRoutes.alerts)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(3, profileRoutes.privacy)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(4, profileRoutes.payments)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(5, profileRoutes.appSettings)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(6, profileRoutes.help)
     expect(openBrowserAsync).toHaveBeenNthCalledWith(
       1,
       `https://volta.example.com${PROFILE_LEGAL_LINK_PATHS.helpCenter}`,
@@ -270,13 +265,14 @@ describe('ProfileScreen', () => {
     renderWithProvider(<ProfileScreen />)
 
     expect(
-      screen.getByText('Joao Ferreira · PT50************4321 associado'),
-    ).toBeTruthy()
-    expect(
       screen.getAllByText(
         i18n.t('tabScreens.profile.hub.rows.accountHolderNameTitle'),
       ),
     ).toHaveLength(1)
     expect(screen.getAllByText('Joao Ferreira').length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText(i18n.t('tabScreens.profile.hub.rows.ibanTitle')),
+    ).toHaveLength(1)
+    expect(screen.getByText('PT50************4321')).toBeTruthy()
   })
 })

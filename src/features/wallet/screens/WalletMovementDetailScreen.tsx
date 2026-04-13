@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Share } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { Text, YStack } from 'tamagui'
 import {
@@ -15,11 +16,13 @@ import { WalletReceiptCard } from '../components/WalletReceiptCard'
 import { useWalletMovementDetailQuery } from '../hooks'
 import { formatWalletAmount, getWalletMovementStateTone } from '../models'
 import {
-  getWalletMovementSummaryItems,
+  getWalletMovementDetailItems,
+  getWalletMovementReceiptShareMessage,
   getWalletMovementStateCopy,
   getWalletMovementTitle,
   getWalletTransferTimelineItems,
 } from '../presentation'
+import { profileRoutes } from '@/features/profile/routes'
 import { walletRoutes } from '../routes'
 
 function getMovementIdParam(
@@ -59,6 +62,34 @@ function WalletMovementDetailSkeleton() {
   )
 }
 
+function WalletMovementNotFoundState({
+  description,
+  onHistoryPress,
+  t,
+}: {
+  description: string
+  onHistoryPress: () => void
+  t: ReturnType<typeof useTranslation>['t']
+}) {
+  return (
+    <SurfaceCard items="center" p="$5">
+      <YStack gap="$3" items="center">
+        <Text color="$color11" fontSize={14} style={{ textAlign: 'center' }}>
+          {description}
+        </Text>
+        <PrimaryButton
+          emphasis="outline"
+          fullWidth={false}
+          tone="neutral"
+          onPress={onHistoryPress}
+        >
+          {t('tabScreens.wallet.overview.latestMovements.actionLabel')}
+        </PrimaryButton>
+      </YStack>
+    </SurfaceCard>
+  )
+}
+
 export default function WalletMovementDetailScreen() {
   const router = useRouter()
   const { i18n, t } = useTranslation()
@@ -79,18 +110,24 @@ export default function WalletMovementDetailScreen() {
     void refetch()
   }
 
+  const handleOpenHistory = () => {
+    router.replace(walletRoutes.movements)
+  }
+
   if (!resolvedMovementId) {
     return (
       <WalletDetailScreenFrame
-        description={t('tabScreens.wallet.common.notFoundDescription')}
+        description=""
         onRefresh={handleRefresh}
         refreshing={isRefetching}
         testID="wallet-movement-not-found-screen"
         title={t('tabScreens.wallet.common.notFoundTitle')}
       >
-        <Text color="$color11" fontSize={14}>
-          {t('tabScreens.wallet.common.notFoundDescription')}
-        </Text>
+        <WalletMovementNotFoundState
+          description={t('tabScreens.wallet.common.notFoundDescription')}
+          onHistoryPress={handleOpenHistory}
+          t={t}
+        />
       </WalletDetailScreenFrame>
     )
   }
@@ -98,11 +135,11 @@ export default function WalletMovementDetailScreen() {
   if (isPending) {
     return (
       <WalletDetailScreenFrame
-        description={t('tabScreens.wallet.movementsPage.emptyStateDescription')}
+        description={t('tabScreens.wallet.movementDetail.loadingDescription')}
         onRefresh={handleRefresh}
         refreshing={isRefetching}
         testID="wallet-movement-detail-screen"
-        title=""
+        title={t('tabScreens.wallet.movementDetail.loadingTitle')}
       >
         <WalletMovementDetailSkeleton />
       </WalletDetailScreenFrame>
@@ -112,15 +149,18 @@ export default function WalletMovementDetailScreen() {
   if (isError && !movement) {
     return (
       <WalletDetailScreenFrame
-        description={t('tabScreens.wallet.movementsPage.emptyStateDescription')}
+        description=""
         onRefresh={handleRefresh}
         refreshing={isRefetching}
         testID="wallet-movement-detail-screen"
-        title={t('tabScreens.wallet.movementsPage.title')}
+        title={t('tabScreens.wallet.movementDetail.errorTitle')}
       >
         <QueryErrorState
+          description={t('tabScreens.wallet.movementDetail.errorDescription')}
           onRetry={handleRefresh}
+          recoveryHint={t('tabScreens.wallet.movementDetail.errorRecoveryHint')}
           testID="wallet-movement-detail-screen-error-state"
+          title={t('tabScreens.wallet.movementDetail.errorTitle')}
         />
       </WalletDetailScreenFrame>
     )
@@ -129,35 +169,54 @@ export default function WalletMovementDetailScreen() {
   if (!movement) {
     return (
       <WalletDetailScreenFrame
-        description={t('tabScreens.wallet.common.notFoundDescription')}
+        description=""
         onRefresh={handleRefresh}
         refreshing={isRefetching}
         testID="wallet-movement-not-found-screen"
         title={t('tabScreens.wallet.common.notFoundTitle')}
       >
-        <Text color="$color11" fontSize={14}>
-          {t('tabScreens.wallet.common.notFoundDescription')}
-        </Text>
+        <WalletMovementNotFoundState
+          description={t('tabScreens.wallet.common.notFoundDescription')}
+          onHistoryPress={handleOpenHistory}
+          t={t}
+        />
       </WalletDetailScreenFrame>
     )
   }
 
   const detailCopy = getWalletMovementStateCopy(t, movement)
-  const summaryItems = getWalletMovementSummaryItems(t, i18n.language, movement)
+  const detailItems = getWalletMovementDetailItems(t, i18n.language, movement)
   const isProcessingTransfer =
     movement.type === 'transfer_debit' &&
     (movement.status === 'pending' || movement.status === 'processing')
-  const isRetryableTransfer =
-    movement.type === 'transfer_debit' &&
-    (movement.status === 'failed' || movement.status === 'cancelled')
+  const isFailedTransfer =
+    movement.type === 'transfer_debit' && movement.status === 'failed'
+  const isCancelledTransfer =
+    movement.type === 'transfer_debit' && movement.status === 'cancelled'
+  const isCompletedTransfer =
+    movement.type === 'transfer_debit' && movement.status === 'completed'
+  const failureReason = movement.transferDetails?.failureReason?.trim()
+
+  const handleShareReceipt = async () => {
+    await Share.share({
+      message: getWalletMovementReceiptShareMessage(t, i18n.language, movement),
+      title: t(
+        'tabScreens.wallet.movementDetail.transfer.completed.receiptActionLabel',
+      ),
+    })
+  }
 
   return (
     <WalletDetailScreenFrame
       description=""
       footer={
-        isRetryableTransfer ? (
+        isFailedTransfer ? (
+          <PrimaryButton onPress={() => router.push(profileRoutes.payments)}>
+            {t('tabScreens.wallet.transfer.reviewDestinationActionLabel')}
+          </PrimaryButton>
+        ) : isCancelledTransfer ? (
           <PrimaryButton onPress={() => router.push(walletRoutes.transfer)}>
-            {t('tabScreens.wallet.movementDetail.transfer.retryActionLabel')}
+            {t('tabScreens.wallet.transfer.newTransferActionLabel')}
           </PrimaryButton>
         ) : undefined
       }
@@ -169,17 +228,46 @@ export default function WalletMovementDetailScreen() {
       <WalletMovementSummaryCard
         amount={formatWalletAmount(movement.amount.amountMinor, i18n.language)}
         description={detailCopy.description}
-        stateLabel={detailCopy.stateLabel}
         status={movement.status}
         title={detailCopy.stateCardTitle}
         tone={getWalletMovementStateTone(movement)}
       />
 
       <WalletReceiptCard
-        items={summaryItems}
+        footer={
+          isCompletedTransfer ? (
+            <PrimaryButton
+              emphasis="outline"
+              fullWidth={false}
+              tone="neutral"
+              onPress={() => {
+                void handleShareReceipt()
+              }}
+            >
+              {t(
+                'tabScreens.wallet.movementDetail.transfer.completed.receiptActionLabel',
+              )}
+            </PrimaryButton>
+          ) : undefined
+        }
+        items={detailItems}
         testID="wallet-movement-detail-receipt-card"
         title={t('tabScreens.wallet.movementDetail.detailSectionTitle')}
       />
+
+      {isFailedTransfer ? (
+        <SurfaceCard gap="$2.5" p="$4.5" tone="error">
+          <Text accessibilityRole="header" fontSize={18} fontWeight="800">
+            {t('tabScreens.wallet.movementDetail.transfer.failed.reasonTitle')}
+          </Text>
+          <Text color="$color11" fontSize={15} lineHeight={22}>
+            {failureReason ??
+              t(
+                'tabScreens.wallet.movementDetail.transfer.failed.reasonFallback',
+              )}
+          </Text>
+        </SurfaceCard>
+      ) : null}
 
       {isProcessingTransfer ? (
         <SectionBlock
