@@ -318,6 +318,45 @@ describe('WalletTransferScreen', () => {
     })
   })
 
+  it('shows the recovery state when the previous transfer request failed and resets before routing to payments', () => {
+    const reset = jest.fn()
+
+    mockUseWalletOverviewQuery.mockReturnValue({
+      data: walletOverviewState,
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+    mockUseProfileQuery.mockReturnValue({
+      data: profileState,
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+    mockUseRequestWalletTransferMutation.mockReturnValue({
+      isError: true,
+      isPending: false,
+      mutate: jest.fn(),
+      reset,
+    })
+
+    renderWithProvider(<WalletTransferScreen />)
+
+    expect(screen.getByTestId('wallet-transfer-support-state')).toBeTruthy()
+    expect(
+      screen.getByText(i18n.t('tabScreens.wallet.transfer.requestFailedTitle')),
+    ).toBeTruthy()
+
+    fireEvent.press(
+      screen.getAllByText(
+        i18n.t('tabScreens.wallet.transfer.reviewDestinationActionLabel'),
+      )[0]!,
+    )
+
+    expect(reset).toHaveBeenCalledTimes(1)
+    expect(mockRouterPush).toHaveBeenCalledWith('/profile/payments')
+  })
+
   it('blocks transfer submission until a payout account is configured', async () => {
     mockUseWalletOverviewQuery.mockReturnValue({
       data: walletOverviewState,
