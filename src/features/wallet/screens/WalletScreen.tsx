@@ -7,7 +7,6 @@ import {
   ScreenContainer,
   SectionBlock,
   SkeletonBlock,
-  StatusBadge,
   SurfaceCard,
   TransactionListItem,
 } from '@/components/ui'
@@ -41,28 +40,19 @@ function WalletBalanceHero({
 }) {
   return (
     <SurfaceCard gap="$4.5" p="$5" tone="accent">
-      <XStack items="flex-start" justify="space-between" gap="$3">
-        <YStack flex={1} gap="$2" style={{ minWidth: 0 }}>
-          <Text
-            color="$color10"
-            fontSize={13}
-            fontWeight="800"
-            textTransform="uppercase"
-          >
-            {t('tabScreens.wallet.overview.balanceCard.availableBalanceLabel')}
-          </Text>
-          <Text color="$color" fontSize={24} fontWeight="800" lineHeight={30}>
-            {t('tabScreens.wallet.overview.balanceCard.title')}
-          </Text>
-        </YStack>
-        {!canTransfer ? (
-          <StatusBadge tone="neutral">
-            {t(
-              'tabScreens.wallet.overview.balanceCard.transferUnavailableBadge',
-            )}
-          </StatusBadge>
-        ) : null}
-      </XStack>
+      <YStack gap="$2" style={{ minWidth: 0 }}>
+        <Text
+          color="$color10"
+          fontSize={13}
+          fontWeight="800"
+          textTransform="uppercase"
+        >
+          {t('tabScreens.wallet.overview.balanceCard.availableBalanceLabel')}
+        </Text>
+        <Text color="$color" fontSize={24} fontWeight="800" lineHeight={30}>
+          {t('tabScreens.wallet.overview.balanceCard.title')}
+        </Text>
+      </YStack>
 
       <YStack gap="$2">
         <Text
@@ -80,11 +70,9 @@ function WalletBalanceHero({
         </Text>
       </YStack>
 
-      {canTransfer ? (
-        <PrimaryButton onPress={onTransferPress}>
-          {t('tabScreens.wallet.overview.balanceCard.actionLabel')}
-        </PrimaryButton>
-      ) : null}
+      <PrimaryButton onPress={onTransferPress}>
+        {t('tabScreens.wallet.overview.balanceCard.actionLabel')}
+      </PrimaryButton>
     </SurfaceCard>
   )
 }

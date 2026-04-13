@@ -158,7 +158,7 @@
       },
       "home": {
         "balanceCard": {
-          "actionLabel": "Transferir",
+          "actionLabel": "Transferir saldo",
           "availableBalanceLabel": "Saldo disponível",
           "badges": {
             "credits_one": "{{count}} crédito",
@@ -168,7 +168,7 @@
             "transfers_one": "{{count}} transferência pendente",
             "transfers_other": "{{count}} transferências pendentes"
           },
-          "caption": "Pronto para transferir para a conta associada."
+          "caption": "Segue para a tua conta associada quando quiseres."
         },
         "errors": {
           "description": "Não foi possível carregar o teu saldo e resumo de devoluções agora. Tenta novamente para atualizar a informação.",
@@ -675,8 +675,8 @@
               "stateLabel": "Falhou"
             },
             "processing": {
-              "description": "Pedido recebido. O montante deve chegar à conta associada em menos de 24h.",
-              "footer": "Disponível na conta até 24h, dependendo do banco.",
+              "description": "Pedido recebido. O montante deve chegar à conta associada até 1 dia útil.",
+              "footer": "Disponível na conta até 1 dia útil, dependendo do banco.",
               "stateCardTitle": "Transferência em processamento",
               "stateLabel": "Em processamento",
               "timeline": {
@@ -738,23 +738,37 @@
         },
         "transfer": {
           "actionLabel": "Pedir transferência",
+          "addDestinationActionLabel": "Adicionar conta",
           "amountPendingValue": "Insere um montante",
           "amountSummaryLabel": "Montante a transferir",
           "amountFieldHelper": "Insere um valor até {{amount}}.",
           "amountFieldLabel": "Quanto queres transferir?",
-          "balanceCaption": "Enviamos o saldo para a conta associada.",
+          "balanceCaption": "Confirma o montante e a conta onde queres receber o saldo.",
           "balanceTitle": "Saldo disponível",
           "confirmActionLabel": "Confirmar transferência",
           "confirmActionAmountLabel": "Transferir {{amount}}",
           "confirmationBadge": "Transferência pedida",
           "confirmationDescription": "O teu pedido de transferência de {{amount}} foi enviado para a conta associada.",
           "confirmationTitle": "Transferência a caminho",
-          "description": "Escolhe o montante que queres transferir.",
+          "description": "Revê a conta de destino e escolhe o montante.",
+          "destinationCardEyebrow": "Conta de destino",
           "destinationLabel": "Conta de destino",
+          "destinationMissingDescription": "Ainda não tens uma conta pronta para receber este saldo.",
+          "destinationMissingHelper": "Adiciona ou confirma o teu IBAN em Pagamentos para continuares.",
+          "destinationMissingSupportDescription": "Sem uma conta associada, a transferência não pode avançar.",
+          "destinationMissingSupportTitle": "Falta confirmar a conta",
+          "destinationMissingTitle": "Falta confirmar onde o saldo vai cair",
+          "destinationMissingValue": "Conta por associar",
+          "destinationReadyDescription": "Este saldo vai seguir para a conta associada assim que confirmares.",
+          "destinationReadyHelper": "Se precisares, podes rever ou alterar esta conta em Pagamentos.",
+          "destinationReadyTitle": "O saldo vai seguir para esta conta",
+          "destinationReviewHelper": "Confirma a conta antes de pedires a transferência.",
+          "destinationSetupRequiredValue": "Depois de associares a conta",
           "errorToast": "Não foi possível pedir a transferência agora.",
-          "estimatedArrivalValue": "Hoje, até 24h",
+          "estimatedArrivalValue": "Até 1 dia útil",
           "expectedArrivalLabel": "Chegada prevista",
           "exceedsBalanceError": "O montante não pode exceder {{amount}}.",
+          "frameDescription": "Confirma rapidamente a conta e o montante antes de enviares o saldo.",
           "fullBalanceActionLabel": "Usar saldo total",
           "newTransferActionLabel": "Pedir nova transferência",
           "payoutOptionsTitle": "Escolhe como queres receber",
@@ -762,6 +776,9 @@
           "payoutOptionUnavailableBadge": "Indisponível",
           "payoutMethodLabel": "Método de pagamento",
           "payoutMethodSepa": "Transferência SEPA",
+          "requestFailedDescription": "Volta a confirmar a conta associada ou tenta novamente dentro de momentos.",
+          "requestFailedTitle": "Não conseguimos confirmar este pedido",
+          "reviewDestinationActionLabel": "Rever conta",
           "reviewTitle": "Antes de confirmar",
           "successToast": "O pedido de transferência foi enviado.",
           "title": "Transferir saldo",

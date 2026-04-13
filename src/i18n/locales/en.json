@@ -158,7 +158,7 @@
       },
       "home": {
         "balanceCard": {
-          "actionLabel": "Transfer",
+          "actionLabel": "Transfer balance",
           "availableBalanceLabel": "Available balance",
           "badges": {
             "credits_one": "{{count}} credit",
@@ -168,7 +168,7 @@
             "transfers_one": "{{count}} pending transfer",
             "transfers_other": "{{count}} pending transfers"
           },
-          "caption": "Ready to transfer to your linked account."
+          "caption": "Send it to your linked account whenever you are ready."
         },
         "errors": {
           "description": "We couldn't load your wallet and return summary right now. Try again to refresh your latest balance.",
@@ -667,8 +667,8 @@
               "stateLabel": "Failed"
             },
             "processing": {
-              "description": "Request received. The amount should reach the linked account within 24h.",
-              "footer": "Available in the account within 24h, depending on the bank.",
+              "description": "Request received. The amount should reach the linked account within 1 business day.",
+              "footer": "Available in the account within 1 business day, depending on the bank.",
               "stateCardTitle": "Transfer processing",
               "stateLabel": "Processing",
               "timeline": {
@@ -730,23 +730,37 @@
         },
         "transfer": {
           "actionLabel": "Request transfer",
+          "addDestinationActionLabel": "Add account",
           "amountPendingValue": "Enter an amount",
           "amountSummaryLabel": "Amount to transfer",
           "amountFieldHelper": "Enter an amount up to {{amount}}.",
           "amountFieldLabel": "How much do you want to transfer?",
-          "balanceCaption": "We will send your balance to the linked account.",
+          "balanceCaption": "Confirm the amount and the account where you want to receive the balance.",
           "balanceTitle": "Available balance",
           "confirmActionLabel": "Confirm transfer",
           "confirmActionAmountLabel": "Transfer {{amount}}",
           "confirmationBadge": "Transfer requested",
           "confirmationDescription": "Your transfer request for {{amount}} was sent to the linked account.",
           "confirmationTitle": "Transfer on the way",
-          "description": "Choose the amount you want to transfer.",
+          "description": "Review the destination account and choose the amount.",
+          "destinationCardEyebrow": "Destination account",
           "destinationLabel": "Destination account",
+          "destinationMissingDescription": "You do not have an account ready to receive this balance yet.",
+          "destinationMissingHelper": "Add or confirm your IBAN in Payments before you continue.",
+          "destinationMissingSupportDescription": "Without a linked account, this transfer cannot go through.",
+          "destinationMissingSupportTitle": "Account still missing",
+          "destinationMissingTitle": "You still need to confirm where the balance should go",
+          "destinationMissingValue": "Account not linked yet",
+          "destinationReadyDescription": "This balance will be sent to the linked account as soon as you confirm.",
+          "destinationReadyHelper": "You can review or update this account in Payments at any time.",
+          "destinationReadyTitle": "The balance will be sent to this account",
+          "destinationReviewHelper": "Check the account details before you request the transfer.",
+          "destinationSetupRequiredValue": "After you add the account",
           "errorToast": "We couldn't request the transfer right now.",
-          "estimatedArrivalValue": "Today, within 24h",
+          "estimatedArrivalValue": "Within 1 business day",
           "expectedArrivalLabel": "Expected arrival",
           "exceedsBalanceError": "The amount cannot exceed {{amount}}.",
+          "frameDescription": "Quickly confirm the account and amount before you send the balance.",
           "fullBalanceActionLabel": "Use full balance",
           "newTransferActionLabel": "Request another transfer",
           "payoutOptionsTitle": "Choose how you want to receive it",
@@ -754,6 +768,9 @@
           "payoutOptionUnavailableBadge": "Unavailable",
           "payoutMethodLabel": "Payout method",
           "payoutMethodSepa": "SEPA transfer",
+          "requestFailedDescription": "Review the linked account or try again in a moment.",
+          "requestFailedTitle": "We could not confirm this request",
+          "reviewDestinationActionLabel": "Review account",
           "reviewTitle": "Before you confirm",
           "successToast": "Your transfer request was sent.",
           "title": "Transfer balance",

@@ -199,18 +199,6 @@ describe('WalletScreen', () => {
     renderWithProvider(<WalletScreen />)
 
     expect(
-      screen.queryByText(
-        i18n.t('tabScreens.wallet.overview.balanceCard.actionLabel'),
-      ),
-    ).toBeNull()
-    expect(
-      screen.getByText(
-        i18n.t(
-          'tabScreens.wallet.overview.balanceCard.transferUnavailableBadge',
-        ),
-      ),
-    ).toBeTruthy()
-    expect(
       screen.getByText(
         i18n.t('tabScreens.wallet.overview.latestMovements.emptyTitle'),
       ),
@@ -222,5 +210,13 @@ describe('WalletScreen', () => {
         ),
       ),
     ).toBeTruthy()
+
+    fireEvent.press(
+      screen.getByText(
+        i18n.t('tabScreens.wallet.overview.balanceCard.actionLabel'),
+      ),
+    )
+
+    expect(mockRouterPush).toHaveBeenCalledWith(walletRoutes.transfer)
   })
 })

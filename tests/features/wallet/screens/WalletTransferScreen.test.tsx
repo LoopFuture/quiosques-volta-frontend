@@ -33,8 +33,10 @@ jest.mock('@/features/wallet/hooks', () => ({
   useWalletOverviewQuery: jest.fn(),
 }))
 
-const { __mockRouterReplace: mockRouterReplace } =
-  jest.requireMock('expo-router')
+const {
+  __mockRouterPush: mockRouterPush,
+  __mockRouterReplace: mockRouterReplace,
+} = jest.requireMock('expo-router')
 const { useProfileQuery: mockUseProfileQuery } = jest.requireMock(
   '@/features/profile/hooks',
 )
@@ -103,6 +105,11 @@ const profileState = profileResponseSchema.parse({
   },
 })
 
+const profileStateWithoutPayoutAccount = profileResponseSchema.parse({
+  ...profileState,
+  payoutAccount: null,
+})
+
 function getButtonDisabledState(testID: string) {
   const button = screen.getByTestId(testID)
 
@@ -128,8 +135,10 @@ describe('WalletTransferScreen', () => {
       refetch: jest.fn(),
     })
     mockUseRequestWalletTransferMutation.mockReturnValue({
+      isError: false,
       isPending: false,
       mutate: jest.fn(),
+      reset: jest.fn(),
     })
   })
 
@@ -209,8 +218,10 @@ describe('WalletTransferScreen', () => {
       refetch: jest.fn(),
     })
     mockUseRequestWalletTransferMutation.mockReturnValue({
+      isError: false,
       isPending: false,
       mutate,
+      reset: jest.fn(),
     })
 
     renderWithProvider(<WalletTransferScreen />)
@@ -283,8 +294,10 @@ describe('WalletTransferScreen', () => {
       refetch: jest.fn(),
     })
     mockUseRequestWalletTransferMutation.mockReturnValue({
+      isError: false,
       isPending: false,
       mutate,
+      reset: jest.fn(),
     })
 
     renderWithProvider(<WalletTransferScreen />)
@@ -305,7 +318,7 @@ describe('WalletTransferScreen', () => {
     })
   })
 
-  it('renders fallback review values when no payout account is configured', () => {
+  it('blocks transfer submission until a payout account is configured', async () => {
     mockUseWalletOverviewQuery.mockReturnValue({
       data: walletOverviewState,
       isError: false,
@@ -313,28 +326,53 @@ describe('WalletTransferScreen', () => {
       refetch: jest.fn(),
     })
     mockUseProfileQuery.mockReturnValue({
-      data: {
-        ...profileState,
-        payoutAccount: null,
-      },
+      data: profileStateWithoutPayoutAccount,
       isError: false,
       isPending: false,
       refetch: jest.fn(),
     })
+    mockUseRequestWalletTransferMutation.mockReturnValue({
+      isError: false,
+      isPending: false,
+      mutate: jest.fn(),
+      reset: jest.fn(),
+    })
 
     renderWithProvider(<WalletTransferScreen />)
 
+    fireEvent.press(
+      screen.getByText(
+        i18n.t('tabScreens.wallet.transfer.fullBalanceActionLabel'),
+      ),
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('wallet-transfer-amount-input').props.value,
+      ).toBe('4,70')
+    })
+
+    expect(screen.getByTestId('wallet-transfer-support-state')).toBeTruthy()
+    expect(getButtonDisabledState('wallet-transfer-submit-button')).toBe(true)
+    expect(
+      screen.getAllByText(
+        i18n.t('tabScreens.wallet.transfer.destinationMissingValue'),
+      ).length,
+    ).toBeGreaterThan(0)
     expect(
       screen.getByText(i18n.t('tabScreens.wallet.transfer.reviewTitle')),
     ).toBeTruthy()
-    expect(screen.getAllByText('-').length).toBeGreaterThan(0)
-    expect(screen.queryByTestId('wallet-transfer-review-note')).toBeNull()
-    expect(
-      screen.getByText(i18n.t('tabScreens.wallet.transfer.confirmActionLabel')),
-    ).toBeTruthy()
+
+    fireEvent.press(
+      screen.getAllByText(
+        i18n.t('tabScreens.wallet.transfer.addDestinationActionLabel'),
+      )[0]!,
+    )
+
+    expect(mockRouterPush).toHaveBeenCalledWith('/profile/payments')
   })
 
-  it('renders SEPA payout review copy when a payout account is configured', () => {
+  it('renders account review copy when a payout account is configured', () => {
     mockUseWalletOverviewQuery.mockReturnValue({
       data: walletOverviewState,
       isError: false,
@@ -353,17 +391,24 @@ describe('WalletTransferScreen', () => {
       isPending: false,
       refetch: jest.fn(),
     })
+    mockUseRequestWalletTransferMutation.mockReturnValue({
+      isError: false,
+      isPending: false,
+      mutate: jest.fn(),
+      reset: jest.fn(),
+    })
 
     renderWithProvider(<WalletTransferScreen />)
 
     expect(
-      screen.getAllByText(i18n.t('tabScreens.wallet.transfer.payoutMethodSepa'))
-        .length,
-    ).toBeGreaterThan(0)
+      screen.getByText(
+        i18n.t('tabScreens.wallet.transfer.destinationReadyTitle'),
+      ),
+    ).toBeTruthy()
     expect(
-      screen.getAllByText(
-        i18n.t('tabScreens.wallet.transfer.payoutOptionSepaCaption'),
-      ).length,
-    ).toBeGreaterThan(0)
+      screen.getByText(
+        i18n.t('tabScreens.wallet.transfer.reviewDestinationActionLabel'),
+      ),
+    ).toBeTruthy()
   })
 })
