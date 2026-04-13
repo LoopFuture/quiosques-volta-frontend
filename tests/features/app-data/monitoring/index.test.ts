@@ -4,6 +4,7 @@ import {
   registerNavigationContainer,
   resetMonitoringForTests,
 } from '@/features/app-data/monitoring'
+import { ApiError } from '@/features/app-data/api'
 import { createMockExpoConfig } from '@tests/support/expo-config'
 
 const { __setExpoConfig } = jest.requireMock('expo-constants')
@@ -66,11 +67,12 @@ describe('app-data/monitoring index', () => {
 
   it('includes sanitized errors in development console diagnostics', () => {
     setNodeEnv('development')
+    const error = new Error('refresh failed')
 
     recordDiagnosticEvent({
       captureError: true,
       domain: 'auth',
-      error: new Error('refresh failed'),
+      error,
       operation: 'console-test',
       phase: 'write',
       status: 'error',
@@ -84,6 +86,7 @@ describe('app-data/monitoring index', () => {
           name: 'Error',
         }),
       }),
+      error,
     )
   })
 
@@ -159,9 +162,7 @@ describe('app-data/monitoring index', () => {
         category: 'app.react-query',
         data: expect.objectContaining({
           details: expect.objectContaining({
-            items: expect.objectContaining({
-              totalCount: 12,
-            }),
+            items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
             token: '[REDACTED]',
           }),
         }),
@@ -180,6 +181,71 @@ describe('app-data/monitoring index', () => {
     })
 
     expect(captureException).toHaveBeenCalledWith(expect.any(Error))
+  })
+
+  it('preserves sanitized ApiError response payload details in Sentry diagnostic context', () => {
+    __setExpoConfig(
+      createMockExpoConfig({
+        sentry: {
+          dsn: 'https://public@example.ingest.sentry.io/1',
+          environment: 'test',
+        },
+      }),
+    )
+
+    recordDiagnosticEvent({
+      captureError: true,
+      domain: 'react-query',
+      error: new ApiError({
+        message: 'API request failed with status 422.',
+        method: 'PATCH',
+        responsePayload: {
+          error: {
+            code: 'validation_error',
+            message: 'One or more fields are invalid.',
+            requestId: '3934d456e06953300fd7efd001d2eb2a',
+          },
+          issues: [
+            {
+              code: 'invalid_format',
+              field: 'payoutAccount.iban',
+              message: 'iban must be an IBAN',
+            },
+          ],
+        },
+        status: 422,
+        url: 'https://volta.example/api/v1/profile',
+      }),
+      operation: 'complete-setup',
+      phase: 'execute',
+      status: 'error',
+    })
+
+    expect(addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          error: expect.objectContaining({
+            method: 'PATCH',
+            responsePayload: expect.objectContaining({
+              error: expect.objectContaining({
+                code: 'validation_error',
+                message: 'One or more fields are invalid.',
+                requestId: '3934d456e06953300fd7efd001d2eb2a',
+              }),
+              issues: [
+                expect.objectContaining({
+                  code: 'invalid_format',
+                  field: 'payoutAccount.iban',
+                  message: 'iban must be an IBAN',
+                }),
+              ],
+            }),
+            status: 422,
+            url: 'https://volta.example/api/v1/profile',
+          }),
+        }),
+      }),
+    )
   })
 
   it('initializes Sentry tracing and registers the navigation container when enabled', () => {

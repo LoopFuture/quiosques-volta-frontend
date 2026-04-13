@@ -69,17 +69,20 @@ describe('ProfilePaymentsScreen', () => {
 
     renderWithProvider(<ProfilePaymentsScreen />)
 
-    expect(screen.getByDisplayValue('Joao Ferreira')).toBeTruthy()
-    fireEvent.changeText(
-      screen.getByLabelText(i18n.t('tabScreens.profile.payments.ibanLabel')),
-      'PT50000201231234567890154',
+    const ibanField = screen.getByLabelText(
+      i18n.t('tabScreens.profile.payments.ibanLabel'),
     )
+
+    expect(screen.getByDisplayValue('Joao Ferreira')).toBeTruthy()
+    fireEvent.changeText(ibanField, 'PT50 0002 0123 1234 5678 9015 4')
+    expect(ibanField).toHaveProp('value', 'PT50 0002 0123 1234 5678 9015 4')
     fireEvent.press(screen.getByTestId('profile-payments-save-button'))
 
     await waitFor(() => {
       expect(mutate).toHaveBeenCalledWith(
         {
           payoutAccount: {
+            accountHolderName: 'Joao Ferreira',
             iban: 'PT50000201231234567890154',
             rail: 'sepa',
           },

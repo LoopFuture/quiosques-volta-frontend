@@ -148,17 +148,31 @@ describe('ProfileSetupScreen', () => {
     syncLocale('system')
   })
 
-  async function advanceToSecurityStep() {
+  async function advanceToNotificationsStep() {
     fireEvent.press(screen.getByTestId('profile-setup-next-button'))
 
     await waitFor(() => {
       expect(screen.getByTestId('profile-setup-step-payments')).toBeTruthy()
     })
 
-    fireEvent.changeText(
-      screen.getByLabelText(i18n.t('tabScreens.profile.payments.ibanLabel')),
-      'PT50000201231234567890154',
+    const ibanField = screen.getByLabelText(
+      i18n.t('tabScreens.profile.payments.ibanLabel'),
     )
+
+    fireEvent.changeText(ibanField, 'PT50 0002 0123 1234 5678 9015 4')
+    expect(ibanField).toHaveProp('value', 'PT50 0002 0123 1234 5678 9015 4')
+    fireEvent.press(screen.getByTestId('profile-setup-next-button'))
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('profile-setup-step-notifications'),
+      ).toBeTruthy()
+    })
+  }
+
+  async function advanceToSecurityStep() {
+    await advanceToNotificationsStep()
+
     fireEvent.press(screen.getByTestId('profile-setup-next-button'))
 
     await waitFor(() => {
@@ -171,18 +185,24 @@ describe('ProfileSetupScreen', () => {
 
     expect(screen.getByTestId('profile-setup-step-personal')).toBeTruthy()
 
-    await advanceToSecurityStep()
+    await advanceToNotificationsStep()
 
     fireEvent.press(
       screen.getByLabelText(
         i18n.t(
-          'tabScreens.profile.setup.steps.security.pushNotificationsLabel',
+          'tabScreens.profile.setup.steps.notifications.pushNotificationsLabel',
         ),
       ),
     )
 
     await waitFor(() => {
       expect(requestPushPermissionAndToken).toHaveBeenCalledTimes(1)
+    })
+
+    fireEvent.press(screen.getByTestId('profile-setup-next-button'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('profile-setup-step-security')).toBeTruthy()
     })
 
     fireEvent.press(
@@ -218,6 +238,7 @@ describe('ProfileSetupScreen', () => {
             pinEnabled: false,
             pushNotificationsEnabled: true,
           },
+          alertsEnabled: true,
         },
       })
       expect(mockRouterReplace).toHaveBeenCalledWith(homeRoutes.index)
@@ -266,7 +287,9 @@ describe('ProfileSetupScreen', () => {
     fireEvent.press(screen.getByTestId('profile-setup-back-button'))
 
     await waitFor(() => {
-      expect(screen.getByTestId('profile-setup-step-payments')).toBeTruthy()
+      expect(
+        screen.getByTestId('profile-setup-step-notifications'),
+      ).toBeTruthy()
     })
 
     fireEvent.press(screen.getByTestId('profile-setup-next-button'))
@@ -282,10 +305,48 @@ describe('ProfileSetupScreen', () => {
         i18n.t('tabScreens.profile.setup.actions.finishLabel'),
         i18n.t('tabScreens.profile.setup.submitError'),
       )
-      expect(screen.getByText('setup exploded')).toBeTruthy()
     })
 
     windowSpy.mockRestore()
+  })
+
+  it('prefills account holder name from the entered personal name when payments is still blank', async () => {
+    mockUseAuthSession.mockReturnValue({
+      identity: {
+        email: 'joao@volta.pt',
+        name: null,
+      },
+    })
+    mockUseProfileQuery.mockReturnValue({
+      data: profileResponseSchema.parse({
+        ...profileState,
+        personal: {
+          ...profileState.personal,
+          name: null,
+        },
+      }),
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<ProfileSetupScreen />)
+
+    fireEvent.changeText(
+      screen.getByLabelText(i18n.t('tabScreens.profile.personal.nameLabel')),
+      'Maria Silva',
+    )
+    fireEvent.press(screen.getByTestId('profile-setup-next-button'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('profile-setup-step-payments')).toBeTruthy()
+    })
+
+    expect(
+      screen.getByLabelText(
+        i18n.t('tabScreens.profile.payments.accountHolderNameLabel'),
+      ),
+    ).toHaveProp('value', 'Maria Silva')
   })
 
   it('shows the biometric failure toast when device authentication is rejected', async () => {
@@ -355,19 +416,12 @@ describe('ProfileSetupScreen', () => {
 
     renderWithProvider(<ProfileSetupScreen />)
 
-    await advanceToSecurityStep()
-
-    expect(
-      screen.queryByLabelText(
-        i18n.t('tabScreens.profile.privacy.biometricLabel'),
-      ),
-    ).toBeNull()
-    expect(screen.getByTestId('profile-setup-pin-set-button')).toBeTruthy()
+    await advanceToNotificationsStep()
 
     fireEvent.press(
       screen.getByLabelText(
         i18n.t(
-          'tabScreens.profile.setup.steps.security.pushNotificationsLabel',
+          'tabScreens.profile.setup.steps.notifications.pushNotificationsLabel',
         ),
       ),
     )
@@ -375,6 +429,19 @@ describe('ProfileSetupScreen', () => {
     await waitFor(() => {
       expect(requestPushPermissionAndToken).not.toHaveBeenCalled()
     })
+
+    fireEvent.press(screen.getByTestId('profile-setup-next-button'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('profile-setup-step-security')).toBeTruthy()
+    })
+
+    expect(
+      screen.queryByLabelText(
+        i18n.t('tabScreens.profile.privacy.biometricLabel'),
+      ),
+    ).toBeNull()
+    expect(screen.getByTestId('profile-setup-pin-set-button')).toBeTruthy()
   })
 
   it('lets the user set a PIN during setup and submits it in the snapshot', async () => {
@@ -421,6 +488,7 @@ describe('ProfileSetupScreen', () => {
             pinEnabled: true,
             pushNotificationsEnabled: false,
           },
+          alertsEnabled: true,
         },
       })
     })
@@ -498,6 +566,7 @@ describe('ProfileSetupScreen', () => {
             pinEnabled: false,
             pushNotificationsEnabled: false,
           },
+          alertsEnabled: true,
         },
       })
     })
@@ -535,6 +604,64 @@ describe('ProfileSetupScreen', () => {
         i18n.t('tabScreens.profile.privacy.biometricLabel'),
         i18n.t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
       )
+    })
+  })
+
+  it('preserves the email alerts toggle state in the setup snapshot', async () => {
+    renderWithProvider(<ProfileSetupScreen />)
+
+    fireEvent.press(screen.getByTestId('profile-setup-next-button'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('profile-setup-step-payments')).toBeTruthy()
+    })
+
+    fireEvent.changeText(
+      screen.getByLabelText(i18n.t('tabScreens.profile.payments.ibanLabel')),
+      'PT50000201231234567890154',
+    )
+    fireEvent.press(screen.getByTestId('profile-setup-next-button'))
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('profile-setup-step-notifications'),
+      ).toBeTruthy()
+    })
+
+    fireEvent.press(
+      screen.getByLabelText(
+        i18n.t('tabScreens.profile.setup.steps.notifications.emailAlertsLabel'),
+      ),
+    )
+    fireEvent.press(screen.getByTestId('profile-setup-next-button'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('profile-setup-step-security')).toBeTruthy()
+    })
+
+    fireEvent.press(screen.getByTestId('profile-setup-finish-button'))
+
+    await waitFor(() => {
+      expect(mutateAsync).toHaveBeenCalledWith({
+        snapshot: {
+          payments: {
+            accountHolderName: 'Joao Ferreira',
+            iban: 'PT50000201231234567890154',
+          },
+          personal: {
+            email: 'joao@volta.pt',
+            name: 'Joao Ferreira',
+            nif: '123456789',
+            phoneNumber: '+351912345678',
+          },
+          preferences: {
+            biometricsEnabled: false,
+            pinEnabled: false,
+            pushNotificationsEnabled: false,
+          },
+          alertsEnabled: false,
+        },
+      })
     })
   })
 

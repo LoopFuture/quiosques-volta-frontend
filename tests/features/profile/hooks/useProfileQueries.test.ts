@@ -153,6 +153,7 @@ describe('profile hooks', () => {
     useUpdateProfilePaymentsMutation()
     const patch = {
       payoutAccount: {
+        accountHolderName: 'Joao Ferreira',
         iban: 'PT50000201231234567890154',
         rail: 'sepa',
       },
@@ -165,7 +166,7 @@ describe('profile hooks', () => {
     expect(options.meta).toEqual({
       feature: 'profile',
       operation: 'update-payments',
-      redactKeys: ['iban'],
+      redactKeys: ['accountHolderName', 'fullName', 'iban'],
     })
 
     await options.mutationFn(patch)
@@ -213,7 +214,15 @@ describe('profile hooks', () => {
     expect(options.meta).toEqual({
       feature: 'profile',
       operation: 'complete-setup',
-      redactKeys: ['email', 'iban', 'name', 'nif', 'phoneNumber'],
+      redactKeys: [
+        'accountHolderName',
+        'email',
+        'fullName',
+        'iban',
+        'name',
+        'nif',
+        'phoneNumber',
+      ],
     })
 
     await options.mutationFn({
@@ -233,6 +242,7 @@ describe('profile hooks', () => {
           pinEnabled: false,
           pushNotificationsEnabled: true,
         },
+        alertsEnabled: true,
       },
     })
     await options.onSuccess(profileState)
@@ -242,6 +252,7 @@ describe('profile hooks', () => {
         status: 'completed',
       },
       payoutAccount: {
+        accountHolderName: 'Joao Ferreira',
         iban: 'PT50000201231234567890154',
         rail: 'sepa',
       },
@@ -264,5 +275,52 @@ describe('profile hooks', () => {
     expect(invalidateHomeQueries).toHaveBeenCalledWith(queryClient)
     expect(invalidateWalletQueries).toHaveBeenCalledWith(queryClient)
     expect(invalidateBarcodeQueries).toHaveBeenCalledWith(queryClient)
+  })
+
+  it('still sends enabled email alert preferences during setup completion', async () => {
+    useCompleteProfileSetupMutation()
+    const [options] = mockUseMutation.mock.calls[0]
+
+    await options.mutationFn({
+      snapshot: {
+        payments: {
+          accountHolderName: 'Joao Ferreira',
+          iban: 'PT50000201231234567890154',
+        },
+        personal: {
+          email: 'joao@volta.pt',
+          name: 'Joao Ferreira',
+          nif: '123456789',
+          phoneNumber: '+351912345678',
+        },
+        preferences: {
+          biometricsEnabled: false,
+          pinEnabled: false,
+          pushNotificationsEnabled: false,
+        },
+        alertsEnabled: false,
+      },
+    })
+
+    expect(mockPatchProfile).toHaveBeenCalledWith({
+      onboarding: {
+        status: 'completed',
+      },
+      payoutAccount: {
+        accountHolderName: 'Joao Ferreira',
+        iban: 'PT50000201231234567890154',
+        rail: 'sepa',
+      },
+      personal: {
+        email: 'joao@volta.pt',
+        name: 'Joao Ferreira',
+        nif: '123456789',
+        phoneNumber: '+351912345678',
+      },
+      preferences: {
+        alertsEmail: 'joao@volta.pt',
+        alertsEnabled: true,
+      },
+    })
   })
 })

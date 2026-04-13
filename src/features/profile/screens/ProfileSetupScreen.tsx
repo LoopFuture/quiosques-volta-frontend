@@ -45,20 +45,26 @@ import { SettingsToggleRow } from '../components/ProfilePreferenceControls'
 import { PinPreferenceCard } from '../components/PinPreferenceCard'
 import { getProfileValidationCopy } from '../presentation'
 
-const totalSteps = 3
+const totalSteps = 4
 
-type SetupStepId = 'payments' | 'personal' | 'security'
+type SetupStepId = 'notifications' | 'payments' | 'personal' | 'security'
 
 const setupStepFieldNames: Record<
   SetupStepId,
   (keyof ProfileSetupFormValues)[]
 > = {
+  notifications: ['alertsEnabled', 'pushNotificationsEnabled'],
   payments: ['accountHolderName', 'iban'],
   personal: ['email', 'name', 'phoneNumber', 'nif'],
-  security: ['biometricsEnabled', 'pinEnabled', 'pushNotificationsEnabled'],
+  security: ['biometricsEnabled', 'pinEnabled'],
 }
 
-const setupStepOrder: SetupStepId[] = ['personal', 'payments', 'security']
+const setupStepOrder: SetupStepId[] = [
+  'personal',
+  'payments',
+  'notifications',
+  'security',
+]
 
 function getBiometricErrorToast(
   reason: 'cancelled' | 'failed' | 'not-available' | 'not-enrolled',
@@ -142,7 +148,6 @@ export function ProfileSetupScreen() {
     requestPushPermissionAndToken,
   } = usePushNotifications()
   const [activeStepIndex, setActiveStepIndex] = useState(0)
-  const [submissionError, setSubmissionError] = useState<string | null>(null)
   const { width } = useWindowDimensions()
   const validationCopy = getProfileValidationCopy(t)
   const isCompactWidth = width < 360
@@ -195,7 +200,7 @@ export function ProfileSetupScreen() {
       'tabScreens.profile.privacy.pushNotificationsDeviceRequiredHelper',
     ),
     idleHelper: t(
-      'tabScreens.profile.setup.steps.security.pushNotificationsHelper',
+      'tabScreens.profile.setup.steps.notifications.pushNotificationsHelper',
     ),
     openSettingsLabel: t(
       'tabScreens.profile.privacy.pushNotificationsOpenSettingsLabel',
@@ -336,7 +341,6 @@ export function ProfileSetupScreen() {
 
     if (currentStepId === 'security') {
       await handleSubmit(async (values) => {
-        setSubmissionError(null)
         try {
           await completeSetupMutation.mutateAsync({
             snapshot: toProfileSetupSnapshot(values),
@@ -351,15 +355,10 @@ export function ProfileSetupScreen() {
             pushNotificationsEnabled: values.pushNotificationsEnabled,
           })
           router.replace(homeRoutes.index)
-        } catch (error) {
+        } catch {
           showError(
             t('tabScreens.profile.setup.actions.finishLabel'),
             t('tabScreens.profile.setup.submitError'),
-          )
-          setSubmissionError(
-            error instanceof Error
-              ? error.message
-              : t('tabScreens.profile.setup.submitError'),
           )
         }
       })()
@@ -393,18 +392,6 @@ export function ProfileSetupScreen() {
       decorativeBackground={false}
       footer={
         <YStack gap="$3" pt="$5">
-          {submissionError ? (
-            <SurfaceCard
-              bg="$red2"
-              borderColor="$red8"
-              testID="profile-setup-error"
-            >
-              <Text color="$red11" fontWeight="700">
-                {submissionError}
-              </Text>
-            </SurfaceCard>
-          ) : null}
-
           {isCompactWidth ? (
             <YStack gap="$3">
               {activeStepIndex > 0 ? (
@@ -678,7 +665,9 @@ export function ProfileSetupScreen() {
                     name="iban"
                     render={({ field, fieldState }) => (
                       <FormField
+                        autoComplete="off"
                         autoCapitalize="characters"
+                        autoCorrect={false}
                         errorText={fieldState.error?.message}
                         helperText={
                           fieldState.error
@@ -689,6 +678,7 @@ export function ProfileSetupScreen() {
                         onBlur={field.onBlur}
                         onChangeText={field.onChange}
                         required
+                        spellCheck={false}
                         value={field.value}
                       />
                     )}
@@ -696,6 +686,114 @@ export function ProfileSetupScreen() {
                 </YStack>
               </SeparatedStack>
             </SurfaceCard>
+          </>
+        ) : null}
+
+        {currentStepId === 'notifications' ? (
+          <>
+            <YStack gap="$2">
+              <Text
+                fontSize={stepTitleFontSize}
+                fontWeight="900"
+                lineHeight={stepTitleLineHeight}
+              >
+                {t('tabScreens.profile.setup.steps.notifications.title')}
+              </Text>
+              <Text
+                color="$color11"
+                fontSize={stepDescriptionFontSize}
+                lineHeight={stepDescriptionLineHeight}
+              >
+                {t('tabScreens.profile.setup.steps.notifications.description')}
+              </Text>
+            </YStack>
+
+            <YStack gap="$3">
+              <SetupSectionLabel>
+                {t(
+                  'tabScreens.profile.setup.steps.notifications.accountSectionLabel',
+                )}
+              </SetupSectionLabel>
+              <Controller
+                control={control}
+                name="pushNotificationsEnabled"
+                render={({ field }) => (
+                  <PushNotificationsPreferenceCard
+                    canAskAgain={canAskAgain}
+                    checked={field.value}
+                    copy={pushNotificationsCopy}
+                    disabled={completeSetupMutation.isPending}
+                    expoPushToken={expoPushToken}
+                    isPending={isSyncingPushNotifications}
+                    isPhysicalDevice={isPhysicalDevice}
+                    label={t(
+                      'tabScreens.profile.setup.steps.notifications.pushNotificationsLabel',
+                    )}
+                    permissionStatus={permissionStatus}
+                    registrationErrorCode={registrationErrorCode}
+                    testID="profile-setup-push-notifications-card"
+                    tone="neutral"
+                    onCheckedChange={(checked) => {
+                      void handlePushNotificationsToggleChange(
+                        checked,
+                        field.onChange,
+                      )
+                    }}
+                    onOpenSettings={() => {
+                      void Linking.openSettings()
+                    }}
+                  />
+                )}
+              />
+            </YStack>
+
+            <YStack gap="$3">
+              <SetupSectionLabel>
+                {t(
+                  'tabScreens.profile.setup.steps.notifications.emailSectionLabel',
+                )}
+              </SetupSectionLabel>
+              <SurfaceCard tone="accent">
+                <SeparatedStack
+                  separatorProps={{ tone: 'accent' }}
+                  separatorSpacing="$3"
+                >
+                  <YStack gap="$1">
+                    <Text fontSize={14} fontWeight="700">
+                      {t(
+                        'tabScreens.profile.setup.steps.notifications.emailAlertsTitle',
+                      )}
+                    </Text>
+                    <Text color="$color11" fontSize={13}>
+                      {t(
+                        'tabScreens.profile.setup.steps.notifications.emailAlertsHelper',
+                        {
+                          email: defaultSnapshot.personal.email,
+                        },
+                      )}
+                    </Text>
+                  </YStack>
+                  <Controller
+                    control={control}
+                    name="alertsEnabled"
+                    render={({ field }) => (
+                      <SettingsToggleRow
+                        checked={field.value}
+                        helperText={t(
+                          'tabScreens.profile.setup.steps.notifications.emailAlertsConsentLabel',
+                        )}
+                        label={t(
+                          'tabScreens.profile.setup.steps.notifications.emailAlertsLabel',
+                        )}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked)
+                        }}
+                      />
+                    )}
+                  />
+                </SeparatedStack>
+              </SurfaceCard>
+            </YStack>
           </>
         ) : null}
 
@@ -759,45 +857,6 @@ export function ProfileSetupScreen() {
                 onRemovePin={() => handleRemovePin()}
                 onSavePin={handleSavePin}
                 testIDPrefix="profile-setup-pin"
-              />
-            </YStack>
-
-            <YStack gap="$3">
-              <SetupSectionLabel>
-                {t(
-                  'tabScreens.profile.setup.steps.security.notificationsSectionLabel',
-                )}
-              </SetupSectionLabel>
-              <Controller
-                control={control}
-                name="pushNotificationsEnabled"
-                render={({ field }) => (
-                  <PushNotificationsPreferenceCard
-                    canAskAgain={canAskAgain}
-                    checked={field.value}
-                    copy={pushNotificationsCopy}
-                    disabled={completeSetupMutation.isPending}
-                    expoPushToken={expoPushToken}
-                    isPending={isSyncingPushNotifications}
-                    isPhysicalDevice={isPhysicalDevice}
-                    label={t(
-                      'tabScreens.profile.setup.steps.security.pushNotificationsLabel',
-                    )}
-                    permissionStatus={permissionStatus}
-                    registrationErrorCode={registrationErrorCode}
-                    testID="profile-setup-push-notifications-card"
-                    tone="neutral"
-                    onCheckedChange={(checked) => {
-                      void handlePushNotificationsToggleChange(
-                        checked,
-                        field.onChange,
-                      )
-                    }}
-                    onOpenSettings={() => {
-                      void Linking.openSettings()
-                    }}
-                  />
-                )}
               />
             </YStack>
           </>

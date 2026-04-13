@@ -17,6 +17,7 @@ import {
   serializeProfilePaymentsForm,
   serializeProfilePersonalForm,
   serializeProfilePrivacyForm,
+  toProfilePaymentsDraft,
   toProfileSetupSnapshot,
 } from '@/features/profile/forms'
 import {
@@ -24,6 +25,7 @@ import {
   getProfileSetupSeedState,
   getProfileSetupSnapshotFromProfile,
   payoutAccountInputSchema,
+  serializeProfilePatchRequest,
   profilePatchRequestSchema,
   profileResponseSchema,
   profileSetupSnapshotSchema,
@@ -51,7 +53,7 @@ const profile = profileResponseSchema.parse({
     status: 'completed',
   },
   payoutAccount: {
-    accountHolderName: 'Joao Ferreira',
+    fullName: 'Joao Ferreira',
     ibanMasked: 'PT50************90123',
     rail: 'spin',
   },
@@ -197,6 +199,7 @@ describe('profile models and forms', () => {
         biometricsEnabled: true,
         notificationsAccepted: false,
       },
+      alertsEnabled: false,
     })
 
     expect(
@@ -215,6 +218,7 @@ describe('profile models and forms', () => {
       t('tabScreens.profile.hub.readiness.securityReviewPinValue'),
     )
     expect(snapshot.preferences.pushNotificationsEnabled).toBe(false)
+    expect(snapshot.alertsEnabled).toBe(false)
   })
 
   it('builds defaults and normalizes personal, payments, privacy, app settings, and setup payloads', () => {
@@ -260,6 +264,7 @@ describe('profile models and forms', () => {
     })
     expect(getProfileSetupFormDefaultValues(setupSnapshot)).toEqual({
       accountHolderName: 'Joao Ferreira',
+      alertsEnabled: true,
       biometricsEnabled: true,
       email: 'joao.ferreira@volta.pt',
       iban: '',
@@ -292,6 +297,16 @@ describe('profile models and forms', () => {
       iban: 'PT50000700001111222233',
     })
     expect(
+      toProfilePaymentsDraft({
+        accountHolderName: ' Conta Joao Ferreira ',
+        iban: 'pt50 0007 0000 1111 2222 33',
+      }),
+    ).toEqual({
+      accountHolderName: 'Conta Joao Ferreira',
+      iban: 'PT50000700001111222233',
+      rail: 'sepa',
+    })
+    expect(
       serializeProfilePrivacyForm({
         alertsEmail: ' alerts@volta.pt ',
         alertsEnabled: true,
@@ -315,6 +330,7 @@ describe('profile models and forms', () => {
     expect(
       toProfileSetupSnapshot({
         accountHolderName: ' Conta Joao Ferreira ',
+        alertsEnabled: true,
         biometricsEnabled: true,
         email: ' joao.ferreira@volta.pt ',
         iban: 'pt50 0007 0000 1111 2222 33',
@@ -340,6 +356,7 @@ describe('profile models and forms', () => {
         pinEnabled: false,
         pushNotificationsEnabled: false,
       },
+      alertsEnabled: true,
     })
   })
 
@@ -381,6 +398,7 @@ describe('profile models and forms', () => {
         personal: validationCopy.personal,
       }).safeParse({
         accountHolderName: '',
+        alertsEnabled: true,
         biometricsEnabled: true,
         email: 'not-an-email',
         iban: 'PT50 1234',
@@ -392,22 +410,41 @@ describe('profile models and forms', () => {
     ).toBe(false)
     expect(
       payoutAccountInputSchema.parse({
+        accountHolderName: ' Joao Ferreira ',
         iban: 'PT50000700001111222233',
         spinEnabled: true,
       }),
     ).toEqual({
+      accountHolderName: 'Joao Ferreira',
       iban: 'PT50000700001111222233',
       rail: 'sepa',
     })
     expect(
       payoutAccountInputSchema.parse({
+        accountHolderName: ' Joao Ferreira ',
         iban: 'PT50000700001111222233',
         rail: 'sepa',
         spinEnabled: true,
       }),
     ).toEqual({
+      accountHolderName: 'Joao Ferreira',
       iban: 'PT50000700001111222233',
       rail: 'sepa',
+    })
+    expect(
+      serializeProfilePatchRequest({
+        payoutAccount: {
+          accountHolderName: ' Joao Ferreira ',
+          iban: 'PT50000700001111222233',
+          rail: 'sepa',
+        },
+      }),
+    ).toEqual({
+      payoutAccount: {
+        fullName: 'Joao Ferreira',
+        iban: 'PT50000700001111222233',
+        rail: 'sepa',
+      },
     })
     expect(profilePatchRequestSchema.safeParse({}).success).toBe(false)
   })
@@ -507,6 +544,51 @@ describe('profile models and forms', () => {
         pinEnabled: false,
         pushNotificationsEnabled: true,
       },
+      alertsEnabled: false,
+    })
+  })
+
+  it('does not prefill onboarding name fields with an email-like identity name', () => {
+    const seededProfile = getProfileSetupSeedState({
+      identity: {
+        email: 'jwt-email@volta.pt',
+        name: 'jwt-email@volta.pt',
+      },
+      profile: profileResponseSchema.parse({
+        ...profile,
+        personal: {
+          ...profile.personal,
+          name: null,
+        },
+        payoutAccount: null,
+      }),
+    }).profile
+
+    expect(seededProfile.personal.email).toBe('jwt-email@volta.pt')
+    expect(seededProfile.personal.name).toBeNull()
+    expect(
+      getProfileSetupSnapshotFromProfile(seededProfile, {
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      }),
+    ).toEqual({
+      payments: {
+        accountHolderName: '',
+        iban: '',
+      },
+      personal: {
+        email: 'jwt-email@volta.pt',
+        name: '',
+        nif: '123456789',
+        phoneNumber: '+351911223344',
+      },
+      preferences: {
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      },
+      alertsEnabled: true,
     })
   })
 })

@@ -1,5 +1,6 @@
 import { z } from 'zod/v4'
 import {
+  payoutAccountInputSchema,
   type PayoutAccount,
   type PayoutAccountInput,
 } from '@/features/profile/models'
@@ -62,10 +63,11 @@ export function getProfilePaymentsFormDefaultValues(
 export function toProfilePaymentsDraft(
   values: ProfilePaymentsFormValues,
 ): PayoutAccountInput {
-  return {
+  return payoutAccountInputSchema.parse({
+    accountHolderName: values.accountHolderName.trim(),
     iban: normalizeIban(values.iban),
     rail: 'sepa',
-  }
+  })
 }
 
 export function serializeProfilePaymentsForm(

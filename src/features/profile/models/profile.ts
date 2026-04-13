@@ -31,15 +31,17 @@ export const profilePersonalSchema = z.object({
 
 const rawPayoutAccountSchema = z.object({
   accountHolderName: z.string().nullable().optional(),
+  fullName: z.string().nullable().optional(),
   ibanMasked: z.string(),
   rail: rawPayoutRailSchema,
   spinEnabled: z.boolean().optional(),
 })
 
 export const payoutAccountSchema = rawPayoutAccountSchema.transform(
-  ({ accountHolderName, ibanMasked }) => {
-    const normalizedAccountHolderName =
-      normalizeOptionalPayoutAccountName(accountHolderName)
+  ({ accountHolderName, fullName, ibanMasked }) => {
+    const normalizedAccountHolderName = normalizeOptionalPayoutAccountName(
+      fullName ?? accountHolderName,
+    )
 
     return {
       ...(normalizedAccountHolderName
@@ -55,12 +57,14 @@ export const payoutAccountSchema = rawPayoutAccountSchema.transform(
 
 export const payoutAccountInputSchema = z
   .object({
+    accountHolderName: z.string().trim().min(2).max(120),
     iban: z.string().regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/),
     rail: rawPayoutRailSchema.optional(),
     spinEnabled: z.boolean().optional(),
   })
   .transform((value) => {
     return {
+      accountHolderName: value.accountHolderName.trim(),
       iban: value.iban,
       rail: 'sepa' as const,
     }
@@ -139,6 +143,54 @@ export type Onboarding = z.infer<typeof onboardingSchema>
 export type ProfileResponse = z.infer<typeof profileResponseSchema>
 export type ProfilePatchRequest = z.infer<typeof profilePatchRequestSchema>
 export type PayoutRail = z.infer<typeof payoutRailSchema>
+
+const payoutAccountApiInputSchema = z
+  .object({
+    fullName: z.string().trim().min(2).max(120),
+    iban: z.string().regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/),
+    rail: rawPayoutRailSchema.optional(),
+    spinEnabled: z.boolean().optional(),
+  })
+  .transform((value) => {
+    return {
+      fullName: value.fullName.trim(),
+      iban: value.iban,
+      rail: 'sepa' as const,
+    }
+  })
+
+export const profilePatchApiRequestSchema = z
+  .object({
+    onboarding: profileOnboardingPatchSchema.optional(),
+    payoutAccount: payoutAccountApiInputSchema.optional(),
+    personal: profilePersonalPatchSchema.optional(),
+    preferences: profilePreferencesPatchSchema.optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0)
+
+export type ProfilePatchApiRequest = z.infer<
+  typeof profilePatchApiRequestSchema
+>
+
+export function serializeProfilePatchRequest(
+  patch: ProfilePatchRequest,
+): ProfilePatchApiRequest {
+  const normalizedPatch = profilePatchRequestSchema.parse(patch)
+
+  return profilePatchApiRequestSchema.parse({
+    ...normalizedPatch,
+    ...(normalizedPatch.payoutAccount
+      ? {
+          payoutAccount: {
+            fullName: normalizedPatch.payoutAccount.accountHolderName,
+            iban: normalizedPatch.payoutAccount.iban,
+            rail: normalizedPatch.payoutAccount.rail,
+          },
+        }
+      : {}),
+  })
+}
+
 export {
   devicePrivacySettingsSchema,
   getDefaultDevicePrivacySettings,

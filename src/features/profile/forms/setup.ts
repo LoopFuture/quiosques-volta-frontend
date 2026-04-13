@@ -26,6 +26,7 @@ function isPracticalPtIban(value: string) {
 
 export type ProfileSetupFormValues = {
   accountHolderName: string
+  alertsEnabled: boolean
   biometricsEnabled: boolean
   email: string
   iban: string
@@ -62,6 +63,7 @@ export function getProfileSetupFormSchema(
       .trim()
       .min(1, validation.payments.accountHolderNameRequired)
       .max(120),
+    alertsEnabled: z.boolean(),
     biometricsEnabled: z.boolean(),
     email: z
       .string()
@@ -106,6 +108,7 @@ export function getProfileSetupFormDefaultValues(
 ): ProfileSetupFormValues {
   return {
     accountHolderName: snapshot.payments.accountHolderName,
+    alertsEnabled: snapshot.alertsEnabled,
     biometricsEnabled: snapshot.preferences.biometricsEnabled,
     email: snapshot.personal.email,
     iban: snapshot.payments.iban,
@@ -131,6 +134,7 @@ export function toProfileSetupSnapshot(
       nif: normalizeNif(values.nif),
       phoneNumber: normalizePhoneNumber(values.phoneNumber),
     },
+    alertsEnabled: values.alertsEnabled,
     preferences: {
       biometricsEnabled: values.biometricsEnabled,
       pinEnabled: values.pinEnabled,

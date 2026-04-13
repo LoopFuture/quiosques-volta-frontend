@@ -1,6 +1,10 @@
 import { request } from '@/features/app-data/api'
-import type { ProfilePatchRequest, ProfileResponse } from './models'
-import { profilePatchRequestSchema, profileResponseSchema } from './models'
+import type {
+  ProfilePatchApiRequest,
+  ProfilePatchRequest,
+  ProfileResponse,
+} from './models'
+import { profileResponseSchema, serializeProfilePatchRequest } from './models'
 
 export async function fetchProfileState(signal?: AbortSignal) {
   return profileResponseSchema.parse(
@@ -18,12 +22,20 @@ export async function fetchProfileState(signal?: AbortSignal) {
 
 export async function patchProfile(patch: ProfilePatchRequest) {
   return profileResponseSchema.parse(
-    await request<ProfileResponse, ProfilePatchRequest>({
-      body: profilePatchRequestSchema.parse(patch),
+    await request<ProfileResponse, ProfilePatchApiRequest>({
+      body: serializeProfilePatchRequest(patch),
       meta: {
         feature: 'profile',
         operation: 'patch-profile',
-        redactKeys: ['email', 'iban', 'name', 'nif', 'phoneNumber'],
+        redactKeys: [
+          'accountHolderName',
+          'email',
+          'fullName',
+          'iban',
+          'name',
+          'nif',
+          'phoneNumber',
+        ],
       },
       method: 'PATCH',
       path: '/api/v1/profile',

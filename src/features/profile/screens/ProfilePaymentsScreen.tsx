@@ -104,7 +104,9 @@ function ProfilePaymentsForm({
             name="iban"
             render={({ field, fieldState }) => (
               <FormField
+                autoComplete="off"
                 autoCapitalize="characters"
+                autoCorrect={false}
                 errorText={fieldState.error?.message}
                 helperText={
                   fieldState.error
@@ -116,6 +118,7 @@ function ProfilePaymentsForm({
                 onChangeText={field.onChange}
                 placeholder={payments?.ibanMasked ?? undefined}
                 required
+                spellCheck={false}
                 value={field.value}
               />
             )}

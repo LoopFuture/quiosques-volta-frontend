@@ -60,9 +60,7 @@ describe('app query client', () => {
           details: expect.objectContaining({
             data: expect.objectContaining({
               email: '[REDACTED]',
-              items: expect.objectContaining({
-                totalCount: 15,
-              }),
+              items: Array.from({ length: 15 }, (_, index) => ({ index })),
             }),
           }),
         }),
@@ -209,9 +207,7 @@ describe('app query client', () => {
         data: expect.objectContaining({
           context: expect.objectContaining({
             feature: 'react-query',
-            queryKey: expect.objectContaining({
-              totalCount: 0,
-            }),
+            queryKey: [],
           }),
         }),
         message: 'unknown.fetch.success',

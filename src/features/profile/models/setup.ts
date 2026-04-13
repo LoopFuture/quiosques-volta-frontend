@@ -20,6 +20,7 @@ const legacyProfileSetupPreferencesSchema = z.object({
 })
 
 const EMPTY_PROFILE_EMAIL = 'setup@volta.invalid'
+const emailValueSchema = z.string().email()
 
 export const profileSetupPreferencesSchema = z
   .union([
@@ -47,6 +48,7 @@ export const profileSetupSnapshotSchema = z.object({
     phoneNumber: z.string(),
   }),
   preferences: profileSetupPreferencesSchema,
+  alertsEnabled: z.boolean(),
 })
 
 export type ProfileSetupSnapshot = z.infer<typeof profileSetupSnapshotSchema>
@@ -59,6 +61,31 @@ function resolveIdentityEmail(
   fallbackEmail?: string,
 ) {
   return identity?.email ?? fallbackEmail ?? ''
+}
+
+function resolveSetupName(
+  identity?: Pick<AppAuthIdentity, 'email' | 'name'> | null,
+  fallbackName?: string | null,
+) {
+  if (!identity?.name) {
+    return fallbackName ?? null
+  }
+
+  const normalizedIdentityName = identity.name.trim()
+
+  if (!normalizedIdentityName) {
+    return fallbackName ?? null
+  }
+
+  const identityNameIsEmail = emailValueSchema.safeParse(
+    normalizedIdentityName,
+  ).success
+
+  if (identityNameIsEmail) {
+    return fallbackName ?? null
+  }
+
+  return normalizedIdentityName
 }
 
 function createEmptyProfileResponse() {
@@ -98,7 +125,7 @@ export function getProfileSetupSeedState({
   profile?: ProfileResponse
 } = {}) {
   const resolvedEmail = resolveIdentityEmail(identity, profile.personal.email)
-  const resolvedName = identity?.name ?? profile.personal.name ?? null
+  const resolvedName = resolveSetupName(identity, profile.personal.name)
 
   return {
     deviceSettings: devicePrivacySettingsSchema.parse(deviceSettings),
@@ -144,5 +171,6 @@ export function getProfileSetupSnapshotFromProfile(
       pinEnabled: deviceSettings.pinEnabled,
       pushNotificationsEnabled: deviceSettings.pushNotificationsEnabled,
     },
+    alertsEnabled: profile.preferences?.alertsEnabled ?? false,
   })
 }

@@ -566,6 +566,18 @@
           "successToast": "O teu registo está concluído.",
           "topBarTitle": "Configuração inicial",
           "steps": {
+            "notifications": {
+              "accountSectionLabel": "Notificações do dispositivo",
+              "description": "Escolhe que avisos da conta queres receber neste dispositivo e por e-mail.",
+              "emailAlertsConsentLabel": "Quero receber alertas da conta e dos pagamentos por e-mail.",
+              "emailAlertsHelper": "Os alertas de segurança e pagamentos serão enviados para {{email}}.",
+              "emailAlertsLabel": "Ativar alertas por e-mail",
+              "emailAlertsTitle": "Alertas por e-mail",
+              "emailSectionLabel": "Atualizações por e-mail",
+              "pushNotificationsHelper": "Ativa para receberes avisos importantes neste dispositivo.",
+              "pushNotificationsLabel": "Ativar notificações push",
+              "title": "Preferências de notificações"
+            },
             "payments": {
               "accountSectionLabel": "Conta para receber",
               "description": "Escolhe o nome da conta e o IBAN onde queres receber os teus pagamentos.",
@@ -582,13 +594,10 @@
             },
             "security": {
               "biometricsHelper": "Protege a entrada na app com Face ID ou impressão digital neste dispositivo.",
-              "description": "Define como queres proteger este dispositivo e receber avisos importantes da conta.",
+              "description": "Define como queres proteger o acesso à app neste dispositivo.",
               "deviceSectionLabel": "Proteção do dispositivo",
-              "notificationsSectionLabel": "Avisos da conta",
               "pinHelper": "Define um PIN de 4 dígitos para proteger a app neste dispositivo.",
-              "pushNotificationsHelper": "Ativa para receberes avisos importantes neste dispositivo.",
-              "pushNotificationsLabel": "Ativar notificações push",
-              "title": "Segurança e permissões"
+              "title": "Segurança do dispositivo"
             }
           }
         },

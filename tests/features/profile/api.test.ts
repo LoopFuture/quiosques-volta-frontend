@@ -24,7 +24,7 @@ describe('profile api', () => {
         status: 'in_progress',
       },
       payoutAccount: {
-        accountHolderName: 'Joao Ferreira',
+        fullName: 'Joao Ferreira',
         ibanMasked: 'PT50************4321',
         rail: 'spin',
         spinEnabled: true,
@@ -101,6 +101,7 @@ describe('profile api', () => {
         status: 'completed',
       },
       payoutAccount: {
+        fullName: 'Joao Ferreira',
         ibanMasked: 'PT50************4321',
         rail: 'spin',
       },
@@ -127,6 +128,7 @@ describe('profile api', () => {
 
     await patchProfile({
       payoutAccount: {
+        accountHolderName: 'Joao Ferreira',
         iban: 'PT50000201231234567890154',
         rail: 'sepa',
       },
@@ -135,6 +137,7 @@ describe('profile api', () => {
     expect(mockRequest).toHaveBeenCalledWith({
       body: {
         payoutAccount: {
+          fullName: 'Joao Ferreira',
           iban: 'PT50000201231234567890154',
           rail: 'sepa',
         },
@@ -142,7 +145,15 @@ describe('profile api', () => {
       meta: {
         feature: 'profile',
         operation: 'patch-profile',
-        redactKeys: ['email', 'iban', 'name', 'nif', 'phoneNumber'],
+        redactKeys: [
+          'accountHolderName',
+          'email',
+          'fullName',
+          'iban',
+          'name',
+          'nif',
+          'phoneNumber',
+        ],
       },
       method: 'PATCH',
       path: '/api/v1/profile',

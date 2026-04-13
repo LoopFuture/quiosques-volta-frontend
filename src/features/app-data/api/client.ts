@@ -1,7 +1,6 @@
 import {
   createDiagnosticTimer,
   recordDiagnosticEvent,
-  sanitizeDiagnosticsValue,
 } from '@/features/app-data/monitoring'
 import { getCurrentAuthAccessToken } from '@/features/auth/runtime'
 import { getApiRuntimeConfig } from './runtime'
@@ -301,10 +300,7 @@ export async function request<TResponse, TBody = unknown>({
     if (!response.ok) {
       throw toApiError({
         method,
-        responsePayload: sanitizeDiagnosticsValue(
-          parsedBody,
-          meta.redactKeys,
-        ) as ParsedResponseBody | undefined,
+        responsePayload: parsedBody,
         status: response.status,
         url: url.toString(),
       })

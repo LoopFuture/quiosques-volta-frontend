@@ -193,7 +193,7 @@ describe('app api client', () => {
       method: 'GET',
       name: 'ApiError',
       responsePayload: {
-        secret: '[REDACTED]',
+        secret: 'very-secret',
       },
       status: 500,
       url: 'https://volta.be.dev.theloop.tech/home',
@@ -203,6 +203,154 @@ describe('app api client', () => {
     expect(addBreadcrumb).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'screen-state.request.error',
+      }),
+    )
+  })
+
+  it('preserves full validation issue details in diagnostics while redacting sensitive request fields', async () => {
+    global.fetch = jest.fn(async () => {
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: 'validation_error',
+            message: 'One or more fields are invalid.',
+            requestId: '26636b4173af0e89f302b7cb3d683642',
+          },
+          issues: [
+            {
+              code: 'invalid_format',
+              field: 'payoutAccount.iban',
+              message: 'iban must be an IBAN',
+            },
+            {
+              code: 'invalid_string',
+              field: 'personal.email',
+              message: 'email must be an email',
+            },
+          ],
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          status: 422,
+        },
+      )
+    }) as typeof fetch
+
+    await expect(
+      request({
+        body: {
+          payoutAccount: {
+            iban: 'PT50000201231234567890154',
+            rail: 'sepa',
+          },
+          personal: {
+            email: 'maria.clara@example.com',
+            name: 'Maria Clara',
+            nif: '123456789',
+            phoneNumber: '+351911223344',
+          },
+          preferences: {
+            alertsEmail: 'alerts@example.com',
+            alertsEnabled: true,
+          },
+        },
+        meta: {
+          feature: 'profile',
+          operation: 'patch-profile',
+          redactKeys: ['email', 'iban', 'name', 'nif', 'phoneNumber'],
+        },
+        method: 'PATCH',
+        path: '/api/v1/profile',
+      }),
+    ).rejects.toMatchObject({
+      name: 'ApiError',
+      responsePayload: {
+        error: {
+          code: 'validation_error',
+          message: 'One or more fields are invalid.',
+          requestId: '26636b4173af0e89f302b7cb3d683642',
+        },
+        issues: [
+          {
+            code: 'invalid_format',
+            field: 'payoutAccount.iban',
+            message: 'iban must be an IBAN',
+          },
+          {
+            code: 'invalid_string',
+            field: 'personal.email',
+            message: 'email must be an email',
+          },
+        ],
+      },
+      status: 422,
+    })
+
+    expect(addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          details: expect.objectContaining({
+            requestBody: {
+              payoutAccount: {
+                iban: '[REDACTED]',
+                rail: 'sepa',
+              },
+              personal: {
+                email: '[REDACTED]',
+                name: '[REDACTED]',
+                nif: '[REDACTED]',
+                phoneNumber: '[REDACTED]',
+              },
+              preferences: {
+                alertsEmail: '[REDACTED]',
+                alertsEnabled: true,
+              },
+            },
+            responseBody: {
+              error: {
+                code: 'validation_error',
+                message: 'One or more fields are invalid.',
+                requestId: '26636b4173af0e89f302b7cb3d683642',
+              },
+              issues: [
+                {
+                  code: 'invalid_format',
+                  field: 'payoutAccount.iban',
+                  message: 'iban must be an IBAN',
+                },
+                {
+                  code: 'invalid_string',
+                  field: 'personal.email',
+                  message: 'email must be an email',
+                },
+              ],
+            },
+          }),
+          error: expect.objectContaining({
+            responsePayload: {
+              error: {
+                code: 'validation_error',
+                message: 'One or more fields are invalid.',
+                requestId: '26636b4173af0e89f302b7cb3d683642',
+              },
+              issues: [
+                {
+                  code: 'invalid_format',
+                  field: 'payoutAccount.iban',
+                  message: 'iban must be an IBAN',
+                },
+                {
+                  code: 'invalid_string',
+                  field: 'personal.email',
+                  message: 'email must be an email',
+                },
+              ],
+            },
+          }),
+        }),
+        message: 'patch-profile.request.error',
       }),
     )
   })

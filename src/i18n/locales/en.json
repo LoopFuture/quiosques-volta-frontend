@@ -565,6 +565,18 @@
           "submitError": "We could not save this setup right now.",
           "successToast": "Your setup is complete.",
           "steps": {
+            "notifications": {
+              "accountSectionLabel": "Device notifications",
+              "description": "Choose which account alerts you want to receive on this device and by email.",
+              "emailAlertsConsentLabel": "I want to receive account and payout alerts by email.",
+              "emailAlertsHelper": "Security and payout alerts will be sent to {{email}}.",
+              "emailAlertsLabel": "Enable email alerts",
+              "emailAlertsTitle": "Email alerts",
+              "emailSectionLabel": "Email updates",
+              "pushNotificationsHelper": "Turn this on when you are ready to request push notification access.",
+              "pushNotificationsLabel": "Enable push notifications",
+              "title": "Notification preferences"
+            },
             "payments": {
               "description": "Add the bank account name and IBAN where your refunds should arrive.",
               "title": "Set up payments"
@@ -576,11 +588,9 @@
             },
             "security": {
               "biometricsHelper": "Protect access to the app with Face ID or fingerprint on this device.",
-              "description": "Choose how you want to prepare local protection and notification permissions for this account.",
+              "description": "Choose how you want to protect access to the app on this device.",
               "pinHelper": "Set a 4-digit app PIN to protect access on this device.",
-              "pushNotificationsHelper": "Turn this on when you are ready to request push notification access.",
-              "pushNotificationsLabel": "Enable push notifications",
-              "title": "Security & permissions"
+              "title": "Device security"
             }
           }
         },
