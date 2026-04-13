@@ -8,6 +8,7 @@ import { useNeutralBorderColor } from './useNeutralBorderColor'
 
 export type SurfaceCardProps = GetProps<typeof Card> & {
   children: ReactNode
+  decorativeAccent?: boolean
   maxHeight?: number | string
   minHeight?: number | string
   tone?: Tone
@@ -18,6 +19,7 @@ export function SurfaceCard({
   borderColor: customBorderColor,
   borderWidth = 1,
   children,
+  decorativeAccent = false,
   flex,
   gap = '$3',
   height,
@@ -87,15 +89,15 @@ export function SurfaceCard({
         }
         width={width}
       >
-        {tone !== 'neutral' ? (
+        {tone !== 'neutral' && decorativeAccent ? (
           <Card.Background>
             <YStack
               pointerEvents="none"
               position="absolute"
-              rounded={48}
-              bg="$accent4"
-              opacity={0.18}
-              style={{ top: -24, right: -16, width: 96, height: 96 }}
+              rounded={36}
+              bg="$accent3"
+              opacity={0.1}
+              style={{ top: -18, right: -8, width: 72, height: 72 }}
             />
           </Card.Background>
         ) : null}

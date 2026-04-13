@@ -9,6 +9,7 @@ export type TransactionListItemProps = {
   amount: string
   amountTone?: Tone
   accessibilityLabel?: string
+  accessibilityHint?: string
   badgeLabel?: string
   badgeTone?: Tone
   framed?: boolean
@@ -21,6 +22,7 @@ export type TransactionListItemProps = {
 export function TransactionListItem({
   amount,
   amountTone = 'accent',
+  accessibilityHint,
   accessibilityLabel,
   badgeLabel,
   badgeTone = 'neutral',
@@ -32,7 +34,8 @@ export function TransactionListItem({
 }: TransactionListItemProps) {
   const { width } = useWindowDimensions()
   const hasLongBadgeLabel = (badgeLabel?.length ?? 0) > 18
-  const isCompactWidth = width < 360
+  const hasVeryLongBadgeLabel = (badgeLabel?.length ?? 0) > 26
+  const isCompactWidth = width < 380
 
   const iconNode = (
     <XStack
@@ -60,7 +63,7 @@ export function TransactionListItem({
       <ToneScope tone={amountTone}>
         <Text
           color="$color"
-          fontSize={24}
+          fontSize={isCompactWidth ? 22 : 24}
           fontWeight="900"
           style={{ textAlign: isCompactWidth ? 'left' : 'right' }}
         >
@@ -73,14 +76,20 @@ export function TransactionListItem({
             bg="$background"
             borderColor="$borderColor"
             borderWidth={1}
-            px={hasLongBadgeLabel ? '$1.5' : '$2'}
+            px={hasVeryLongBadgeLabel ? '$1.5' : '$2'}
             py={hasLongBadgeLabel ? '$0.75' : '$1'}
             rounded={999}
+            style={{
+              alignSelf: isCompactWidth ? 'flex-start' : 'flex-end',
+              maxWidth: '100%',
+            }}
           >
             <Text
               color="$color"
-              fontSize={hasLongBadgeLabel ? 10 : 11}
+              fontSize={hasLongBadgeLabel ? 11 : 12}
               fontWeight="800"
+              numberOfLines={2}
+              style={{ flexShrink: 1, textAlign: 'center' }}
             >
               {badgeLabel}
             </Text>
@@ -96,11 +105,11 @@ export function TransactionListItem({
         {iconNode}
 
         <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
-          <Text color="$color" fontSize={17} fontWeight="800" numberOfLines={2}>
+          <Text color="$color" fontSize={17} fontWeight="800" numberOfLines={3}>
             {title}
           </Text>
           {subtitle ? (
-            <Text color="$color11" fontSize={14} numberOfLines={1}>
+            <Text color="$color11" fontSize={14} numberOfLines={2}>
               {subtitle}
             </Text>
           ) : null}
@@ -118,7 +127,7 @@ export function TransactionListItem({
           {title}
         </Text>
         {subtitle ? (
-          <Text color="$color11" fontSize={14} numberOfLines={1}>
+          <Text color="$color11" fontSize={14} numberOfLines={2}>
             {subtitle}
           </Text>
         ) : null}
@@ -131,6 +140,7 @@ export function TransactionListItem({
   if (!framed) {
     return (
       <YStack
+        accessibilityHint={onPress ? accessibilityHint : undefined}
         accessibilityLabel={onPress ? (accessibilityLabel ?? title) : undefined}
         accessibilityRole={onPress ? 'button' : undefined}
         bg="$background"
@@ -148,6 +158,7 @@ export function TransactionListItem({
 
   return (
     <SurfaceCard
+      accessibilityHint={onPress ? accessibilityHint : undefined}
       accessibilityLabel={onPress ? (accessibilityLabel ?? title) : undefined}
       accessibilityRole={onPress ? 'button' : undefined}
       onPress={onPress}

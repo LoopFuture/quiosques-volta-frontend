@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Animated,
   type FlatList,
@@ -199,6 +199,16 @@ export default function OnboardingScreen({
   const footerHelper = isLastSlide
     ? t('onboarding.actions.finishHelper')
     : t('onboarding.actions.progressHelper')
+
+  useEffect(() => {
+    // Keep a matching JS subscription while the native-driven scroll value is
+    // active so React Native does not warn about unhandled value updates.
+    const listenerId = scrollX.addListener(() => {})
+
+    return () => {
+      scrollX.removeListener(listenerId)
+    }
+  }, [scrollX])
 
   function handleScrollEnd(event: NativeSyntheticEvent<NativeScrollEvent>) {
     const nextIndex = Math.round(

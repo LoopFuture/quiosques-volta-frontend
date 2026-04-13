@@ -54,6 +54,7 @@ export const detailItemSchema = z.object({
 export const timelineItemStateSchema = z.enum(['done', 'current', 'upcoming'])
 
 export const timelineItemSchema = z.object({
+  accessibilityStateLabel: z.string().optional(),
   description: z.string().optional(),
   id: z.string(),
   label: z.string(),

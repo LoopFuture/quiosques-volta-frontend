@@ -1,0 +1,335 @@
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native'
+import UnlockScreen from '@/features/auth/screens/UnlockScreen'
+import { renderWithProvider } from '@tests/support/test-utils'
+import { authRoutes } from '@/features/auth/routes'
+jest.mock('expo-router', () => {
+  const { createExpoRouterMock } = jest.requireActual(
+    '@tests/support/expo-router-mock',
+  )
+
+  return createExpoRouterMock()
+})
+
+jest.mock('@/features/auth/hooks/useAuthSession', () => ({
+  useAuthSession: jest.fn(),
+}))
+
+jest.mock('@/features/auth/components/AuthSessionProvider', () => ({
+  AuthSessionProvider: ({ children }: any) => children,
+}))
+
+const { __mockRouterReplace: mockRouterReplace } =
+  jest.requireMock('expo-router')
+const { useAuthSession: mockUseAuthSession } = jest.requireMock(
+  '@/features/auth/hooks/useAuthSession',
+)
+
+function createAuthSessionMock(overrides: Record<string, unknown> = {}) {
+  return {
+    appLockRevision: 0,
+    completeSignIn: jest.fn(),
+    consumePendingBiometricPrompt: jest.fn(() => false),
+    isBiometricUnlockEnabled: false,
+    isAppLocked: true,
+    isAuthenticated: true,
+    isPinUnlockEnabled: false,
+    session: { accessToken: 'token', expiresAt: null },
+    signOut: jest.fn(),
+    status: 'authenticated',
+    unlockWithBiometrics: jest.fn().mockResolvedValue({
+      success: true,
+    }),
+    unlockWithPin: jest.fn().mockResolvedValue({
+      success: true,
+    }),
+    ...overrides,
+  }
+}
+
+describe('unlock screen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseAuthSession.mockReturnValue(createAuthSessionMock())
+  })
+
+  it('redirects back to auth when there is no locked session', async () => {
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        isAppLocked: false,
+        isAuthenticated: false,
+        session: null,
+        status: 'anonymous',
+      }),
+    )
+
+    renderWithProvider(<UnlockScreen />)
+
+    await waitFor(() => {
+      expect(mockRouterReplace).toHaveBeenCalledWith(authRoutes.index)
+    })
+  })
+
+  it('auto-prompts biometrics once when opening from a new lock event', async () => {
+    const consumePendingBiometricPrompt = jest.fn(() => true)
+    const unlockWithBiometrics = jest.fn().mockResolvedValue({
+      success: true,
+    })
+
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        appLockRevision: 1,
+        consumePendingBiometricPrompt,
+        isBiometricUnlockEnabled: true,
+        unlockWithBiometrics,
+      }),
+    )
+
+    renderWithProvider(<UnlockScreen />)
+
+    await waitFor(() => {
+      expect(unlockWithBiometrics).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('does not auto-prompt biometrics again when the unlock screen remounts without a new lock event', async () => {
+    const consumePendingBiometricPrompt = jest
+      .fn()
+      .mockReturnValueOnce(true)
+      .mockReturnValue(false)
+    const unlockWithBiometrics = jest.fn().mockResolvedValue({
+      success: true,
+    })
+
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        appLockRevision: 1,
+        consumePendingBiometricPrompt,
+        isBiometricUnlockEnabled: true,
+        unlockWithBiometrics,
+      }),
+    )
+
+    const firstView = renderWithProvider(<UnlockScreen />)
+
+    await waitFor(() => {
+      expect(unlockWithBiometrics).toHaveBeenCalledTimes(1)
+    })
+
+    firstView.unmount()
+
+    renderWithProvider(<UnlockScreen />)
+
+    expect(unlockWithBiometrics).toHaveBeenCalledTimes(1)
+    expect(consumePendingBiometricPrompt.mock.calls.length).toBeGreaterThan(1)
+  })
+
+  it.each(['not-available', 'not-enrolled'] as const)(
+    'disables biometrics after %s is returned',
+    async (reason) => {
+      const unlockWithBiometrics = jest.fn().mockResolvedValue({
+        reason,
+        success: false,
+      })
+
+      mockUseAuthSession.mockReturnValue(
+        createAuthSessionMock({
+          isBiometricUnlockEnabled: true,
+          unlockWithBiometrics,
+        }),
+      )
+
+      renderWithProvider(<UnlockScreen />)
+
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('auth-biometric-button'))
+      })
+
+      await waitFor(() => {
+        expect(unlockWithBiometrics).toHaveBeenCalledTimes(1)
+        expect(
+          screen.getByTestId('auth-biometric-button').props.accessibilityState
+            .disabled,
+        ).toBe(true)
+      })
+    },
+  )
+
+  it.each(['cancelled', 'failed'] as const)(
+    'does not surface a biometric error badge for %s',
+    async (reason) => {
+      const unlockWithBiometrics = jest.fn().mockResolvedValue({
+        reason,
+        success: false,
+      })
+
+      mockUseAuthSession.mockReturnValue(
+        createAuthSessionMock({
+          isBiometricUnlockEnabled: true,
+          unlockWithBiometrics,
+        }),
+      )
+
+      renderWithProvider(<UnlockScreen />)
+
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('auth-biometric-button'))
+      })
+
+      await waitFor(() => {
+        expect(unlockWithBiometrics).toHaveBeenCalledTimes(1)
+      })
+
+      expect(screen.queryByTestId('auth-error-text')).toBeNull()
+    },
+  )
+
+  it('submits the PIN from the keypad without using the keyboard', async () => {
+    const unlockWithPin = jest.fn().mockResolvedValue({
+      success: true,
+    })
+
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        isPinUnlockEnabled: true,
+        unlockWithPin,
+      }),
+    )
+
+    renderWithProvider(<UnlockScreen />)
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('auth-pin-key-1'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-2'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-3'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-4'))
+    })
+
+    await waitFor(() => {
+      expect(unlockWithPin).toHaveBeenCalledWith('1234')
+    })
+  })
+
+  it.each(['invalid-pin', 'too-many-attempts'] as const)(
+    'shows red PIN feedback for %s',
+    async (reason) => {
+      const unlockWithPin = jest.fn().mockResolvedValue({
+        reason,
+        success: false,
+      })
+
+      mockUseAuthSession.mockReturnValue(
+        createAuthSessionMock({
+          isPinUnlockEnabled: true,
+          unlockWithPin,
+        }),
+      )
+
+      renderWithProvider(<UnlockScreen />)
+
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('auth-pin-key-9'))
+        fireEvent.press(screen.getByTestId('auth-pin-key-9'))
+        fireEvent.press(screen.getByTestId('auth-pin-key-9'))
+        fireEvent.press(screen.getByTestId('auth-pin-key-9'))
+      })
+
+      await waitFor(() => {
+        expect(unlockWithPin).toHaveBeenCalledWith('9999')
+        expect(
+          screen.getByTestId('auth-pin-dot-1').props.accessibilityLabel,
+        ).toBe('error')
+        expect(
+          screen.getByTestId('auth-pin-dot-2').props.accessibilityLabel,
+        ).toBe('error')
+        expect(
+          screen.getByTestId('auth-pin-dot-3').props.accessibilityLabel,
+        ).toBe('error')
+        expect(
+          screen.getByTestId('auth-pin-dot-4').props.accessibilityLabel,
+        ).toBe('error')
+      })
+    },
+  )
+
+  it('clears the PIN failure feedback when the user starts entering a new PIN', async () => {
+    const unlockWithPin = jest
+      .fn()
+      .mockResolvedValueOnce({
+        reason: 'invalid-pin',
+        success: false,
+      })
+      .mockResolvedValueOnce({
+        success: true,
+      })
+
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        isPinUnlockEnabled: true,
+        unlockWithPin,
+      }),
+    )
+
+    renderWithProvider(<UnlockScreen />)
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('auth-pin-key-9'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-9'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-9'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-9'))
+    })
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('auth-pin-dot-1').props.accessibilityLabel,
+      ).toBe('error')
+    })
+
+    fireEvent.press(screen.getByTestId('auth-pin-key-1'))
+
+    expect(screen.getByTestId('auth-pin-dot-1').props.accessibilityLabel).toBe(
+      'filled',
+    )
+  })
+
+  it('lets the user delete a digit before submitting the PIN', async () => {
+    const unlockWithPin = jest.fn().mockResolvedValue({
+      success: true,
+    })
+
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        isPinUnlockEnabled: true,
+        unlockWithPin,
+      }),
+    )
+
+    renderWithProvider(<UnlockScreen />)
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('auth-pin-key-1'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-2'))
+      fireEvent.press(screen.getByTestId('auth-pin-delete-button'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-3'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-4'))
+      fireEvent.press(screen.getByTestId('auth-pin-key-5'))
+    })
+
+    await waitFor(() => {
+      expect(unlockWithPin).toHaveBeenCalledWith('1345')
+    })
+  })
+
+  it('closes back to the login page', () => {
+    renderWithProvider(<UnlockScreen />)
+
+    fireEvent.press(screen.getByTestId('auth-unlock-close-button'))
+
+    expect(mockRouterReplace).toHaveBeenCalledWith({
+      params: {
+        showLogin: '1',
+      },
+      pathname: authRoutes.index,
+    })
+    expect(screen.queryByTestId('auth-unlock-login-button')).toBeNull()
+  })
+})

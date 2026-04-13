@@ -15,13 +15,6 @@ import {
   createDiagnosticTimer,
   recordDiagnosticEvent,
 } from '@/features/app-data/monitoring'
-import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
-import {
-  createPushInstallationRequest,
-  getOrCreatePushInstallationId,
-  registerPushInstallation,
-  unregisterPushInstallation,
-} from '@/features/notifications/api'
 import {
   parseStoredBoolean,
   privacyPreferenceStorage,
@@ -153,7 +146,6 @@ export function PushNotificationsProvider({
 }: {
   children: ReactNode
 }) {
-  const { isAuthenticated } = useAuthSession()
   const [storedPushNotificationsEnabled] = useMMKVString(
     PUSH_NOTIFICATIONS_ENABLED_STORAGE_KEY,
     privacyPreferenceStorage,
@@ -162,7 +154,6 @@ export function PushNotificationsProvider({
     defaultPushNotificationsState,
   )
   const stateRef = useRef(state)
-  const registeredInstallationIdRef = useRef<string | null>(null)
   const [isSyncing, setIsSyncing] = useState(false)
   const [latestForegroundNotification, setLatestForegroundNotification] =
     useState<Notifications.Notification | null>(null)
@@ -444,80 +435,18 @@ export function PushNotificationsProvider({
   }, [replaceState, syncFromPermissionStatus])
 
   useEffect(() => {
-    const shouldRegister =
-      isAuthenticated &&
-      pushNotificationsEnabled &&
-      state.permissionStatus === 'granted' &&
-      Boolean(state.expoPushToken) &&
-      !state.registrationErrorCode
+    if (!pushNotificationsEnabled) {
+      return
+    }
 
-    void (async () => {
-      if (!shouldRegister) {
-        if (!registeredInstallationIdRef.current) {
-          return
-        }
-
-        try {
-          await unregisterPushInstallation(registeredInstallationIdRef.current)
-        } catch (error) {
-          recordDiagnosticEvent({
-            captureError: true,
-            details: {
-              installationId: registeredInstallationIdRef.current,
-            },
-            domain: 'push',
-            error,
-            operation: 'push-installation',
-            phase: 'delete',
-            status: 'error',
-          })
-        } finally {
-          registeredInstallationIdRef.current = null
-        }
-
-        return
-      }
-
-      const installationId = getOrCreatePushInstallationId()
-
-      try {
-        await registerPushInstallation({
-          installationId,
-          requestBody: createPushInstallationRequest(
-            state.expoPushToken as string,
-          ),
-        })
-        registeredInstallationIdRef.current = installationId
-        recordDiagnosticEvent({
-          details: {
-            installationId,
-          },
-          domain: 'push',
-          operation: 'push-installation',
-          phase: 'register',
-          status: 'success',
-        })
-      } catch (error) {
-        recordDiagnosticEvent({
-          captureError: true,
-          details: {
-            installationId,
-          },
-          domain: 'push',
-          error,
-          operation: 'push-installation',
-          phase: 'register',
-          status: 'error',
-        })
-      }
-    })()
-  }, [
-    isAuthenticated,
-    pushNotificationsEnabled,
-    state.expoPushToken,
-    state.permissionStatus,
-    state.registrationErrorCode,
-  ])
+    recordDiagnosticEvent({
+      details: describePushState(state),
+      domain: 'push',
+      operation: 'push-state',
+      phase: 'register',
+      status: 'info',
+    })
+  }, [pushNotificationsEnabled, state])
 
   const value = useMemo<PushNotificationsContextValue>(
     () => ({

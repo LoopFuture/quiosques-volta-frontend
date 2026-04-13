@@ -1,16 +1,28 @@
 import { request } from '@/features/app-data/api'
-import { homeResponseSchema, type HomeResponse } from './models'
+import {
+  getHomeGreetingDisplayName,
+  homeResponseSchema,
+  type HomeResponse,
+} from './models'
 
 export async function fetchHomeScreenState(signal?: AbortSignal) {
-  return homeResponseSchema.parse(
+  const response = homeResponseSchema.parse(
     await request<HomeResponse>({
       meta: {
         feature: 'home',
         operation: 'screen-state',
       },
       method: 'GET',
-      path: '/home',
+      path: '/api/v1/home',
       signal,
     }),
   )
+
+  return {
+    ...response,
+    greeting: {
+      ...response.greeting,
+      displayName: getHomeGreetingDisplayName(response.greeting.displayName),
+    },
+  }
 }

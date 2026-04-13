@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { BackHandler, Platform } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { Clock3 } from '@tamagui/lucide-icons'
 import { useToastController } from '@tamagui/toast'
 import { Text, XStack, YStack } from 'tamagui'
 import {
@@ -11,6 +12,7 @@ import {
   ScreenContainer,
   SectionBlock,
   SkeletonBlock,
+  StatusBadge,
   StatTileGrid,
   SurfaceCard,
   SurfaceSeparator,
@@ -18,8 +20,6 @@ import {
 } from '@/components/ui'
 import { getAppToastDuration } from '@/features/app-shell/toast'
 import { TabTopBar } from '@/features/app-shell/navigation/tab-header'
-import { useNotificationsQuery } from '@/features/notifications/hooks'
-import { notificationsRoutes } from '@/features/notifications/routes'
 import { profileRoutes } from '@/features/profile/routes'
 import { WalletMovementIcon } from '@/features/wallet/components/WalletMovementIcon'
 import { walletRoutes } from '@/features/wallet/routes'
@@ -117,6 +117,50 @@ function HomeScreenSkeleton() {
   )
 }
 
+function HomeRecentActivityEmptyState({
+  description,
+  label,
+  title,
+}: {
+  description: string
+  label: string
+  title: string
+}) {
+  return (
+    <SurfaceCard
+      gap="$4"
+      p="$4.5"
+      testID="home-recent-activity-empty-state"
+      tone="accent"
+    >
+      <XStack items="center" justify="space-between" gap="$3">
+        <StatusBadge tone="accent">{label}</StatusBadge>
+        <YStack
+          bg="$background"
+          borderColor="$borderColor"
+          borderWidth={1}
+          items="center"
+          justify="center"
+          rounded={999}
+          width={40}
+          height={40}
+        >
+          <Clock3 color="$accent11" size={18} />
+        </YStack>
+      </XStack>
+
+      <YStack gap="$1.5">
+        <Text fontSize={20} fontWeight="900" lineHeight={26}>
+          {title}
+        </Text>
+        <Text color="$color11" fontSize={15} lineHeight={22}>
+          {description}
+        </Text>
+      </YStack>
+    </SurfaceCard>
+  )
+}
+
 export default function HomeScreen() {
   const backPressTimestampRef = useRef(0)
   const pathname = usePathname()
@@ -130,28 +174,9 @@ export default function HomeScreen() {
     isRefetching,
     refetch,
   } = useHomeScreenQuery()
-  const {
-    data: notificationsState,
-    isRefetching: isNotificationsRefetching,
-    refetch: refetchNotifications,
-  } = useNotificationsQuery()
-  const unreadNotificationsCount =
-    notificationsState?.pages[0]?.unreadCount ?? 0
-  const unreadNotificationsBadgeValue =
-    unreadNotificationsCount > 0
-      ? unreadNotificationsCount > 99
-        ? '99+'
-        : formatWalletCount(unreadNotificationsCount, i18n.language)
-      : undefined
-  const unreadNotificationsHint =
-    unreadNotificationsCount > 0
-      ? t('tabs.home.header.notificationUnreadHint', {
-          count: unreadNotificationsCount,
-        })
-      : undefined
 
   const handleRefresh = () => {
-    void Promise.all([refetch(), refetchNotifications()])
+    void refetch()
   }
 
   useEffect(() => {
@@ -200,15 +225,12 @@ export default function HomeScreen() {
     <ScreenContainer
       header={
         <TabTopBar
-          homeNotificationAccessibilityHint={unreadNotificationsHint}
-          homeNotificationBadgeValue={unreadNotificationsBadgeValue}
           homeTitle={homeScreenState?.greeting.displayName}
           routeName="index"
-          onHomeNotificationPress={() => router.push(notificationsRoutes.index)}
         />
       }
       onRefresh={handleRefresh}
-      refreshing={isRefetching || isNotificationsRefetching}
+      refreshing={isRefetching}
       scrollable
       testID="home-dashboard-screen"
     >
@@ -276,28 +298,41 @@ export default function HomeScreen() {
             title={t('tabScreens.home.recentActivity.title')}
             description={t('tabScreens.home.recentActivity.description')}
           >
-            <YStack gap={10}>
-              {homeScreenState.recentActivity.map((movement) => (
-                <TransactionListItem
-                  key={movement.id}
-                  accessibilityLabel={getWalletMovementTitle(t, movement)}
-                  amount={formatWalletAmount(
-                    movement.amount.amountMinor,
-                    i18n.language,
-                  )}
-                  amountTone={getWalletTransactionAmountTone(movement)}
-                  badgeLabel={getWalletMovementBadgeLabel(t, movement)}
-                  badgeTone={getWalletTransactionBadgeTone(movement)}
-                  framed={false}
-                  icon={<WalletMovementIcon type={movement.type} />}
-                  onPress={() =>
-                    router.push(walletRoutes.movementDetail(movement.id))
-                  }
-                  subtitle={getWalletMovementSubtitle(i18n.language, movement)}
-                  title={getWalletMovementTitle(t, movement)}
-                />
-              ))}
-            </YStack>
+            {homeScreenState.recentActivity.length > 0 ? (
+              <YStack gap={10}>
+                {homeScreenState.recentActivity.map((movement) => (
+                  <TransactionListItem
+                    key={movement.id}
+                    accessibilityLabel={getWalletMovementTitle(t, movement)}
+                    amount={formatWalletAmount(
+                      movement.amount.amountMinor,
+                      i18n.language,
+                    )}
+                    amountTone={getWalletTransactionAmountTone(movement)}
+                    badgeLabel={getWalletMovementBadgeLabel(t, movement)}
+                    badgeTone={getWalletTransactionBadgeTone(movement)}
+                    framed={false}
+                    icon={<WalletMovementIcon type={movement.type} />}
+                    onPress={() =>
+                      router.push(walletRoutes.movementDetail(movement.id))
+                    }
+                    subtitle={getWalletMovementSubtitle(
+                      i18n.language,
+                      movement,
+                    )}
+                    title={getWalletMovementTitle(t, movement)}
+                  />
+                ))}
+              </YStack>
+            ) : (
+              <HomeRecentActivityEmptyState
+                description={t(
+                  'tabScreens.home.recentActivity.emptyStateDescription',
+                )}
+                label={t('tabScreens.home.recentActivity.emptyStateLabel')}
+                title={t('tabScreens.home.recentActivity.emptyStateTitle')}
+              />
+            )}
           </SectionBlock>
         </>
       )}

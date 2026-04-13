@@ -20,16 +20,15 @@ Make the smallest correct change that fits this mobile-only Expo app, use the ex
 - Shared app-shell navigation, tab chrome, and cross-feature shell helpers live in `src/features/app-shell`.
 - Auth runtime config is injected from env in `app.config.ts` and consumed in-app through `expo-constants`.
 - Optional Sentry runtime config is injected from env in `app.config.ts` and consumed in-app through `expo-constants`.
-- Optional app API runtime config is injected from env in `app.config.ts` and consumed in-app through `expo-constants`.
+- Required app API runtime config is injected from env in `app.config.ts` and consumed in-app through `expo-constants`.
 - Optional Sentry build-time sourcemap upload config is read from env during Expo export builds.
-- Feature-owned schemas, typed mock data builders, and API-ready view-model helpers live in `src/features/<feature>/models`.
+- Feature-owned schemas and API-ready view-model helpers live in `src/features/<feature>/models`.
 - Feature-owned form schemas, RHF helpers, normalization logic, and request serializers live in `src/features/<feature>/forms`.
 - Feature-owned app API request helpers live in `src/features/<feature>/api.ts`.
 - Feature-owned query and mutation hooks live in `src/features/<feature>/hooks`.
 - Shared app API runtime config, request client, and error types live in `src/features/app-data/api`.
 - Shared diagnostics, redaction helpers, and Sentry bootstrap live in `src/features/app-data/monitoring`.
 - Shared query client, keys, and invalidation helpers live in `src/features/app-data/query`.
-- Shared session-only MSW-backed backend emulator helpers live in `src/features/app-data/mock`.
 - Shared MMKV-backed client storage lives in `src/features/app-data/storage`.
 - Shared i18n bootstrap, locales, and formatting helpers live in `src/i18n`.
 - Shared UI primitives live in `src/components/ui`.
@@ -48,12 +47,12 @@ Make the smallest correct change that fits this mobile-only Expo app, use the ex
 5. When testing UI that depends on Tamagui theme values, wrap the subject with `TamaguiProvider` or the app `Provider`.
 6. Prefer extending the existing provider, routing, and Tamagui patterns instead of introducing parallel abstractions.
 7. Keep `src/app` thin. Put feature logic, feature copy, and feature-specific components under the owning `src/features/<feature>` slice.
-8. Wire translations directly in the owning screen, navigation helper, or feature component with `useTranslation`. Put Zod schemas, mock builders, serializers, and view-model shaping under the owning feature's `models/` or `forms/` folder, and keep translation/formatting decisions in UI or screen-local presentation helpers.
+8. Wire translations directly in the owning screen, navigation helper, or feature component with `useTranslation`. Put Zod schemas, serializers, and view-model shaping under the owning feature's `models/` or `forms/` folder, and keep translation/formatting decisions in UI or screen-local presentation helpers.
 9. When adding API-prep contracts, prefer feature-local types and serializers over cross-feature abstractions unless the helper is truly generic.
-10. Use React Query for server-state and API-ready async reads/writes. Screens should consume feature hooks instead of calling mock/model builders directly.
+10. Use React Query for server-state and API-ready async reads/writes. Screens should consume feature hooks instead of calling model builders directly.
 11. Keep MMKV-backed client storage in `src/features/app-data/storage`, with app preferences under `preferences/` and broader device/client state under `device/`. Do not introduce Zustand to mirror React Query cache or client storage state.
 12. Keep auth tokens and other credentials out of MMKV. Use `expo-secure-store` via the existing auth storage helpers.
-13. Use `src/features/app-data/mock` for the session-only MSW backend emulator and `src/features/app-data/query` for shared query helpers.
+13. Use `src/features/app-data/query` for shared query helpers.
 14. Prefer the shared diagnostics layer in `src/features/app-data/monitoring` for app-wide runtime logging and Sentry breadcrumbs instead of feature-local logging utilities.
 15. Add tests by ownership: feature tests in `tests/features/<feature>`, router tests in `tests/router`, shared primitive tests in `tests/ui`, and shared helpers in `tests/support`.
 16. When a mock is reused across suites, move it into `tests/support` instead of duplicating inline `jest.mock(...)` blocks.

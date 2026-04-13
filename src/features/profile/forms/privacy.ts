@@ -26,6 +26,7 @@ export function getProfilePrivacyFormSchema(
     alertsEmail: z.string().email(),
     alertsEnabled: z.boolean(),
     biometricsEnabled: z.boolean(),
+    pinEnabled: z.boolean(),
     pushNotificationsEnabled: z.boolean(),
   })
 }
@@ -34,9 +35,10 @@ export function getProfilePrivacyFormDefaultValues(
   values: ProfilePrivacyFormValues,
 ): ProfilePrivacyFormValues {
   return {
-    alertsEmail: values.alertsEmail,
+    alertsEmail: values.alertsEmail.trim(),
     alertsEnabled: values.alertsEnabled,
     biometricsEnabled: values.biometricsEnabled,
+    pinEnabled: values.pinEnabled,
     pushNotificationsEnabled: values.pushNotificationsEnabled,
   }
 }

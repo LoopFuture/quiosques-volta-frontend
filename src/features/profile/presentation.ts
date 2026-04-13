@@ -14,6 +14,36 @@ import {
   type ProfileSummaryMetrics,
 } from './models'
 
+function getProfileDisplayValue(value: string | null | undefined) {
+  return value && value.trim().length > 0 ? value : '-'
+}
+
+function getProfilePaymentsReadinessValue(
+  t: TFunction,
+  profile: ProfileResponse,
+) {
+  if (!profile.payoutAccount?.ibanMasked) {
+    return t('tabScreens.profile.hub.readiness.paymentsReviewValue')
+  }
+
+  const accountHolderName =
+    profile.payoutAccount.accountHolderName ?? profile.personal.name
+
+  if (accountHolderName) {
+    return t(
+      'tabScreens.profile.hub.readiness.paymentsEnabledValueWithAccountHolder',
+      {
+        accountHolderName: getProfileDisplayValue(accountHolderName),
+        iban: getProfileDisplayValue(profile.payoutAccount.ibanMasked),
+      },
+    )
+  }
+
+  return t('tabScreens.profile.hub.readiness.paymentsEnabledValue', {
+    iban: getProfileDisplayValue(profile.payoutAccount.ibanMasked),
+  })
+}
+
 export function getProfileValidationCopy(t: TFunction) {
   return {
     appSettings: {
@@ -25,6 +55,9 @@ export function getProfileValidationCopy(t: TFunction) {
       ),
     },
     payments: {
+      accountHolderNameRequired: t(
+        'tabScreens.profile.validation.payments.accountHolderNameRequired',
+      ),
       ibanInvalid: t('tabScreens.profile.validation.payments.ibanInvalid'),
       ibanRequired: t('tabScreens.profile.validation.payments.ibanRequired'),
     },
@@ -128,11 +161,30 @@ export function getProfileHubSections(
 ) {
   return profileHubSectionSchema.array().parse([
     {
+      id: 'alerts',
+      previewRows: [
+        {
+          label: t('tabScreens.profile.hub.rows.alertsEmailTitle'),
+          value: profile.preferences?.alertsEnabled
+            ? t('tabScreens.profile.hub.rows.alertsEmailEnabledHelper')
+            : t('tabScreens.profile.hub.rows.alertsEmailDisabledHelper'),
+        },
+        {
+          label: t('tabScreens.profile.hub.rows.pushNotificationsTitle'),
+          value: deviceSettings.pushNotificationsEnabled
+            ? t('tabScreens.profile.hub.rows.pushNotificationsEnabledHelper')
+            : t('tabScreens.profile.hub.rows.pushNotificationsDisabledHelper'),
+        },
+      ],
+      summary: t('tabScreens.profile.hub.summaries.alerts'),
+      title: t('tabScreens.profile.hub.cards.alerts'),
+    },
+    {
       id: 'personal',
       previewRows: [
         {
           label: t('tabScreens.profile.hub.rows.nameTitle'),
-          value: profile.personal.name,
+          value: getProfileDisplayValue(profile.personal.name),
         },
         {
           label: t('tabScreens.profile.hub.rows.emailTitle'),
@@ -140,11 +192,11 @@ export function getProfileHubSections(
         },
         {
           label: t('tabScreens.profile.hub.rows.phoneNumberTitle'),
-          value: profile.personal.phoneNumber,
+          value: getProfileDisplayValue(profile.personal.phoneNumber),
         },
         {
           label: t('tabScreens.profile.hub.rows.nifTitle'),
-          value: profile.personal.nif,
+          value: getProfileDisplayValue(profile.personal.nif),
         },
       ],
       summary: t('tabScreens.profile.hub.summaries.personal'),
@@ -154,14 +206,14 @@ export function getProfileHubSections(
       id: 'payments',
       previewRows: [
         {
-          label: t('tabScreens.profile.hub.rows.ibanTitle'),
-          value: profile.payoutAccount.ibanMasked,
+          label: t('tabScreens.profile.hub.rows.accountHolderNameTitle'),
+          value: getProfileDisplayValue(
+            profile.payoutAccount?.accountHolderName ?? profile.personal.name,
+          ),
         },
         {
-          label: t('tabScreens.profile.hub.rows.spinTitle'),
-          value: profile.payoutAccount.spinEnabled
-            ? t('tabScreens.profile.hub.rows.spinEnabledHelper')
-            : t('tabScreens.profile.hub.rows.spinDisabledHelper'),
+          label: t('tabScreens.profile.hub.rows.ibanTitle'),
+          value: getProfileDisplayValue(profile.payoutAccount?.ibanMasked),
         },
       ],
       summary: t('tabScreens.profile.hub.summaries.payments'),
@@ -171,16 +223,10 @@ export function getProfileHubSections(
       id: 'privacy',
       previewRows: [
         {
-          label: t('tabScreens.profile.hub.rows.alertsEmailTitle'),
-          value: profile.preferences.alertsEnabled
-            ? t('tabScreens.profile.hub.rows.alertsEmailEnabledHelper')
-            : t('tabScreens.profile.hub.rows.alertsEmailDisabledHelper'),
-        },
-        {
-          label: t('tabScreens.profile.hub.rows.pushNotificationsTitle'),
-          value: deviceSettings.pushNotificationsEnabled
-            ? t('tabScreens.profile.hub.rows.pushNotificationsEnabledHelper')
-            : t('tabScreens.profile.hub.rows.pushNotificationsDisabledHelper'),
+          label: t('tabScreens.profile.hub.rows.pinTitle'),
+          value: deviceSettings.pinEnabled
+            ? t('tabScreens.profile.hub.rows.pinEnabledHelper')
+            : t('tabScreens.profile.hub.rows.pinDisabledHelper'),
         },
         ...(biometricsSupported
           ? [
@@ -226,10 +272,13 @@ export function getProfileHubReadiness(
     profile: ProfileResponse
   },
 ) {
-  const paymentsReady = profile.payoutAccount.ibanMasked.length > 0
-  const securityReady = !biometricsSupported || deviceSettings.biometricsEnabled
+  const paymentsReady = Boolean(profile.payoutAccount?.ibanMasked)
+  const securityReady =
+    deviceSettings.pinEnabled ||
+    (biometricsSupported && deviceSettings.biometricsEnabled)
   const alertsReady =
-    profile.preferences.alertsEnabled || deviceSettings.pushNotificationsEnabled
+    (profile.preferences?.alertsEnabled ?? false) ||
+    deviceSettings.pushNotificationsEnabled
   const badgeTone =
     paymentsReady && securityReady && alertsReady ? 'success' : 'warning'
   const securityItems: {
@@ -237,18 +286,25 @@ export function getProfileHubReadiness(
     label: string
     tone: 'success' | 'warning'
     value: string
-  }[] = biometricsSupported
-    ? [
-        {
-          id: 'security',
-          label: t('tabScreens.profile.hub.readiness.securityLabel'),
-          tone: securityReady ? 'success' : 'warning',
-          value: deviceSettings.biometricsEnabled
-            ? t('tabScreens.profile.hub.readiness.securityBiometricsValue')
-            : t('tabScreens.profile.hub.readiness.securityReviewValue'),
-        },
-      ]
-    : []
+  }[] = [
+    {
+      id: 'security',
+      label: t('tabScreens.profile.hub.readiness.securityLabel'),
+      tone: securityReady ? 'success' : 'warning',
+      value:
+        deviceSettings.pinEnabled && deviceSettings.biometricsEnabled
+          ? t('tabScreens.profile.hub.readiness.securityAllValue')
+          : deviceSettings.pinEnabled
+            ? t('tabScreens.profile.hub.readiness.securityPinValue')
+            : deviceSettings.biometricsEnabled
+              ? t('tabScreens.profile.hub.readiness.securityBiometricsValue')
+              : t(
+                  biometricsSupported
+                    ? 'tabScreens.profile.hub.readiness.securityReviewValue'
+                    : 'tabScreens.profile.hub.readiness.securityReviewPinValue',
+                ),
+    },
+  ]
 
   return {
     badgeLabel:
@@ -265,13 +321,7 @@ export function getProfileHubReadiness(
         id: 'payments',
         label: t('tabScreens.profile.hub.readiness.paymentsLabel'),
         tone: paymentsReady ? 'success' : 'warning',
-        value: profile.payoutAccount.spinEnabled
-          ? t('tabScreens.profile.hub.readiness.paymentsEnabledValue', {
-              iban: profile.payoutAccount.ibanMasked,
-            })
-          : t('tabScreens.profile.hub.readiness.paymentsReviewValue', {
-              iban: profile.payoutAccount.ibanMasked,
-            }),
+        value: getProfilePaymentsReadinessValue(t, profile),
       },
       ...securityItems,
       {
@@ -279,10 +329,10 @@ export function getProfileHubReadiness(
         label: t('tabScreens.profile.hub.readiness.alertsLabel'),
         tone: alertsReady ? 'success' : 'warning',
         value:
-          profile.preferences.alertsEnabled &&
+          (profile.preferences?.alertsEnabled ?? false) &&
           deviceSettings.pushNotificationsEnabled
             ? t('tabScreens.profile.hub.readiness.alertsAllValue')
-            : profile.preferences.alertsEnabled
+            : profile.preferences?.alertsEnabled
               ? t('tabScreens.profile.hub.readiness.alertsEmailValue')
               : deviceSettings.pushNotificationsEnabled
                 ? t('tabScreens.profile.hub.readiness.alertsPushValue')

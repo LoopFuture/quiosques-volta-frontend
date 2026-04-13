@@ -9,7 +9,7 @@ export async function fetchBarcodeScreenState(signal?: AbortSignal) {
         operation: 'screen-state',
       },
       method: 'GET',
-      path: '/barcode',
+      path: '/api/v1/barcode',
       signal,
     }),
   )

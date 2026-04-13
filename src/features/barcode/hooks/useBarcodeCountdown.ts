@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { BarcodeResponse } from '../models'
 
-type BarcodeCountdownSource = Pick<BarcodeResponse, 'expiresAt' | 'reference'>
+type BarcodeCountdownSource = Pick<BarcodeResponse, 'code' | 'expiresAt'>
 
 type BarcodeCountdownSnapshot = {
   expiresAtMs: number
@@ -32,7 +32,7 @@ function getCountdownSnapshot(
   return {
     expiresAtMs,
     initialRemainingMs: Math.max(expiresAtMs - nowMs, 0),
-    payloadKey: `${source.reference}:${source.expiresAt}`,
+    payloadKey: `${source.code}:${source.expiresAt}`,
   }
 }
 
@@ -47,21 +47,21 @@ export function useBarcodeCountdown(source?: BarcodeCountdownSource | null) {
   const [snapshot, setSnapshot] = useState(() => getCountdownSnapshot(source))
   const [nowMs, setNowMs] = useState(() => Date.now())
   const sourceExpiresAt = source?.expiresAt ?? null
-  const sourceReference = source?.reference ?? null
+  const sourceCode = source?.code ?? null
 
   useEffect(() => {
     setSnapshot(
       getCountdownSnapshot(
-        sourceExpiresAt && sourceReference
+        sourceExpiresAt && sourceCode
           ? {
+              code: sourceCode,
               expiresAt: sourceExpiresAt,
-              reference: sourceReference,
             }
           : null,
       ),
     )
     setNowMs(Date.now())
-  }, [sourceExpiresAt, sourceReference])
+  }, [sourceCode, sourceExpiresAt])
 
   useEffect(() => {
     if (!snapshot.payloadKey || snapshot.initialRemainingMs <= 0) {

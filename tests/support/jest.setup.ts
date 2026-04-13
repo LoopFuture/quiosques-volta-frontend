@@ -1,10 +1,9 @@
 import { cleanup } from '@testing-library/react-native'
 import { resetApiRuntimeConfigForTests } from '@/features/app-data/api'
-import { resetMockApiState } from '@/features/app-data/mock'
-import { mockApiServer } from '@/features/app-data/mock/server.node'
 import { resetMonitoringForTests } from '@/features/app-data/monitoring'
 import { resetKeycloakRuntimeConfigForTests } from '@/features/auth/models/config'
-import { resetPushNotificationsRuntimeConfigForTests } from '@/features/notifications/models'
+import { resetProfileWebAppRuntimeConfigForTests } from '@/features/profile/runtime'
+import { resetPushNotificationsRuntimeConfigForTests } from '@/features/notifications/models/runtime'
 
 jest.mock('expo-constants', () => {
   const defaultExpoConfig = {
@@ -18,7 +17,10 @@ jest.mock('expo-constants', () => {
         scopes: ['openid', 'profile', 'email'],
       },
       api: {
-        mockingEnabled: true,
+        baseUrl: 'https://volta.be.dev.theloop.tech',
+      },
+      webApp: {
+        baseUrl: 'https://volta.example.com',
       },
       sentry: {},
     },
@@ -62,6 +64,56 @@ jest.mock('expo-secure-store', () => {
     setItemAsync: jest.fn(async (key: string, value: string) => {
       store.set(key, value)
     }),
+  }
+})
+
+jest.mock('expo-crypto', () => {
+  const { createHash } = jest.requireActual('node:crypto') as {
+    createHash: (algorithm: string) => {
+      digest: (encoding: 'hex') => string
+      update: (value: string) => { digest: (encoding: 'hex') => string }
+    }
+  }
+  let randomUuidCounter = 0
+
+  const digestStringAsync = jest.fn(async (_algorithm: string, value: string) =>
+    createHash('sha256').update(value).digest('hex'),
+  )
+  const randomUUID = jest.fn(() => {
+    randomUuidCounter += 1
+
+    return `00000000-0000-4000-8000-${String(randomUuidCounter).padStart(12, '0')}`
+  })
+
+  return {
+    __esModule: true,
+    __resetExpoCryptoMock: () => {
+      randomUuidCounter = 0
+      digestStringAsync.mockClear()
+      randomUUID.mockClear()
+    },
+    CryptoDigestAlgorithm: {
+      SHA256: 'SHA-256',
+    },
+    digestStringAsync,
+    randomUUID,
+  }
+})
+
+jest.mock('expo-web-browser', () => {
+  const openBrowserAsync = jest.fn(async () => ({
+    type: 'opened',
+  }))
+  const dismissBrowser = jest.fn(async () => {})
+
+  return {
+    __esModule: true,
+    __resetExpoWebBrowserMock: () => {
+      dismissBrowser.mockClear()
+      openBrowserAsync.mockClear()
+    },
+    dismissBrowser,
+    openBrowserAsync,
   }
 })
 
@@ -698,17 +750,15 @@ const originalError = console.error.bind(console)
 const originalInfo = console.info.bind(console)
 const originalWarn = console.warn.bind(console)
 
-beforeAll(() => {
-  mockApiServer.listen({
-    onUnhandledRequest: 'bypass',
-  })
-})
-
 beforeEach(() => {
   const { __resetAuthSessionMock } = jest.requireMock('expo-auth-session')
   const { __resetExpoDeviceMock } = jest.requireMock('expo-device')
+  const expoCryptoMock = jest.requireMock('expo-crypto') as {
+    __resetExpoCryptoMock?: () => void
+  }
   const { __resetExpoConstantsMock } = jest.requireMock('expo-constants')
   const { __resetExpoNetworkMock } = jest.requireMock('expo-network')
+  const { __resetExpoWebBrowserMock } = jest.requireMock('expo-web-browser')
   const { __resetFlashListMock } = jest.requireMock('@shopify/flash-list')
   const { __resetExpoNotificationsMock } =
     jest.requireMock('expo-notifications')
@@ -720,29 +770,26 @@ beforeEach(() => {
   const { __resetSecureStoreMock } = jest.requireMock('expo-secure-store')
 
   __resetAuthSessionMock()
+  expoCryptoMock.__resetExpoCryptoMock?.()
   __resetExpoDeviceMock()
   __resetExpoConstantsMock()
   __resetExpoNetworkMock()
+  __resetExpoWebBrowserMock()
   __resetFlashListMock()
   __resetExpoNotificationsMock()
   __resetLocalAuthenticationMock()
   __resetSentryMock()
   __resetMMKVMock()
   __resetSecureStoreMock()
-  mockApiServer.resetHandlers()
   resetApiRuntimeConfigForTests()
   resetMonitoringForTests()
   resetKeycloakRuntimeConfigForTests()
+  resetProfileWebAppRuntimeConfigForTests()
   resetPushNotificationsRuntimeConfigForTests()
-  resetMockApiState()
 })
 
 afterEach(() => {
   cleanup()
-})
-
-afterAll(() => {
-  mockApiServer.close()
 })
 
 jest.mock('expo-localization', () => {

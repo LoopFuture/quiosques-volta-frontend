@@ -55,11 +55,6 @@ const DEFAULT_REDACTED_KEYS = [
   'token',
 ] as const
 
-const MAX_ARRAY_ITEMS = 10
-const MAX_OBJECT_ENTRIES = 20
-const MAX_STRING_LENGTH = 300
-const MAX_SANITIZE_DEPTH = 4
-
 let monitoringInitialized = false
 const navigationIntegration = Sentry.reactNavigationIntegration({
   enableTimeToInitialDisplay: true,
@@ -77,14 +72,6 @@ function buildRedactedKeySet(redactKeys: readonly string[] = []) {
   )
 }
 
-function truncateString(value: string) {
-  if (value.length <= MAX_STRING_LENGTH) {
-    return value
-  }
-
-  return `${value.slice(0, MAX_STRING_LENGTH)}...`
-}
-
 function toError(value: unknown) {
   if (value instanceof Error) {
     return value
@@ -97,15 +84,37 @@ function toError(value: unknown) {
   return new Error('Unknown diagnostic error')
 }
 
+function sanitizeError(
+  value: Error,
+  redactedKeySet: Set<string>,
+  depth: number,
+) {
+  const ownEntries = Object.entries(value).filter(
+    ([key]) => key !== 'message' && key !== 'name' && key !== 'stack',
+  )
+
+  return {
+    message: value.message,
+    name: value.name,
+    ...(value.stack ? { stack: value.stack } : {}),
+    ...Object.fromEntries(
+      ownEntries.map(([key, nestedValue]) => [
+        key,
+        sanitizeValue(
+          nestedValue,
+          redactedKeySet,
+          key === 'responsePayload' ? 0 : depth + 1,
+        ),
+      ]),
+    ),
+  }
+}
+
 function sanitizeValue(
   value: unknown,
   redactedKeySet: Set<string>,
   depth = 0,
 ): unknown {
-  if (depth >= MAX_SANITIZE_DEPTH) {
-    return '[Truncated]'
-  }
-
   if (
     value === null ||
     typeof value === 'boolean' ||
@@ -116,15 +125,11 @@ function sanitizeValue(
   }
 
   if (typeof value === 'string') {
-    return truncateString(value)
+    return value
   }
 
   if (value instanceof Error) {
-    return {
-      message: truncateString(value.message),
-      name: value.name,
-      ...(value.stack ? { stack: truncateString(value.stack) } : {}),
-    }
+    return sanitizeError(value, redactedKeySet, depth)
   }
 
   if (value instanceof Date) {
@@ -132,18 +137,11 @@ function sanitizeValue(
   }
 
   if (Array.isArray(value)) {
-    const sanitizedItems = value
-      .slice(0, MAX_ARRAY_ITEMS)
-      .map((item) => sanitizeValue(item, redactedKeySet, depth + 1))
-
-    return {
-      items: sanitizedItems,
-      totalCount: value.length,
-    }
+    return value.map((item) => sanitizeValue(item, redactedKeySet, depth + 1))
   }
 
   if (typeof value === 'object') {
-    const entries = Object.entries(value).slice(0, MAX_OBJECT_ENTRIES)
+    const entries = Object.entries(value)
 
     return Object.fromEntries(
       entries.map(([key, nestedValue]) => {
@@ -252,12 +250,10 @@ export function recordDiagnosticEvent(event: DiagnosticEvent) {
   const breadcrumbMessage = `${event.operation}.${event.phase}.${event.status}`
 
   if (isConsoleDiagnosticsEnabled()) {
-    const logArgs = ['[diagnostics]', sanitizedPayload] as const
-
     if (event.status === 'error') {
-      console.error(...logArgs)
+      console.error('[diagnostics]', sanitizedPayload, event.error)
     } else {
-      console.info(...logArgs)
+      console.info('[diagnostics]', sanitizedPayload)
     }
   }
 

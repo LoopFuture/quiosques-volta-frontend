@@ -15,15 +15,37 @@ const timelineTones: Record<TimelineItem['state'], Tone> = {
 
 export function StatusTimeline({ items }: StatusTimelineProps) {
   return (
-    <SurfaceCard gap="$2">
+    <SurfaceCard accessibilityRole="list" gap="$2">
       {items.map((item, index) => {
         const tone = timelineTones[item.state]
         const marker =
           item.state === 'done' ? '✓' : item.state === 'current' ? '•' : ''
         const isActiveState = item.state === 'done' || item.state === 'current'
+        const accessibilityLabel = [
+          item.label,
+          item.accessibilityStateLabel ?? item.state,
+          item.description,
+        ]
+          .filter(Boolean)
+          .join('. ')
 
         return (
-          <XStack key={item.id} gap="$3" items="stretch">
+          <XStack
+            accessibilityLabel={accessibilityLabel}
+            accessibilityState={
+              item.state === 'current' ? { selected: true } : undefined
+            }
+            accessibilityValue={
+              item.accessibilityStateLabel
+                ? {
+                    text: `${index + 1} of ${items.length}. ${item.accessibilityStateLabel}`,
+                  }
+                : { text: `${index + 1} of ${items.length}` }
+            }
+            key={item.id}
+            gap="$3"
+            items="stretch"
+          >
             <YStack items="center">
               <ToneScope tone={tone}>
                 <YStack

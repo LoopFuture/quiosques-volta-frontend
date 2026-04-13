@@ -2,7 +2,6 @@ import { z } from 'zod/v4'
 import { walletTransferRequestSchema } from '@/features/wallet/models'
 export type WalletTransferFormValues = {
   amount: string
-  useSpin: boolean
 }
 
 export type WalletTransferRequest = z.infer<typeof walletTransferRequestSchema>
@@ -102,16 +101,12 @@ export function getWalletTransferFormSchema(
 
         return amountCents !== null && amountCents <= availableBalanceCents
       }, validation.exceedsBalanceError),
-    useSpin: z.boolean(),
   })
 }
 
-export function getWalletTransferFormDefaultValues(
-  useSpin = false,
-): WalletTransferFormValues {
+export function getWalletTransferFormDefaultValues(): WalletTransferFormValues {
   return {
     amount: '',
-    useSpin,
   }
 }
 
@@ -125,6 +120,5 @@ export function serializeWalletTransferForm(
       amountMinor: amountCents ?? 0,
       currency: 'EUR',
     },
-    payoutRail: values.useSpin ? 'spin' : 'sepa',
   })
 }

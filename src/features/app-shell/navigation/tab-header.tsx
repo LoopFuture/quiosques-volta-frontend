@@ -1,4 +1,4 @@
-import { ArrowLeft, Bell } from '@tamagui/lucide-icons'
+import { ArrowLeft } from '@tamagui/lucide-icons'
 import { useTranslation } from 'react-i18next'
 import {
   TopBar,
@@ -8,30 +8,14 @@ import {
 
 export type AppTabRouteName = 'index' | 'map' | 'barcode' | 'wallet' | 'profile'
 
-type TabTopBarOptions = {
-  homeNotificationAccessibilityHint?: string
-  homeNotificationBadgeValue?: string
-  onHomeNotificationPress?: () => void
-  homeTitle?: string
-}
-
 function buildTabTopBarProps(
   routeName: AppTabRouteName,
   t: ReturnType<typeof useTranslation>['t'],
-  options: TabTopBarOptions = {},
+  options: { homeTitle?: string } = {},
 ): TopBarProps {
   if (routeName === 'index') {
     return {
       eyebrow: t('tabs.home.header.eyebrow'),
-      rightAction: options.onHomeNotificationPress
-        ? {
-            badgeValue: options.homeNotificationBadgeValue,
-            hint: options.homeNotificationAccessibilityHint,
-            icon: <Bell color="$accent11" size={18} />,
-            label: t('tabs.home.header.notificationLabel'),
-            onPress: options.onHomeNotificationPress,
-          }
-        : undefined,
       title: options.homeTitle ?? t('tabs.home.header.title'),
       variant: 'home',
     }
@@ -45,15 +29,9 @@ function buildTabTopBarProps(
 
 export function TabTopBar({
   routeName,
-  homeNotificationAccessibilityHint,
-  homeNotificationBadgeValue,
-  onHomeNotificationPress,
   homeTitle,
 }: {
   routeName: AppTabRouteName
-  homeNotificationAccessibilityHint?: string
-  homeNotificationBadgeValue?: string
-  onHomeNotificationPress?: () => void
   homeTitle?: string
 }) {
   const { t } = useTranslation()
@@ -61,10 +39,7 @@ export function TabTopBar({
   return (
     <TopBar
       {...buildTabTopBarProps(routeName, t, {
-        homeNotificationAccessibilityHint,
-        homeNotificationBadgeValue,
         homeTitle,
-        onHomeNotificationPress,
       })}
     />
   )

@@ -24,9 +24,3 @@ export function invalidateProfileQueries(queryClient: QueryClient) {
     queryKey: appQueryKeys.profile.all,
   })
 }
-
-export function invalidateNotificationsQueries(queryClient: QueryClient) {
-  return queryClient.invalidateQueries({
-    queryKey: appQueryKeys.notifications.all,
-  })
-}

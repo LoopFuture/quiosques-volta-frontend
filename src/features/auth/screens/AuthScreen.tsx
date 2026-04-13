@@ -1,167 +1,54 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useWindowDimensions } from 'react-native'
-import { useRouter } from 'expo-router'
+import { useState, useEffect } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import {
   CodeChallengeMethod,
   exchangeCodeAsync,
   ResponseType,
   useAuthRequest,
 } from 'expo-auth-session'
-import { Fingerprint } from '@tamagui/lucide-icons'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import {
-  Button,
-  Paragraph,
-  SizableText,
-  Text,
-  XStack,
-  YStack,
-  useTheme,
-} from 'tamagui'
+import { LockKeyhole } from '@tamagui/lucide-icons'
 import { useTranslation } from 'react-i18next'
+import { Button, Text, XStack, YStack } from 'tamagui'
 import { PrimaryButton, ScreenContainer, SurfaceCard } from '@/components/ui'
-import AppLogo from '@/assets/images/logo.svg'
+import { useDevicePrivacySettings } from '@/features/app-data/storage/device/privacy'
 import {
   createDiagnosticTimer,
   recordDiagnosticEvent,
 } from '@/features/app-data/monitoring'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
+import { clearStoredAppPin } from '@/features/auth/pin'
 import {
   createKeycloakDiscoveryDocument,
   createKeycloakRedirectUri,
   getKeycloakRuntimeConfig,
 } from '@/features/auth/models/config'
+import { authRoutes } from '@/features/auth/routes'
 import { homeRoutes } from '@/features/home/routes'
 import { useOnboardingStatus } from '@/features/onboarding/hooks'
 import OnboardingScreen from '@/features/onboarding/screens/OnboardingScreen'
 import { useAppPreferences } from '@/hooks/useAppPreferences'
-import { brandBlack } from '@/themes'
+import {
+  AuthActionDivider,
+  AuthHeader,
+  useAuthSurfaceMetrics,
+} from './auth-screen-shared'
 
 type AuthIntent = 'login' | 'register' | null
 
-function getUnlockErrorMessage(
-  reason: 'cancelled' | 'failed' | 'not-available' | 'not-enrolled',
-  t: ReturnType<typeof useTranslation>['t'],
-) {
-  if (reason === 'not-available') {
-    return t('auth.lock.notAvailableError')
-  }
-
-  if (reason === 'not-enrolled') {
-    return t('auth.lock.notEnrolledError')
-  }
-
-  if (reason === 'cancelled') {
-    return t('auth.lock.cancelledError')
-  }
-
-  return t('auth.lock.failedError')
-}
-
-function useAuthSurfaceMetrics() {
-  const theme = useTheme()
-  const { resolvedTheme } = useAppPreferences()
-  const insets = useSafeAreaInsets()
-  const { width } = useWindowDimensions()
-  const isCompactWidth = width < 360
-
-  return {
-    heroLogoColor: resolvedTheme === 'dark' ? theme.accent10.val : brandBlack,
-    heroLogoSize: isCompactWidth ? 88 : 104,
-    heroTitleFontSize: isCompactWidth ? 44 : 56,
-    insets,
-    subtitleMaxWidth: Math.max(Math.min(width - 32, 360), 240),
-  }
-}
-
-function AuthHeader({
-  description,
-  heroLogoColor,
-  heroLogoSize,
-  heroTitleFontSize,
-  subtitleMaxWidth,
-  titleLeading,
-  titleTrailing,
-}: {
-  description: string
-  heroLogoColor: string
-  heroLogoSize: number
-  heroTitleFontSize: number
-  subtitleMaxWidth: number
-  titleLeading: string
-  titleTrailing: string
-}) {
-  return (
-    <YStack gap="$6" items="center">
-      <YStack items="center" justify="center" pt={8}>
-        <AppLogo
-          color={heroLogoColor}
-          height={heroLogoSize}
-          width={heroLogoSize}
-        />
-      </YStack>
-
-      <YStack gap="$3" items="center">
-        <XStack gap="$2" flexWrap="wrap" justify="center">
-          <Text
-            fontSize={heroTitleFontSize}
-            fontWeight="900"
-            letterSpacing={-2}
-          >
-            {titleLeading}
-          </Text>
-          <Text
-            color="$accent10"
-            fontSize={heroTitleFontSize}
-            fontWeight="900"
-            letterSpacing={-2}
-          >
-            {titleTrailing}
-          </Text>
-        </XStack>
-
-        <Paragraph
-          color="$color11"
-          size="$8"
-          style={{ maxWidth: subtitleMaxWidth, textAlign: 'center' }}
-        >
-          {description}
-        </Paragraph>
-      </YStack>
-    </YStack>
-  )
-}
-
-function AuthActionDivider({ label }: { label: string }) {
-  return (
-    <XStack gap="$3" items="center">
-      <YStack bg="$borderColor" flex={1} height={1} />
-      <SizableText
-        color="$color10"
-        fontSize={12}
-        fontWeight="700"
-        textTransform="uppercase"
-      >
-        {label}
-      </SizableText>
-      <YStack bg="$borderColor" flex={1} height={1} />
-    </XStack>
-  )
-}
-
 function AuthPromptScreen() {
   const { t } = useTranslation()
+  const { showLogin } = useLocalSearchParams<{ showLogin?: string }>()
+  const { settings, setSettings } = useDevicePrivacySettings()
   const runtimeConfig = getKeycloakRuntimeConfig()
   const discovery = createKeycloakDiscoveryDocument(runtimeConfig.issuerUrl)
   const redirectUri = createKeycloakRedirectUri()
   const {
-    appLockRevision,
     completeSignIn,
-    consumePendingBiometricPrompt,
+    isBiometricUnlockEnabled,
     isAppLocked,
     isAuthenticated,
+    isPinUnlockEnabled,
     signOut,
-    unlockWithBiometrics,
   } = useAuthSession()
   const router = useRouter()
   const { resolvedLocale, themeMode } = useAppPreferences()
@@ -172,11 +59,11 @@ function AuthPromptScreen() {
     insets,
     subtitleMaxWidth,
   } = useAuthSurfaceMetrics()
-  const lastAutoPromptedLockRevisionRef = useRef<number | null>(null)
   const [activeIntent, setActiveIntent] = useState<AuthIntent>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isUnlockingBiometrics, setIsUnlockingBiometrics] = useState(false)
   const isLockedSession = isAuthenticated && isAppLocked
+  const shouldShowUnlockEntry =
+    isLockedSession && (isBiometricUnlockEnabled || isPinUnlockEnabled)
 
   const authExtraParams = {
     theme: themeMode,
@@ -229,51 +116,15 @@ function AuthPromptScreen() {
 
   const isReady = Boolean(loginRequest && registerRequest && reloginRequest)
   const isBusy = activeIntent !== null
-  const actionsDisabled = !isReady || isBusy || isUnlockingBiometrics
-  const canRetryBiometrics = isLockedSession && !isBusy
-
-  const handleBiometricUnlock = useCallback(async () => {
-    if (!isLockedSession) {
-      return
-    }
-
-    setIsUnlockingBiometrics(true)
-    setErrorMessage(null)
-
-    try {
-      const result = await unlockWithBiometrics()
-
-      if (result.success) {
-        return
-      }
-
-      setErrorMessage(getUnlockErrorMessage(result.reason, t))
-    } finally {
-      setIsUnlockingBiometrics(false)
-    }
-  }, [isLockedSession, t, unlockWithBiometrics])
+  const actionsDisabled = !isReady || isBusy
 
   useEffect(() => {
-    if (!isLockedSession) {
+    if (!shouldShowUnlockEntry || showLogin === '1') {
       return
     }
 
-    if (lastAutoPromptedLockRevisionRef.current === appLockRevision) {
-      return
-    }
-
-    if (!consumePendingBiometricPrompt()) {
-      return
-    }
-
-    lastAutoPromptedLockRevisionRef.current = appLockRevision
-    void handleBiometricUnlock()
-  }, [
-    appLockRevision,
-    consumePendingBiometricPrompt,
-    handleBiometricUnlock,
-    isLockedSession,
-  ])
+    router.replace(authRoutes.unlock)
+  }, [router, shouldShowUnlockEntry, showLogin])
 
   async function handleAuthAction(intent: Exclude<AuthIntent, null>) {
     const isRelogin = intent === 'login' && isLockedSession
@@ -316,6 +167,13 @@ function AuthPromptScreen() {
 
     try {
       if (isLockedSession) {
+        if (isPinUnlockEnabled) {
+          await clearStoredAppPin()
+          setSettings({
+            ...settings,
+            pinEnabled: false,
+          })
+        }
         await signOut()
       }
 
@@ -472,31 +330,34 @@ function AuthPromptScreen() {
             {t('auth.loginLabel')}
           </PrimaryButton>
 
-          <AuthActionDivider label={t('auth.dividerLabel')} />
+          {shouldShowUnlockEntry ? (
+            <YStack gap="$4">
+              <AuthActionDivider label={t('auth.dividerLabel')} />
 
-          <PrimaryButton
-            disabled={!canRetryBiometrics}
-            emphasis="outline"
-            isPending={isUnlockingBiometrics}
-            onPress={() => {
-              void handleBiometricUnlock()
-            }}
-            testID="auth-biometric-button"
-            tone="neutral"
-          >
-            <XStack gap="$2" items="center" justify="center">
-              <Fingerprint
-                color={canRetryBiometrics ? '$accent11' : '$color10'}
-                size={18}
-              />
-              <Text
-                color={canRetryBiometrics ? '$color' : '$color10'}
-                fontWeight="700"
+              <PrimaryButton
+                disabled={actionsDisabled}
+                emphasis="outline"
+                onPress={() => {
+                  router.push(authRoutes.unlock)
+                }}
+                testID="auth-open-unlock-button"
+                tone="neutral"
               >
-                {t('auth.biometricLabel')}
-              </Text>
-            </XStack>
-          </PrimaryButton>
+                <XStack gap="$2" items="center" justify="center">
+                  <LockKeyhole
+                    color={actionsDisabled ? '$color10' : '$color11'}
+                    size={18}
+                  />
+                  <Text
+                    color={actionsDisabled ? '$color10' : '$color'}
+                    fontWeight="700"
+                  >
+                    {t('auth.lock.openLabel')}
+                  </Text>
+                </XStack>
+              </PrimaryButton>
+            </YStack>
+          ) : null}
         </YStack>
 
         <XStack
@@ -506,7 +367,7 @@ function AuthPromptScreen() {
           justify="center"
           pb={Math.max(insets.bottom, 12)}
         >
-          <Paragraph color="$color11">{t('auth.registerPrompt')}</Paragraph>
+          <Text color="$color11">{t('auth.registerPrompt')}</Text>
           <Button
             disabled={actionsDisabled}
             onPress={() => {

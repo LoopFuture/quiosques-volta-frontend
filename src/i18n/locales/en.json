@@ -8,14 +8,23 @@
       "lock": {
         "cancelLabel": "Cancel",
         "cancelledError": "Biometric verification was cancelled. Try again or log in again.",
-        "description": "Use Face ID or fingerprint to reopen your account on this phone.",
+        "closeLabel": "Close unlock",
+        "description": "Use biometrics or your app PIN to reopen your account on this phone.",
         "failedError": "We couldn't confirm your biometrics. Try again or log in again.",
+        "invalidPinError": "That app PIN wasn't right. Try again.",
         "loginAgainLabel": "Log in again",
         "notAvailableError": "Biometrics are not available on this device. Log in again to continue.",
         "notEnrolledError": "Set up Face ID or fingerprint on this device, or log in again to continue.",
+        "openLabel": "Use PIN or biometrics",
+        "pinFailedError": "We couldn't verify your app PIN. Try again or log in again.",
+        "pinHelper": "Enter the 4-digit app PIN for this phone.",
+        "pinLabel": "App PIN",
+        "pinNotConfiguredError": "App PIN is not set on this device. Log in again to continue.",
         "promptMessage": "Use Face ID or fingerprint for Volta",
         "retryLabel": "Try again",
-        "title": "Unlock Volta"
+        "tooManyPinAttemptsError": "Too many wrong PIN attempts. Log in again to continue.",
+        "title": "Unlock Volta",
+        "unlockWithPinLabel": "Unlock with app PIN"
       },
       "loginLabel": "Log in",
       "registerLabel": "Register",
@@ -23,9 +32,6 @@
       "subtitle": "Welcome back to the sustainable future",
       "titleLeading": "Volta",
       "titleTrailing": "Portugal"
-    },
-    "mockAction": {
-      "message": "This action is using mocked data for now."
     },
     "onboarding": {
       "actions": {
@@ -78,9 +84,6 @@
       "home": {
         "header": {
           "eyebrow": "Welcome",
-          "notificationLabel": "Notifications",
-          "notificationUnreadHint_one": "{{count}} unread alert.",
-          "notificationUnreadHint_other": "{{count}} unread alerts.",
           "title": "Volta"
         },
         "label": "Home"
@@ -121,59 +124,6 @@
         "retryLabel": "Try again",
         "title": "Unable to load"
       },
-      "notifications": {
-        "backLabel": "Back",
-        "clearAllLabel": "Clear all",
-        "clearAllErrorToast": "We couldn't clear the notifications right now.",
-        "clearAllSuccessToast": "The notifications were cleared.",
-        "description": "Credits, transfers, and account alerts.",
-        "errorDescription": "We couldn't load your alerts right now.",
-        "errorRecoveryHint": "Try again to refresh recent wallet and account updates.",
-        "errorTitle": "Alerts unavailable",
-        "emptyStateDescription": "When there is wallet activity or an account alert, we will show it here.",
-        "emptyStateTitle": "No alerts yet",
-        "items": {
-          "barcodeReminder": {
-            "message": "Keep your QR code ready to speed up the next return.",
-            "timeLabel": "Yesterday, 18:05",
-            "title": "Keep your Volta code handy"
-          },
-          "creditAdded": {
-            "message": "You received {{amount}} in your wallet after the return at {{location}}.",
-            "timeLabel": "Today, 14:30",
-            "title": "Credit added at {{location}}"
-          },
-          "transferProcessing": {
-            "message": "Your {{amount}} transfer request is being sent to the linked account.",
-            "timeLabel": "Now",
-            "title": "Transfer is processing"
-          },
-          "securitySettings": {
-            "message": "Confirm your alerts email and permissions in the privacy area.",
-            "timeLabel": "Today, 11:10",
-            "title": "Review your account alerts"
-          },
-          "walletHistory": {
-            "message": "Review the recent credits and transfer requests in your Volta wallet.",
-            "timeLabel": "Yesterday, 09:10",
-            "title": "Wallet history is ready"
-          }
-        },
-        "listDescription": "Open an alert to see the latest wallet or account status.",
-        "listDescriptionUnread_one": "{{count}} unread alert to review.",
-        "listDescriptionUnread_other": "{{count}} unread alerts to review.",
-        "listTitle": "Recent alerts",
-        "manageTitle": "Manage alerts",
-        "markAllReadLabel": "Mark all as read",
-        "markAllReadErrorToast": "We couldn't mark the notifications right now.",
-        "markAllReadSuccessToast": "The notifications were marked as read.",
-        "readA11yLabel": "Read",
-        "title": "Notifications",
-        "unreadCountBadge_one": "{{count}} unread",
-        "unreadCountBadge_other": "{{count}} unread",
-        "unreadA11yLabel": "Unread",
-        "unreadBadgeLabel": "New"
-      },
       "two": {
         "title": "Tab Two"
       }
@@ -208,7 +158,7 @@
       },
       "home": {
         "balanceCard": {
-          "actionLabel": "Transfer",
+          "actionLabel": "Transfer balance",
           "availableBalanceLabel": "Available balance",
           "badges": {
             "credits_one": "{{count}} credit",
@@ -218,7 +168,7 @@
             "transfers_one": "{{count}} pending transfer",
             "transfers_other": "{{count}} pending transfers"
           },
-          "caption": "Ready to transfer to your linked account."
+          "caption": "Send it to your linked account whenever you are ready."
         },
         "errors": {
           "description": "We couldn't load your wallet and return summary right now. Try again to refresh your latest balance.",
@@ -251,6 +201,9 @@
         },
         "recentActivity": {
           "description": "Your latest credits and transfer requests.",
+          "emptyStateDescription": "As soon as you receive new credits or request a transfer, this list updates automatically.",
+          "emptyStateLabel": "No movements yet",
+          "emptyStateTitle": "Your next movements will show up here",
           "title": "Recent activity",
           "transactions": {
             "colomboTitle": "Continente - Colombo",
@@ -389,13 +342,6 @@
             "label": "Tax ID",
             "saveLabel": "Save tax ID",
             "title": "Update tax ID"
-          },
-          "spin": {
-            "description": "Enable or disable instant payouts for this account.",
-            "helperText": "Keep instant payouts enabled for this account.",
-            "label": "SPIN",
-            "saveLabel": "Save SPIN",
-            "title": "Manage SPIN"
           }
         },
         "hub": {
@@ -406,6 +352,7 @@
           },
           "accountDescription": "Check the items that affect payouts, alerts, and security before your next return.",
           "cards": {
+            "alerts": "Account alerts",
             "appSettings": "App settings",
             "payments": "Payments",
             "personal": "Profile data",
@@ -417,6 +364,7 @@
             "memberSinceValue": "Oct 2023"
           },
           "helpRowLabel": "How Volta works",
+          "helpLinksDescription": "Open help, privacy, and terms without leaving the app.",
           "logoutLabel": "Log out",
           "readiness": {
             "alertsAllValue": "Email + push on",
@@ -424,26 +372,32 @@
             "alertsLabel": "Alerts",
             "alertsPushValue": "Push on",
             "alertsReviewValue": "Turn on alerts",
-            "paymentsEnabledValue": "{{iban}} · SPIN on",
+            "paymentsEnabledValue": "{{iban}} linked",
+            "paymentsEnabledValueWithAccountHolder": "{{accountHolderName}} · {{iban}} linked",
             "paymentsLabel": "Payments",
-            "paymentsReviewValue": "{{iban}} · check SPIN",
+            "paymentsReviewValue": "Add an IBAN",
             "readyBadge": "Account ready",
-            "readyDescription": "Payments, security, and alerts are set.",
+            "readyDescription": "Payments, device protection, and alerts are set.",
             "readyTitle": "Ready for refunds",
             "reviewBadge": "Review account",
             "reviewDescription": "Check one item before your next refund.",
             "reviewTitle": "Review before next refund",
+            "securityAllValue": "PIN + biometrics on",
             "securityBiometricsValue": "Biometrics on",
             "securityLabel": "Security",
-            "securityReviewValue": "Turn on biometrics"
+            "securityPinValue": "PIN on",
+            "securityReviewPinValue": "Turn on PIN",
+            "securityReviewValue": "Turn on PIN or biometrics"
           },
           "summaries": {
+            "alerts": "Email and push updates",
             "appSettings": "Language and appearance",
-            "payments": "IBAN and instant payouts",
+            "payments": "IBAN for refunds",
             "personal": "Name, phone, tax ID",
-            "privacy": "Push alerts and biometrics"
+            "privacy": "PIN, biometrics, and device access"
           },
           "rows": {
+            "accountHolderNameTitle": "Account holder",
             "alertsEmailDisabledHelper": "Disabled",
             "alertsEmailEnabledHelper": "Enabled",
             "alertsEmailHelper": "Used for security alerts and refund updates.",
@@ -466,14 +420,16 @@
             "nifTitle": "Tax ID",
             "onboardingHelper": "See the app introduction again.",
             "onboardingTitle": "How it works",
+            "pinDisabledHelper": "App PIN off",
+            "pinEnabledHelper": "4-digit PIN active",
+            "pinTitle": "App PIN",
             "phoneNumberTitle": "Phone number",
+            "privacyPolicyHelper": "How we handle your data and permissions.",
+            "privacyPolicyTitle": "Privacy policy",
             "pushNotificationsDisabledHelper": "Push notifications disabled.",
             "pushNotificationsEnabledHelper": "Push notifications active.",
             "pushNotificationsTitle": "Push notifications",
             "summaryHelper": "Activity, credits, and transfers",
-            "spinDisabledHelper": "Instant payments disabled",
-            "spinEnabledHelper": "Instant payments enabled",
-            "spinTitle": "SPIN",
             "termsHelper": "Usage and privacy conditions.",
             "termsTitle": "Terms and conditions"
           },
@@ -492,6 +448,19 @@
           "sessionLabel": "Session",
           "supportDescription": "See the short introduction again if you want a quick refresher.",
           "supportLabel": "Need a refresher?"
+        },
+        "alerts": {
+          "description": "Choose how Volta sends account and payment updates.",
+          "emailAlertsErrorToast": "We couldn't update email alerts right now.",
+          "emailAlertsHelper": "Send payment security alerts to your account email.",
+          "emailAlertsLabel": "Payment security emails",
+          "emailAlertsSuccessToast": "Email alerts were updated.",
+          "pushNotificationsLabel": "Push notifications",
+          "sectionHelper": "These alert channels keep you updated about account activity and refunds.",
+          "sectionTitle": "Delivery preferences",
+          "securityPreferencesHelper": "Security alert emails will be sent to the current email set in your profile: {{email}}.",
+          "securityPreferencesTitle": "Security preferences",
+          "title": "Account alerts"
         },
         "summary": {
           "description": "See your credits, returns, and transfers in one place.",
@@ -524,7 +493,7 @@
           "phoneNumberHelper": "Use the international format, for example +351 912 345 678.",
           "phoneNumberLabel": "Phone number",
           "photoActionLabel": "Change photo",
-          "photoDescription": "Keep a profile photo ready. In this pass, the action still uses mock feedback.",
+          "photoDescription": "Keep a profile photo ready so your account details stay up to date.",
           "photoTitle": "Profile photo",
           "saveErrorToast": "We couldn't save your profile details right now.",
           "saveLabel": "Save profile details",
@@ -534,7 +503,9 @@
           "title": "Profile data"
         },
         "payments": {
-          "description": "Manage where refunds are paid and whether instant payout stays on.",
+          "accountHolderNameHelper": "Use the name registered on this bank account.",
+          "accountHolderNameLabel": "Account holder name",
+          "description": "Manage where refunds are paid.",
           "ibanHelper": "Used to send completed payments and refunds.",
           "ibanLabel": "Linked IBAN",
           "saveErrorToast": "We couldn't save your payment details right now.",
@@ -542,26 +513,32 @@
           "saveSuccessToast": "Your payment details were updated.",
           "sectionHelper": "Keep the payout account ready so refunds can arrive without delay.",
           "sectionTitle": "Refund destination",
-          "spinHelper": "Keep instant payments enabled for this account.",
-          "spinLabel": "SPIN",
           "title": "Payments"
         },
         "privacy": {
-          "accountSectionHelper": "These alerts follow your Volta account, not just this device.",
-          "accountSectionTitle": "Account alerts",
           "biometricCancelledToast": "Biometrics were not enabled on this device.",
           "biometricFailedToast": "We couldn't confirm your biometrics. Try again.",
           "biometricHelper": "Protect access with Face ID or fingerprint.",
-          "emailAlertsErrorToast": "We couldn't update email alerts right now.",
           "biometricLabel": "Biometrics",
           "biometricNotAvailableToast": "Biometrics are not available on this device yet.",
           "biometricNotEnrolledToast": "Set up Face ID or fingerprint on this device first.",
           "deviceSectionHelper": "These controls only affect the phone you are using now.",
           "deviceSectionTitle": "Device protection",
-          "emailAlertsHelper": "Send payment security alerts to your account email.",
-          "emailAlertsLabel": "Payment security emails",
-          "emailAlertsSuccessToast": "Email alerts were updated.",
-          "description": "Control account alerts and protections on this device.",
+          "description": "Control how this phone protects access to your account.",
+          "pinCancelLabel": "Cancel",
+          "pinChangeLabel": "Change PIN",
+          "pinConfirmLabel": "Confirm app PIN",
+          "pinEnabledHelper": "A 4-digit PIN protects access on this device.",
+          "pinHelper": "Set a 4-digit app PIN to protect access on this phone.",
+          "pinInputLabel": "4-digit app PIN",
+          "pinInvalidError": "Enter 4 digits.",
+          "pinLabel": "App PIN",
+          "pinMismatchError": "The PINs do not match.",
+          "pinRemoveErrorToast": "We couldn't remove the app PIN right now.",
+          "pinRemoveLabel": "Remove PIN",
+          "pinSaveErrorToast": "We couldn't save the app PIN right now.",
+          "pinSaveLabel": "Save PIN",
+          "pinSetLabel": "Set PIN",
           "pushNotificationsDeniedHelper": "Push notifications were denied for this device.",
           "pushNotificationsDeviceRequiredHelper": "Push notifications require a physical device.",
           "pushNotificationsHelper": "Turn this on to receive push notifications on this device.",
@@ -574,8 +551,6 @@
           "pushNotificationsTokenValue": "Expo token: {{token}}",
           "pushNotificationsUnavailableToast": "Push notifications are not ready on this device yet.",
           "savedOnThisDeviceToast": "This change was saved on this device.",
-          "securityPreferencesHelper": "Security alert emails will be sent to the current email set in your profile: {{email}}.",
-          "securityPreferencesTitle": "Security preferences",
           "saveLabel": "Save security settings",
           "title": "Privacy & security"
         },
@@ -590,8 +565,20 @@
           "submitError": "We could not save this setup right now.",
           "successToast": "Your setup is complete.",
           "steps": {
+            "notifications": {
+              "accountSectionLabel": "Device notifications",
+              "description": "Choose which account alerts you want to receive on this device and by email.",
+              "emailAlertsConsentLabel": "I want to receive account and payout alerts by email.",
+              "emailAlertsHelper": "Security and payout alerts will be sent to {{email}}.",
+              "emailAlertsLabel": "Enable email alerts",
+              "emailAlertsTitle": "Email alerts",
+              "emailSectionLabel": "Email updates",
+              "pushNotificationsHelper": "Turn this on when you are ready to request push notification access.",
+              "pushNotificationsLabel": "Enable push notifications",
+              "title": "Notification preferences"
+            },
             "payments": {
-              "description": "Link your IBAN and choose whether SPIN should stay enabled for instant payouts.",
+              "description": "Add the bank account name and IBAN where your refunds should arrive.",
               "title": "Set up payments"
             },
             "personal": {
@@ -601,10 +588,9 @@
             },
             "security": {
               "biometricsHelper": "Protect access to the app with Face ID or fingerprint on this device.",
-              "description": "Choose how you want to prepare local security and notification permissions for this account.",
-              "pushNotificationsHelper": "Turn this on when you are ready to request push notification access.",
-              "pushNotificationsLabel": "Enable push notifications",
-              "title": "Security & permissions"
+              "description": "Choose how you want to protect access to the app on this device.",
+              "pinHelper": "Set a 4-digit app PIN to protect access on this device.",
+              "title": "Device security"
             }
           }
         },
@@ -614,6 +600,7 @@
             "invalidThemeMode": "Choose a valid appearance option."
           },
           "payments": {
+            "accountHolderNameRequired": "Account holder name is required.",
             "ibanInvalid": "Enter a valid Portuguese IBAN.",
             "ibanRequired": "IBAN is required."
           },
@@ -636,7 +623,8 @@
         "common": {
           "backLabel": "Back",
           "notFoundDescription": "We could not load this history item.",
-          "notFoundTitle": "History item unavailable"
+          "notFoundTitle": "History item unavailable",
+          "openMovementHint": "Open this movement to review the details."
         },
         "badges": {
           "credit": "Received",
@@ -664,59 +652,19 @@
           "credits": "Credits",
           "transfers": "Transfers"
         },
-        "items": {
-          "auchanAmadora": {
-            "creditedAt": "Mar 8, 09:10",
-            "location": "Auchan - Amadora",
-            "packageCount": "12",
-            "subtitle": "Mar 8, 09:10 · 12 bottles",
-            "title": "Auchan - Amadora"
-          },
-          "continenteColombo": {
-            "creditedAt": "Yesterday, 18:15",
-            "location": "Continente - Colombo",
-            "packageCount": "3",
-            "subtitle": "Yesterday, 18:15 · 3 bottles",
-            "title": "Continente - Colombo"
-          },
-          "lidlBenfica": {
-            "creditedAt": "Today, 10:05",
-            "location": "Lidl - Benfica",
-            "packageCount": "9",
-            "subtitle": "Today, 10:05 · 9 bottles",
-            "title": "Lidl - Benfica"
-          },
-          "pingoDoceAfragide": {
-            "creditedAt": "Today, 14:30",
-            "location": "Pingo Doce - Afragide",
-            "packageCount": "6",
-            "subtitle": "Today, 14:30 · 6 bottles",
-            "title": "Pingo Doce - Afragide"
-          },
-          "transferMarch11": {
-            "completedAt": "Yesterday, 18:15",
-            "reference": "TRF-2603-1902",
-            "requestedAt": "Yesterday, 17:54",
-            "subtitle": "Yesterday, 17:54",
-            "title": "Transfer"
-          },
-          "transferMarch12": {
-            "expectedArrival": "Today, within 24h",
-            "requestedAt": "Today, 13:10",
-            "subtitle": "Today, 13:10",
-            "title": "Transfer",
-            "updatedAt": "Today, 13:24"
-          }
-        },
         "movementDetail": {
           "detailSectionTitle": "Movement details",
+          "errorDescription": "We could not load the details for this movement right now.",
+          "errorRecoveryHint": "Try again to confirm the status, linked account, and reference for this movement.",
+          "errorTitle": "Details unavailable",
+          "loadingDescription": "We are preparing the status, reference, and details for this movement.",
+          "loadingTitle": "Loading movement",
           "credit": {
             "description": "Credit received after the machine return.",
             "stateCardTitle": "Credit added",
             "stateLabel": "Credit received"
           },
           "transfer": {
-            "retryActionLabel": "Request another transfer",
             "cancelled": {
               "description": "This transfer was cancelled before reaching the linked account.",
               "stateCardTitle": "Transfer cancelled",
@@ -730,12 +678,14 @@
             },
             "failed": {
               "description": "We could not complete this transfer to the linked account.",
+              "reasonFallback": "Review the linked account before you try again.",
+              "reasonTitle": "What blocked this transfer",
               "stateCardTitle": "Transfer failed",
               "stateLabel": "Failed"
             },
             "processing": {
-              "description": "Request received. The amount should reach the linked account within 24h.",
-              "footer": "Available in the account within 24h, depending on the bank.",
+              "description": "Request received. The amount should reach the linked account within 1 business day.",
+              "footer": "Available in the account within 1 business day, depending on the bank.",
               "stateCardTitle": "Transfer processing",
               "stateLabel": "Processing",
               "timeline": {
@@ -755,6 +705,11 @@
                   "description": "The amount is on its way to the linked account.",
                   "label": "Sending to account"
                 }
+              },
+              "timelineStates": {
+                "current": "Current step",
+                "done": "Completed step",
+                "upcoming": "Upcoming step"
               },
               "timelineTitle": "Transfer status"
             }
@@ -797,38 +752,48 @@
         },
         "transfer": {
           "actionLabel": "Request transfer",
+          "addDestinationActionLabel": "Add account",
           "amountPendingValue": "Enter an amount",
           "amountSummaryLabel": "Amount to transfer",
           "amountFieldHelper": "Enter an amount up to {{amount}}.",
           "amountFieldLabel": "How much do you want to transfer?",
-          "balanceCaption": "We will send your balance to the linked account.",
+          "balanceCaption": "Confirm the amount and the account where you want to receive the balance.",
           "balanceTitle": "Available balance",
           "confirmActionLabel": "Confirm transfer",
           "confirmActionAmountLabel": "Transfer {{amount}}",
           "confirmationBadge": "Transfer requested",
           "confirmationDescription": "Your transfer request for {{amount}} was sent to the linked account.",
           "confirmationTitle": "Transfer on the way",
-          "description": "Choose the amount and how you want to receive it.",
+          "description": "Review the destination account and choose the amount.",
+          "destinationCardEyebrow": "Destination account",
           "destinationLabel": "Destination account",
+          "destinationMissingDescription": "You do not have an account ready to receive this balance yet.",
+          "destinationMissingHelper": "Add or confirm your IBAN in Payments before you continue.",
+          "destinationMissingSupportDescription": "Without a linked account, this transfer cannot go through.",
+          "destinationMissingSupportTitle": "Account still missing",
+          "destinationMissingTitle": "You still need to confirm where the balance should go",
+          "destinationMissingValue": "Account not linked yet",
+          "destinationReadyDescription": "This balance will be sent to the linked account as soon as you confirm.",
+          "destinationReadyHelper": "You can review or update this account in Payments at any time.",
+          "destinationReadyTitle": "The balance will be sent to this account",
+          "destinationReviewHelper": "Check the account details before you request the transfer.",
+          "destinationSetupRequiredValue": "After you add the account",
           "errorToast": "We couldn't request the transfer right now.",
-          "estimatedArrivalValue": "Today, within 24h",
+          "estimatedArrivalValue": "Within 1 business day",
           "expectedArrivalLabel": "Expected arrival",
           "exceedsBalanceError": "The amount cannot exceed {{amount}}.",
+          "frameDescription": "Quickly confirm the account and amount before you send the balance.",
           "fullBalanceActionLabel": "Use full balance",
           "newTransferActionLabel": "Request another transfer",
           "payoutOptionsTitle": "Choose how you want to receive it",
           "payoutOptionSepaCaption": "Available within 1 business day.",
-          "payoutOptionSpinCaption": "Receive it as soon as instant payout is available.",
           "payoutOptionUnavailableBadge": "Unavailable",
           "payoutMethodLabel": "Payout method",
           "payoutMethodSepa": "SEPA transfer",
-          "payoutMethodSpin": "SPIN instant payout",
+          "requestFailedDescription": "Review the linked account or try again in a moment.",
+          "requestFailedTitle": "We could not confirm this request",
+          "reviewDestinationActionLabel": "Review account",
           "reviewTitle": "Before you confirm",
-          "spinDisabledHelper": "SEPA for this transfer.",
-          "spinEnabledHelper": "Faster when SPIN is active.",
-          "spinHelper": "If you turn on SPIN, we will try to send it right away.",
-          "spinToggleTitle": "Receive with SPIN",
-          "spinUnavailableHelper": "We will use SEPA for this transfer.",
           "successToast": "Your transfer request was sent.",
           "title": "Transfer balance",
           "zeroAmountError": "Enter an amount above 0€."

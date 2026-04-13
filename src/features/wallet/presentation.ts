@@ -7,6 +7,7 @@ import {
   formatWalletAmount,
   formatWalletCount,
   formatWalletDateTime,
+  formatWalletLongDate,
   formatWalletPaymentAccount,
   getWalletTransferTimelineSteps,
   isTransferTransaction,
@@ -108,6 +109,32 @@ export function getWalletMovementSubtitle(
   }
 
   return formatWalletDateTime(movement.occurredAt, locale)
+}
+
+export function getWalletMovementAccessibilityHint(t: TFunction) {
+  return t('tabScreens.wallet.common.openMovementHint')
+}
+
+export function getWalletMovementAccessibilityLabel(
+  t: TFunction,
+  locale: string,
+  movement: ActivityPreview | WalletTransaction,
+) {
+  return [
+    getWalletMovementTitle(t, movement),
+    getWalletMovementBadgeLabel(t, movement),
+    formatWalletAmount(movement.amount.amountMinor, locale),
+    getWalletMovementSubtitle(locale, movement),
+  ]
+    .filter((part) => part && String(part).trim().length > 0)
+    .join('. ')
+}
+
+export function getWalletMovementDateHeading(
+  locale: string,
+  movement: ActivityPreview | WalletTransaction,
+) {
+  return formatWalletLongDate(movement.occurredAt, locale)
 }
 
 export function getWalletMovementStateCopy(
@@ -411,6 +438,9 @@ export function getWalletTransferTimelineItems(
       const translationKey = timelineTranslationKeyMap[step.id]
 
       return {
+        accessibilityStateLabel: t(
+          `tabScreens.wallet.movementDetail.transfer.processing.timelineStates.${step.state}`,
+        ),
         description: t(
           `tabScreens.wallet.movementDetail.transfer.processing.timeline.${translationKey}.description`,
         ),
@@ -422,4 +452,16 @@ export function getWalletTransferTimelineItems(
       }
     }),
   )
+}
+
+export function getWalletMovementReceiptShareMessage(
+  t: TFunction,
+  locale: string,
+  movement: WalletTransaction,
+) {
+  const detailLines = getWalletMovementDetailItems(t, locale, movement).map(
+    (item) => `${item.label}: ${String(item.value)}`,
+  )
+
+  return [getWalletMovementTitle(t, movement), ...detailLines].join('\n')
 }

@@ -75,7 +75,7 @@ export function useUpdateProfilePaymentsMutation() {
       await invalidateHomeQueries(queryClient)
     },
     operation: 'update-payments',
-    redactKeys: ['iban'],
+    redactKeys: ['accountHolderName', 'fullName', 'iban'],
   })
 }
 
@@ -95,11 +95,26 @@ export function useCompleteProfileSetupMutation() {
     meta: {
       feature: 'profile',
       operation: 'complete-setup',
-      redactKeys: ['email', 'iban', 'name', 'nif', 'phoneNumber'],
+      redactKeys: [
+        'accountHolderName',
+        'email',
+        'fullName',
+        'iban',
+        'name',
+        'nif',
+        'phoneNumber',
+      ],
     },
     mutationFn: async ({ snapshot }: { snapshot: ProfileSetupSnapshot }) =>
       patchProfile({
-        payoutAccount: snapshot.payments,
+        onboarding: {
+          status: 'completed',
+        },
+        payoutAccount: {
+          accountHolderName: snapshot.payments.accountHolderName,
+          iban: snapshot.payments.iban,
+          rail: 'sepa',
+        },
         personal: snapshot.personal,
         preferences: {
           alertsEmail: snapshot.personal.email,

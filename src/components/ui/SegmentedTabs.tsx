@@ -1,4 +1,4 @@
-import { ScrollView, Text, ToggleGroup, useThemeName } from 'tamagui'
+import { ScrollView, Text, ToggleGroup } from 'tamagui'
 import type { SegmentOption } from './types'
 
 export type SegmentedTabsProps<TValue extends string = string> = {
@@ -14,11 +14,9 @@ export function SegmentedTabs<TValue extends string>({
   scrollable = true,
   value,
 }: SegmentedTabsProps<TValue>) {
-  const themeName = useThemeName()
-  const isDarkTheme = themeName.startsWith('dark')
-
   const tabs = (
     <ToggleGroup
+      accessibilityRole="tablist"
       disableDeactivation
       flexDirection="row"
       flexWrap="nowrap"
@@ -35,26 +33,18 @@ export function SegmentedTabs<TValue extends string>({
     >
       {options.map((option) => {
         const active = option.value === value
-        const textColor = active
-          ? isDarkTheme
-            ? '$accent1'
-            : '$accent12'
-          : '$color11'
+        const textColor = active ? '$accent11' : '$color11'
 
         return (
           <ToggleGroup.Item
             accessibilityLabel={option.label}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
-            bg={
-              active ? (isDarkTheme ? '$accent10' : '$accent9') : '$background'
-            }
-            borderColor={
-              active ? (isDarkTheme ? '$accent9' : '$accent10') : '$color8'
-            }
+            bg={active ? '$accent3' : '$background'}
+            borderColor={active ? '$accent7' : '$color8'}
             borderWidth={1}
             display="flex"
-            height={42}
+            height={44}
             items="center"
             justify="center"
             key={option.value}

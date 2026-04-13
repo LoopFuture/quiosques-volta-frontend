@@ -159,8 +159,10 @@ export function TopBar(props: TopBarProps) {
               </Text>
             ) : null}
             <Text
+              ellipsizeMode="tail"
               fontSize={isCompactWidth ? 24 : 28}
               fontWeight="900"
+              numberOfLines={1}
               style={{ flexShrink: 1 }}
             >
               {props.title}

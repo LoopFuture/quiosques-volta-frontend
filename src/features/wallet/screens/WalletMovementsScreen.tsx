@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { FlashList } from '@shopify/flash-list'
 import type { FlashListRef } from '@shopify/flash-list'
 import { useRouter } from 'expo-router'
-import { LayoutAnimation, RefreshControl, UIManager } from 'react-native'
+import { RefreshControl } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { Spinner, Text, XStack, YStack, useTheme } from 'tamagui'
 import {
@@ -26,15 +26,25 @@ import {
 } from '../models'
 import {
   getWalletHistoryFilterOptions,
+  getWalletMovementAccessibilityHint,
+  getWalletMovementAccessibilityLabel,
   getWalletMovementBadgeLabel,
+  getWalletMovementDateHeading,
   getWalletMovementSubtitle,
   getWalletMovementTitle,
   matchesWalletHistoryFilter,
 } from '../presentation'
 import { walletRoutes } from '../routes'
 
-function MovementSeparator() {
-  return <YStack height={10} />
+function isSameMovementDay(left: WalletTransaction, right: WalletTransaction) {
+  const leftDate = new Date(left.occurredAt)
+  const rightDate = new Date(right.occurredAt)
+
+  return (
+    leftDate.getFullYear() === rightDate.getFullYear() &&
+    leftDate.getMonth() === rightDate.getMonth() &&
+    leftDate.getDate() === rightDate.getDate()
+  )
 }
 
 function WalletMovementsFooter({
@@ -97,25 +107,27 @@ export default function WalletMovementsScreen() {
   const [historyFilter, setHistoryFilter] = useState<WalletHistoryFilter>(
     walletHistoryFilters[0]?.value ?? 'all',
   )
-  const allHistory =
-    walletHistoryState?.pages.flatMap((page) => page.items) ?? []
-  const visibleHistory = allHistory.filter((movement) =>
-    matchesWalletHistoryFilter(historyFilter, movement),
+  const allHistory = useMemo(
+    () => walletHistoryState?.pages.flatMap((page) => page.items) ?? [],
+    [walletHistoryState],
+  )
+  const visibleHistory = useMemo(
+    () =>
+      historyFilter === 'all'
+        ? allHistory
+        : allHistory.filter((movement) =>
+            matchesWalletHistoryFilter(historyFilter, movement),
+          ),
+    [allHistory, historyFilter],
   )
   const hasAnyHistory = allHistory.length > 0
   const isListRefreshing = isRefreshing || (isRefetching && !isFetchingNextPage)
-
-  useEffect(() => {
-    UIManager.setLayoutAnimationEnabledExperimental?.(true)
-  }, [])
 
   const handleHistoryFilterChange = (nextFilter: string) => {
     if (nextFilter === historyFilter) {
       return
     }
 
-    movementListRef.current?.prepareForLayoutAnimationRender()
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     movementListRef.current?.scrollToOffset({ animated: true, offset: 0 })
     setHistoryFilter(nextFilter as WalletHistoryFilter)
   }
@@ -172,7 +184,6 @@ export default function WalletMovementsScreen() {
           <FlashList
             contentContainerStyle={{ paddingBottom: 24 }}
             data={visibleHistory}
-            ItemSeparatorComponent={MovementSeparator}
             keyExtractor={(entry) => entry.id}
             ListEmptyComponent={
               <SurfaceCard items="center" justify="center" p="$5">
@@ -225,9 +236,6 @@ export default function WalletMovementsScreen() {
             ref={movementListRef}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.4}
-            onRefresh={() => {
-              void handleRefresh()
-            }}
             refreshControl={
               <RefreshControl
                 onRefresh={() => {
@@ -238,25 +246,58 @@ export default function WalletMovementsScreen() {
               />
             }
             refreshing={isListRefreshing}
-            renderItem={({ item: movement }) => (
-              <TransactionListItem
-                accessibilityLabel={getWalletMovementTitle(t, movement)}
-                amount={formatWalletAmount(
-                  movement.amount.amountMinor,
-                  i18n.language,
-                )}
-                amountTone={getWalletTransactionAmountTone(movement)}
-                badgeLabel={getWalletMovementBadgeLabel(t, movement)}
-                badgeTone={getWalletTransactionBadgeTone(movement)}
-                framed={false}
-                icon={<WalletMovementIcon type={movement.type} />}
-                onPress={() =>
-                  router.push(walletRoutes.movementDetail(movement.id))
-                }
-                subtitle={getWalletMovementSubtitle(i18n.language, movement)}
-                title={getWalletMovementTitle(t, movement)}
-              />
-            )}
+            renderItem={({ item: movement, index }) => {
+              const previousMovement =
+                index > 0 ? visibleHistory[index - 1] : null
+              const showDateHeading =
+                !previousMovement ||
+                !isSameMovementDay(previousMovement, movement)
+
+              return (
+                <YStack
+                  gap="$2.5"
+                  pb="$2.5"
+                  pt={showDateHeading && index > 0 ? '$3' : '$0'}
+                >
+                  {showDateHeading ? (
+                    <Text
+                      accessibilityRole="header"
+                      color="$color10"
+                      fontSize={13}
+                      fontWeight="800"
+                    >
+                      {getWalletMovementDateHeading(i18n.language, movement)}
+                    </Text>
+                  ) : null}
+
+                  <TransactionListItem
+                    accessibilityHint={getWalletMovementAccessibilityHint(t)}
+                    accessibilityLabel={getWalletMovementAccessibilityLabel(
+                      t,
+                      i18n.language,
+                      movement,
+                    )}
+                    amount={formatWalletAmount(
+                      movement.amount.amountMinor,
+                      i18n.language,
+                    )}
+                    amountTone={getWalletTransactionAmountTone(movement)}
+                    badgeLabel={getWalletMovementBadgeLabel(t, movement)}
+                    badgeTone={getWalletTransactionBadgeTone(movement)}
+                    framed={false}
+                    icon={<WalletMovementIcon type={movement.type} />}
+                    onPress={() =>
+                      router.push(walletRoutes.movementDetail(movement.id))
+                    }
+                    subtitle={getWalletMovementSubtitle(
+                      i18n.language,
+                      movement,
+                    )}
+                    title={getWalletMovementTitle(t, movement)}
+                  />
+                </YStack>
+              )
+            }}
             showsVerticalScrollIndicator={false}
             style={{ flex: 1 }}
             testID="wallet-movements-list"

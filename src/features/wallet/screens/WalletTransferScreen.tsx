@@ -1,4 +1,3 @@
-import { ArrowUpRight, Wallet } from '@tamagui/lucide-icons'
 import { useRouter } from 'expo-router'
 import { Platform } from 'react-native'
 import { Controller, useForm } from 'react-hook-form'
@@ -10,12 +9,13 @@ import {
   QueryErrorState,
   SkeletonBlock,
   StatusBadge,
+  SurfaceSeparator,
   SurfaceCard,
   ToneScope,
 } from '@/components/ui'
 import { useActionToast } from '@/features/app-shell/hooks/useActionToast'
 import { useProfileQuery } from '@/features/profile/hooks'
-import { WalletPayoutMethodCard } from '../components/WalletPayoutMethodCard'
+import { profileRoutes } from '@/features/profile/routes'
 import { WalletReceiptCard } from '../components/WalletReceiptCard'
 import { WalletDetailScreenFrame } from '../components/WalletDetailScreenFrame'
 import {
@@ -28,7 +28,7 @@ import {
   type WalletTransferRequest,
   type WalletTransferFormValues,
 } from '../forms'
-import { formatWalletAmount } from '../models'
+import { formatWalletAmount, formatWalletPaymentAccount } from '../models'
 import {
   useRequestWalletTransferMutation,
   useWalletOverviewQuery,
@@ -90,9 +90,10 @@ function WalletTransferScreenContent({
   walletBalanceCents,
 }: {
   payoutAccount: {
+    accountHolderName?: string
     ibanMasked: string
-    spinEnabled: boolean
-  }
+    rail: 'sepa'
+  } | null
   walletBalanceCents: number
 }) {
   const router = useRouter()
@@ -122,7 +123,7 @@ function WalletTransferScreenContent({
       ),
     })
   const transferAmount = watch('amount')
-  const usesSpin = watch('useSpin')
+  const hasPayoutAccount = Boolean(payoutAccount)
   const transferAmountError = getWalletTransferAmountError(
     transferAmount,
     walletBalanceCents,
@@ -139,18 +140,47 @@ function WalletTransferScreenContent({
     transferAmountCents !== null
       ? formatWalletAmount(transferAmountCents, i18n.language)
       : t('tabScreens.wallet.transfer.amountPendingValue')
-  const selectedPayoutMethodLabel = usesSpin
-    ? t('tabScreens.wallet.transfer.payoutMethodSpin')
-    : t('tabScreens.wallet.transfer.payoutMethodSepa')
-  const selectedPayoutMethodHelper = usesSpin
-    ? t('tabScreens.wallet.transfer.payoutOptionSpinCaption')
-    : t('tabScreens.wallet.transfer.payoutOptionSepaCaption')
-  const transferActionLabel =
-    isTransferAmountValid && transferAmountCents !== null
-      ? t('tabScreens.wallet.transfer.confirmActionAmountLabel', {
-          amount: selectedTransferAmount,
-        })
-      : t('tabScreens.wallet.transfer.confirmActionLabel')
+  const payoutDestination = payoutAccount
+    ? formatWalletPaymentAccount(payoutAccount)
+    : t('tabScreens.wallet.transfer.destinationMissingValue')
+  const expectedArrivalValue = hasPayoutAccount
+    ? t('tabScreens.wallet.transfer.estimatedArrivalValue')
+    : t('tabScreens.wallet.transfer.destinationSetupRequiredValue')
+  const transferSummaryDestinationHelper = hasPayoutAccount
+    ? t('tabScreens.wallet.transfer.destinationReviewHelper')
+    : t('tabScreens.wallet.transfer.destinationMissingHelper')
+  const canSubmitTransfer =
+    hasPayoutAccount && isTransferAmountValid && transferAmountCents !== null
+  const transferActionLabel = canSubmitTransfer
+    ? t('tabScreens.wallet.transfer.confirmActionAmountLabel', {
+        amount: selectedTransferAmount,
+      })
+    : t('tabScreens.wallet.transfer.confirmActionLabel')
+  const supportStateCopy = !hasPayoutAccount
+    ? {
+        actionLabel: t('tabScreens.wallet.transfer.addDestinationActionLabel'),
+        description: t(
+          'tabScreens.wallet.transfer.destinationMissingSupportDescription',
+        ),
+        title: t('tabScreens.wallet.transfer.destinationMissingSupportTitle'),
+      }
+    : requestTransferMutation.isError
+      ? {
+          actionLabel: t(
+            'tabScreens.wallet.transfer.reviewDestinationActionLabel',
+          ),
+          description: t('tabScreens.wallet.transfer.requestFailedDescription'),
+          title: t('tabScreens.wallet.transfer.requestFailedTitle'),
+        }
+      : null
+
+  const handleManagePayoutAccount = () => {
+    if (requestTransferMutation.isError) {
+      requestTransferMutation.reset()
+    }
+
+    router.push(profileRoutes.payments)
+  }
 
   const submitTransfer = handleSubmit((values) => {
     const request: WalletTransferRequest = serializeWalletTransferForm(values)
@@ -193,6 +223,66 @@ function WalletTransferScreenContent({
           </Text>
         </YStack>
 
+        <YStack
+          bg="$background"
+          borderColor="$borderColor"
+          borderWidth={1}
+          gap="$3"
+          p="$4"
+          rounded="$7"
+        >
+          <YStack gap="$1.5">
+            <Text color="$color10" fontSize={13} fontWeight="800">
+              {t('tabScreens.wallet.transfer.destinationCardEyebrow')}
+            </Text>
+            <Text fontSize={20} fontWeight="800">
+              {t(
+                hasPayoutAccount
+                  ? 'tabScreens.wallet.transfer.destinationReadyTitle'
+                  : 'tabScreens.wallet.transfer.destinationMissingTitle',
+              )}
+            </Text>
+            <Text color="$color11" fontSize={14} lineHeight={21}>
+              {t(
+                hasPayoutAccount
+                  ? 'tabScreens.wallet.transfer.destinationReadyDescription'
+                  : 'tabScreens.wallet.transfer.destinationMissingDescription',
+              )}
+            </Text>
+          </YStack>
+
+          <YStack gap="$1">
+            <Text color="$color10" fontSize={13} fontWeight="800">
+              {t('tabScreens.wallet.transfer.destinationLabel')}
+            </Text>
+            <Text fontSize={16} fontWeight="800">
+              {payoutDestination}
+            </Text>
+            <Text color="$color11" fontSize={14} lineHeight={21}>
+              {t(
+                hasPayoutAccount
+                  ? 'tabScreens.wallet.transfer.destinationReadyHelper'
+                  : 'tabScreens.wallet.transfer.destinationMissingHelper',
+              )}
+            </Text>
+          </YStack>
+
+          <PrimaryButton
+            emphasis="outline"
+            fullWidth={false}
+            onPress={handleManagePayoutAccount}
+            tone="neutral"
+          >
+            {t(
+              hasPayoutAccount
+                ? 'tabScreens.wallet.transfer.reviewDestinationActionLabel'
+                : 'tabScreens.wallet.transfer.addDestinationActionLabel',
+            )}
+          </PrimaryButton>
+        </YStack>
+
+        <SurfaceSeparator />
+
         <YStack gap="$4">
           <Controller
             control={control}
@@ -227,6 +317,10 @@ function WalletTransferScreenContent({
                     keyboardType="decimal-pad"
                     onBlur={field.onBlur}
                     onChangeText={(value) => {
+                      if (requestTransferMutation.isError) {
+                        requestTransferMutation.reset()
+                      }
+
                       field.onChange(normalizeTransferAmountInput(value))
                     }}
                     placeholder="0,00"
@@ -282,6 +376,10 @@ function WalletTransferScreenContent({
               emphasis="outline"
               fullWidth={false}
               onPress={() => {
+                if (requestTransferMutation.isError) {
+                  requestTransferMutation.reset()
+                }
+
                 setValue(
                   'amount',
                   formatTransferAmountInput(walletBalanceCents),
@@ -300,65 +398,7 @@ function WalletTransferScreenContent({
         </YStack>
       </SurfaceCard>
 
-      <YStack gap="$2.5">
-        <Text color="$color10" fontSize={13} fontWeight="800">
-          {t('tabScreens.wallet.transfer.payoutOptionsTitle')}
-        </Text>
-        <WalletPayoutMethodCard
-          badgeLabel={
-            payoutAccount.spinEnabled
-              ? undefined
-              : t('tabScreens.wallet.transfer.payoutOptionUnavailableBadge')
-          }
-          description={
-            payoutAccount.spinEnabled
-              ? t('tabScreens.wallet.transfer.payoutOptionSpinCaption')
-              : t('tabScreens.wallet.transfer.spinUnavailableHelper')
-          }
-          disabled={!payoutAccount.spinEnabled}
-          icon={<ArrowUpRight color="$accent11" size={18} />}
-          onPress={() =>
-            setValue('useSpin', true, {
-              shouldDirty: true,
-              shouldTouch: true,
-              shouldValidate: true,
-            })
-          }
-          selected={usesSpin}
-          testID="wallet-transfer-payout-option-spin"
-          title={t('tabScreens.wallet.transfer.payoutMethodSpin')}
-        />
-        <WalletPayoutMethodCard
-          description={t('tabScreens.wallet.transfer.payoutOptionSepaCaption')}
-          icon={<Wallet color="$accent11" size={18} />}
-          onPress={() =>
-            setValue('useSpin', false, {
-              shouldDirty: true,
-              shouldTouch: true,
-              shouldValidate: true,
-            })
-          }
-          selected={!usesSpin}
-          testID="wallet-transfer-payout-option-sepa"
-          title={t('tabScreens.wallet.transfer.payoutMethodSepa')}
-        />
-      </YStack>
-
       <WalletReceiptCard
-        footer={
-          <YStack
-            bg="$accent2"
-            gap="$1.5"
-            p="$3.5"
-            rounded="$6"
-            testID="wallet-transfer-review-note"
-          >
-            <StatusBadge tone="accent">{selectedPayoutMethodLabel}</StatusBadge>
-            <Text color="$color11" fontSize={14} lineHeight={20}>
-              {selectedPayoutMethodHelper}
-            </Text>
-          </YStack>
-        }
         items={[
           {
             label: t('tabScreens.wallet.transfer.amountSummaryLabel'),
@@ -366,24 +406,45 @@ function WalletTransferScreenContent({
           },
           {
             label: t('tabScreens.wallet.transfer.destinationLabel'),
-            value: payoutAccount.ibanMasked,
-          },
-          {
-            label: t('tabScreens.wallet.transfer.payoutMethodLabel'),
-            value: selectedPayoutMethodLabel,
-            helper: selectedPayoutMethodHelper,
+            value: payoutDestination,
+            helper: transferSummaryDestinationHelper,
           },
           {
             label: t('tabScreens.wallet.transfer.expectedArrivalLabel'),
-            value: t('tabScreens.wallet.transfer.estimatedArrivalValue'),
+            value: expectedArrivalValue,
           },
         ]}
         testID="wallet-transfer-review-card"
         title={t('tabScreens.wallet.transfer.reviewTitle')}
       />
 
+      {supportStateCopy ? (
+        <SurfaceCard
+          gap="$3"
+          p="$4.5"
+          testID="wallet-transfer-support-state"
+          tone="error"
+        >
+          <YStack gap="$1.5">
+            <StatusBadge tone="error">{supportStateCopy.title}</StatusBadge>
+            <Text fontSize={18} fontWeight="800">
+              {supportStateCopy.description}
+            </Text>
+          </YStack>
+
+          <PrimaryButton
+            emphasis="outline"
+            fullWidth={false}
+            onPress={handleManagePayoutAccount}
+            tone="error"
+          >
+            {supportStateCopy.actionLabel}
+          </PrimaryButton>
+        </SurfaceCard>
+      ) : null}
+
       <PrimaryButton
-        disabled={!isTransferAmountValid}
+        disabled={!canSubmitTransfer}
         isPending={requestTransferMutation.isPending}
         onPress={submitTransfer}
         testID="wallet-transfer-submit-button"
@@ -416,7 +477,7 @@ export default function WalletTransferScreen() {
 
   return (
     <WalletDetailScreenFrame
-      description=""
+      description={t('tabScreens.wallet.transfer.frameDescription')}
       keyboardAware
       testID="wallet-transfer-screen"
       title={t('tabScreens.wallet.transfer.title')}

@@ -1,7 +1,6 @@
 import { z } from 'zod/v4'
 import {
   profilePhoneNumberSchema,
-  profilePersonalSchema,
   type ProfilePersonal,
 } from '@/features/profile/models'
 
@@ -23,7 +22,12 @@ export const profilePersonalRequestSchema = z.object({
   phoneNumber: profilePhoneNumberSchema,
 })
 
-export type ProfilePersonalFormValues = ProfilePersonal
+export type ProfilePersonalFormValues = {
+  email: string
+  name: string
+  nif: string
+  phoneNumber: string
+}
 export type ProfilePersonalRequest = z.infer<
   typeof profilePersonalRequestSchema
 >
@@ -75,16 +79,16 @@ export function getProfilePersonalFormDefaultValues(
 ): ProfilePersonalFormValues {
   return {
     email: personal.email,
-    name: personal.name,
-    nif: personal.nif,
-    phoneNumber: personal.phoneNumber,
+    name: personal.name ?? '',
+    nif: personal.nif ?? '',
+    phoneNumber: personal.phoneNumber ?? '',
   }
 }
 
 export function toProfilePersonalDraft(
   values: ProfilePersonalFormValues,
-): ProfilePersonal {
-  return profilePersonalSchema.parse({
+): ProfilePersonalRequest {
+  return profilePersonalRequestSchema.parse({
     email: values.email.trim(),
     name: values.name.trim(),
     nif: normalizeNif(values.nif),

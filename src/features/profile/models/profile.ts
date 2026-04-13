@@ -8,24 +8,67 @@ import { moneySchema, toneSchema } from '@/features/app-data/models'
 
 export const themeModeSchema = z.enum(['system', 'light', 'dark'])
 export const languageModeSchema = z.enum(['system', 'pt', 'en'])
+const rawPayoutRailSchema = z.enum(['sepa', 'spin'])
+export const payoutRailSchema = z.literal('sepa')
 export const profilePhoneNumberSchema = z.string().regex(/^\+[1-9]\d{7,14}$/)
+
+function normalizeOptionalPayoutAccountName(value: string | null | undefined) {
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  const trimmedValue = value.trim()
+
+  return trimmedValue.length > 0 ? trimmedValue : undefined
+}
 
 export const profilePersonalSchema = z.object({
   email: z.string().email(),
-  name: z.string().min(1),
-  nif: z.string().regex(/^\d{9}$/),
-  phoneNumber: profilePhoneNumberSchema,
+  name: z.string().nullable(),
+  nif: z.string().nullable(),
+  phoneNumber: profilePhoneNumberSchema.nullable(),
 })
 
-export const payoutAccountSchema = z.object({
+const rawPayoutAccountSchema = z.object({
+  accountHolderName: z.string().nullable().optional(),
+  fullName: z.string().nullable().optional(),
   ibanMasked: z.string(),
-  spinEnabled: z.boolean(),
+  rail: rawPayoutRailSchema,
+  spinEnabled: z.boolean().optional(),
 })
 
-export const payoutAccountInputSchema = z.object({
-  iban: z.string().regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/),
-  spinEnabled: z.boolean(),
-})
+export const payoutAccountSchema = rawPayoutAccountSchema.transform(
+  ({ accountHolderName, fullName, ibanMasked }) => {
+    const normalizedAccountHolderName = normalizeOptionalPayoutAccountName(
+      fullName ?? accountHolderName,
+    )
+
+    return {
+      ...(normalizedAccountHolderName
+        ? {
+            accountHolderName: normalizedAccountHolderName,
+          }
+        : {}),
+      ibanMasked,
+      rail: 'sepa' as const,
+    }
+  },
+)
+
+export const payoutAccountInputSchema = z
+  .object({
+    accountHolderName: z.string().trim().min(2).max(120),
+    iban: z.string().regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/),
+    rail: rawPayoutRailSchema.optional(),
+    spinEnabled: z.boolean().optional(),
+  })
+  .transform((value) => {
+    return {
+      accountHolderName: value.accountHolderName.trim(),
+      iban: value.iban,
+      rail: 'sepa' as const,
+    }
+  })
 
 export const profilePreferencesSchema = z.object({
   alertsEmail: z.string().email(),
@@ -57,22 +100,36 @@ export const onboardingSchema = z.object({
   status: onboardingStatusSchema,
 })
 
+export const profileOnboardingPatchSchema = z.object({
+  status: onboardingStatusSchema,
+})
+
+export const profilePersonalPatchSchema = z
+  .object({
+    email: z.string().email().optional(),
+    name: z.string().min(2).max(120).optional(),
+    nif: z
+      .string()
+      .regex(/^\d{9}$/)
+      .optional(),
+    phoneNumber: profilePhoneNumberSchema.optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0)
+
 export const profileResponseSchema = z.object({
   memberSince: z.string(),
   onboarding: onboardingSchema,
-  payoutAccount: payoutAccountSchema,
+  payoutAccount: payoutAccountSchema.nullable(),
   personal: profilePersonalSchema,
-  preferences: profilePreferencesSchema,
+  preferences: profilePreferencesSchema.nullable(),
   stats: profileSummaryMetricsSchema,
 })
 
 export const profilePatchRequestSchema = z
   .object({
+    onboarding: profileOnboardingPatchSchema.optional(),
     payoutAccount: payoutAccountInputSchema.optional(),
-    personal: profilePersonalSchema
-      .partial()
-      .refine((value) => Object.keys(value).length > 0)
-      .optional(),
+    personal: profilePersonalPatchSchema.optional(),
     preferences: profilePreferencesPatchSchema.optional(),
   })
   .refine((value) => Object.keys(value).length > 0)
@@ -85,6 +142,55 @@ export type ProfileSummaryMetrics = z.infer<typeof profileSummaryMetricsSchema>
 export type Onboarding = z.infer<typeof onboardingSchema>
 export type ProfileResponse = z.infer<typeof profileResponseSchema>
 export type ProfilePatchRequest = z.infer<typeof profilePatchRequestSchema>
+export type PayoutRail = z.infer<typeof payoutRailSchema>
+
+const payoutAccountApiInputSchema = z
+  .object({
+    fullName: z.string().trim().min(2).max(120),
+    iban: z.string().regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/),
+    rail: rawPayoutRailSchema.optional(),
+    spinEnabled: z.boolean().optional(),
+  })
+  .transform((value) => {
+    return {
+      fullName: value.fullName.trim(),
+      iban: value.iban,
+      rail: 'sepa' as const,
+    }
+  })
+
+export const profilePatchApiRequestSchema = z
+  .object({
+    onboarding: profileOnboardingPatchSchema.optional(),
+    payoutAccount: payoutAccountApiInputSchema.optional(),
+    personal: profilePersonalPatchSchema.optional(),
+    preferences: profilePreferencesPatchSchema.optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0)
+
+export type ProfilePatchApiRequest = z.infer<
+  typeof profilePatchApiRequestSchema
+>
+
+export function serializeProfilePatchRequest(
+  patch: ProfilePatchRequest,
+): ProfilePatchApiRequest {
+  const normalizedPatch = profilePatchRequestSchema.parse(patch)
+
+  return profilePatchApiRequestSchema.parse({
+    ...normalizedPatch,
+    ...(normalizedPatch.payoutAccount
+      ? {
+          payoutAccount: {
+            fullName: normalizedPatch.payoutAccount.accountHolderName,
+            iban: normalizedPatch.payoutAccount.iban,
+            rail: normalizedPatch.payoutAccount.rail,
+          },
+        }
+      : {}),
+  })
+}
+
 export {
   devicePrivacySettingsSchema,
   getDefaultDevicePrivacySettings,
@@ -104,6 +210,7 @@ const profileHubPreviewRowSchema = z.object({
 })
 
 export const profileHubSectionIdSchema = z.enum([
+  'alerts',
   'personal',
   'privacy',
   'payments',
@@ -119,36 +226,3 @@ export const profileHubSectionSchema = z.object({
 
 export type ProfileSummaryStat = z.infer<typeof profileSummaryStatSchema>
 export type ProfileHubSection = z.infer<typeof profileHubSectionSchema>
-
-export function getProfileMockData(): ProfileResponse {
-  return profileResponseSchema.parse({
-    memberSince: '2023-10-01T00:00:00',
-    onboarding: {
-      completedAt: '2023-10-05T12:00:00',
-      status: 'completed',
-    },
-    payoutAccount: {
-      ibanMasked: 'PT50************90123',
-      spinEnabled: true,
-    },
-    personal: {
-      email: 'joao.ferreira@sdr.pt',
-      name: 'Joao Ferreira',
-      nif: '234567890',
-      phoneNumber: '+351912345678',
-    },
-    preferences: {
-      alertsEmail: 'joao.ferreira@sdr.pt',
-      alertsEnabled: true,
-    },
-    stats: {
-      completedTransfersCount: 2,
-      creditsEarned: {
-        amountMinor: 150,
-        currency: 'EUR',
-      },
-      processingTransfersCount: 1,
-      returnedPackagesCount: 30,
-    },
-  })
-}

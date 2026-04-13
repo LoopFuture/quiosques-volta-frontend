@@ -1,12 +1,14 @@
 type MockExpoConfigOverrides = {
   api?: {
     baseUrl?: string
-    mockingEnabled?: boolean
   }
   keycloak?: {
     clientId?: string
     issuerUrl?: string
     scopes?: string[]
+  }
+  webApp?: {
+    baseUrl?: string
   }
   sentry?: {
     dsn?: string
@@ -30,12 +32,10 @@ export function createMockExpoConfig(overrides: MockExpoConfigOverrides = {}) {
         scopes: overrides.keycloak?.scopes ?? ['openid', 'profile', 'email'],
       },
       api: {
-        ...(overrides.api?.baseUrl
-          ? {
-              baseUrl: overrides.api.baseUrl,
-            }
-          : {}),
-        mockingEnabled: overrides.api?.mockingEnabled ?? true,
+        baseUrl: overrides.api?.baseUrl ?? 'https://volta.be.dev.theloop.tech',
+      },
+      webApp: {
+        baseUrl: overrides.webApp?.baseUrl ?? 'https://volta.example.com',
       },
       sentry: {
         ...(typeof overrides.sentry?.dsn === 'string'

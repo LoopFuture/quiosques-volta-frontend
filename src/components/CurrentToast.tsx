@@ -1,10 +1,4 @@
-import {
-  CheckCircle2,
-  CircleAlert,
-  FlaskConical,
-  Info,
-  X,
-} from '@tamagui/lucide-icons'
+import { CheckCircle2, CircleAlert, Info, X } from '@tamagui/lucide-icons'
 import { Toast, useToastState } from '@tamagui/toast'
 import { XStack, YStack, useThemeName } from 'tamagui'
 import { getPlatformShadowProps } from '@/components/ui/platformShadows'
@@ -22,8 +16,6 @@ function getToastIcon(variant: AppToastVariant) {
       return CircleAlert
     case 'hint':
       return Info
-    case 'mock':
-      return FlaskConical
     case 'success':
     default:
       return CheckCircle2

@@ -9,6 +9,7 @@ import {
 import {
   formatCompactNumber,
   formatCurrencyFromCents,
+  formatLongDate,
   formatNumber,
   formatShortDateTime,
 } from '@/i18n/format'
@@ -26,11 +27,42 @@ export const walletTransactionStatusSchema = z.enum([
   'cancelled',
 ])
 export const walletHistoryFilterSchema = z.enum(['all', 'credit', 'transfer'])
+const rawPayoutRailSchema = z.enum(['sepa', 'spin'])
+export const payoutRailSchema = z.literal('sepa')
 
-export const payoutAccountSchema = z.object({
+function normalizeOptionalPayoutAccountName(value: string | null | undefined) {
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  const trimmedValue = value.trim()
+
+  return trimmedValue.length > 0 ? trimmedValue : undefined
+}
+
+const rawPayoutAccountSchema = z.object({
+  accountHolderName: z.string().nullable().optional(),
   ibanMasked: z.string(),
-  spinEnabled: z.boolean(),
+  rail: rawPayoutRailSchema,
+  spinEnabled: z.boolean().optional(),
 })
+
+export const payoutAccountSchema = rawPayoutAccountSchema.transform(
+  ({ accountHolderName, ibanMasked }) => {
+    const normalizedAccountHolderName =
+      normalizeOptionalPayoutAccountName(accountHolderName)
+
+    return {
+      ...(normalizedAccountHolderName
+        ? {
+            accountHolderName: normalizedAccountHolderName,
+          }
+        : {}),
+      ibanMasked,
+      rail: 'sepa' as const,
+    }
+  },
+)
 
 export const transferEligibilitySchema = z.object({
   canTransfer: z.boolean(),
@@ -95,13 +127,12 @@ export const walletTransactionListResponseSchema = z.object({
 
 export const walletTransferRequestSchema = z.object({
   amount: moneySchema,
-  payoutRail: z.enum(['sepa', 'spin']),
 })
 
 export const createTransferResponseSchema = z.object({
-  balanceAfter: moneySchema.optional(),
-  createdAt: z.string().optional(),
-  status: z.enum(['pending', 'processing']),
+  balanceAfter: moneySchema,
+  createdAt: z.string(),
+  status: walletTransactionStatusSchema,
   transferId: z.string(),
 })
 
@@ -163,12 +194,17 @@ export function formatWalletDateTime(value: string, locale: string) {
   return formatShortDateTime(value, locale)
 }
 
+export function formatWalletLongDate(value: string, locale: string) {
+  return formatLongDate(value, locale)
+}
+
 export function formatWalletPaymentAccount(paymentAccount: {
+  accountHolderName?: string
   ibanMasked: string
-  spinEnabled: boolean
+  rail: z.infer<typeof payoutRailSchema>
 }) {
-  return paymentAccount.spinEnabled
-    ? `${paymentAccount.ibanMasked} • SPIN`
+  return paymentAccount.accountHolderName
+    ? `${paymentAccount.accountHolderName} · ${paymentAccount.ibanMasked}`
     : paymentAccount.ibanMasked
 }
 

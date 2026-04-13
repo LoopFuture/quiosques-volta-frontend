@@ -61,6 +61,10 @@ export async function getBiometricAvailability(): Promise<BiometricAvailabilityR
   }
 }
 
+export async function getBiometricHardwareAvailability() {
+  return LocalAuthentication.hasHardwareAsync()
+}
+
 export async function authenticateWithBiometrics({
   cancelLabel,
   promptMessage,
@@ -121,7 +125,7 @@ export function useBiometricHardwareAvailability() {
   useEffect(() => {
     let isMounted = true
 
-    void LocalAuthentication.hasHardwareAsync()
+    void getBiometricHardwareAvailability()
       .then((value) => {
         if (isMounted) {
           setHasHardware(value)

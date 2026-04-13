@@ -15,6 +15,7 @@ export type DetailItem = {
 }
 
 export type TimelineItem = {
+  accessibilityStateLabel?: string
   id: string
   label: string
   description?: string

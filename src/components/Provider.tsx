@@ -12,7 +12,6 @@ import { useMMKVString } from 'react-native-mmkv'
 import { TamaguiProvider, type TamaguiProviderProps } from 'tamagui'
 import { ToastProvider, ToastViewport } from '@tamagui/toast'
 import { CurrentToast } from './CurrentToast'
-import { resetMockApiState } from '@/features/app-data/mock'
 import { initializeMonitoring } from '@/features/app-data/monitoring'
 import { AuthSessionProvider } from '@/features/auth/components/AuthSessionProvider'
 import { createAppQueryClient } from '@/features/app-data/query'
@@ -99,7 +98,6 @@ export function Provider({
   )
   const resolvedTheme = resolveThemeMode(themeMode, colorScheme)
   const handleSessionCleared = useCallback(() => {
-    resetMockApiState()
     queryClient.clear()
   }, [queryClient])
   useEffect(() => {

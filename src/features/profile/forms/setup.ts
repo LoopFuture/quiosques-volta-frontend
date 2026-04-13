@@ -25,18 +25,21 @@ function isPracticalPtIban(value: string) {
 }
 
 export type ProfileSetupFormValues = {
+  accountHolderName: string
+  alertsEnabled: boolean
   biometricsEnabled: boolean
   email: string
   iban: string
   name: string
   nif: string
+  pinEnabled: boolean
   phoneNumber: string
   pushNotificationsEnabled: boolean
-  spinEnabled: boolean
 }
 
 export type ProfileSetupValidationCopy = {
   payments: {
+    accountHolderNameRequired: string
     ibanInvalid: string
     ibanRequired: string
   }
@@ -55,6 +58,12 @@ export function getProfileSetupFormSchema(
   validation: ProfileSetupValidationCopy,
 ) {
   return z.object({
+    accountHolderName: z
+      .string()
+      .trim()
+      .min(1, validation.payments.accountHolderNameRequired)
+      .max(120),
+    alertsEnabled: z.boolean(),
     biometricsEnabled: z.boolean(),
     email: z
       .string()
@@ -89,8 +98,8 @@ export function getProfileSetupFormSchema(
         (value) => normalizeNif(value).length === 9,
         validation.personal.nifInvalid,
       ),
+    pinEnabled: z.boolean(),
     pushNotificationsEnabled: z.boolean(),
-    spinEnabled: z.boolean(),
   })
 }
 
@@ -98,14 +107,16 @@ export function getProfileSetupFormDefaultValues(
   snapshot: ProfileSetupSnapshot,
 ): ProfileSetupFormValues {
   return {
+    accountHolderName: snapshot.payments.accountHolderName,
+    alertsEnabled: snapshot.alertsEnabled,
     biometricsEnabled: snapshot.preferences.biometricsEnabled,
     email: snapshot.personal.email,
     iban: snapshot.payments.iban,
     name: snapshot.personal.name,
     nif: snapshot.personal.nif,
+    pinEnabled: snapshot.preferences.pinEnabled,
     phoneNumber: snapshot.personal.phoneNumber,
     pushNotificationsEnabled: snapshot.preferences.pushNotificationsEnabled,
-    spinEnabled: snapshot.payments.spinEnabled,
   }
 }
 
@@ -114,8 +125,8 @@ export function toProfileSetupSnapshot(
 ): ProfileSetupSnapshot {
   return profileSetupSnapshotSchema.parse({
     payments: {
+      accountHolderName: values.accountHolderName.trim(),
       iban: normalizeIban(values.iban),
-      spinEnabled: values.spinEnabled,
     },
     personal: {
       email: values.email.trim(),
@@ -123,8 +134,10 @@ export function toProfileSetupSnapshot(
       nif: normalizeNif(values.nif),
       phoneNumber: normalizePhoneNumber(values.phoneNumber),
     },
+    alertsEnabled: values.alertsEnabled,
     preferences: {
       biometricsEnabled: values.biometricsEnabled,
+      pinEnabled: values.pinEnabled,
       pushNotificationsEnabled: values.pushNotificationsEnabled,
     },
   })

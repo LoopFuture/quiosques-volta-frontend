@@ -3,8 +3,6 @@ import type { AppAuthIdentity } from '@/features/auth/models/identity'
 import {
   devicePrivacySettingsSchema,
   getDefaultDevicePrivacySettings,
-  getProfileMockData,
-  profilePersonalSchema,
   profileResponseSchema,
   type DevicePrivacySettings,
   type ProfileResponse,
@@ -12,6 +10,7 @@ import {
 
 const currentProfileSetupPreferencesSchema = z.object({
   biometricsEnabled: z.boolean(),
+  pinEnabled: z.boolean(),
   pushNotificationsEnabled: z.boolean(),
 })
 
@@ -20,6 +19,9 @@ const legacyProfileSetupPreferencesSchema = z.object({
   notificationsAccepted: z.boolean(),
 })
 
+const EMPTY_PROFILE_EMAIL = 'setup@volta.invalid'
+const emailValueSchema = z.string().email()
+
 export const profileSetupPreferencesSchema = z
   .union([
     currentProfileSetupPreferencesSchema,
@@ -27,6 +29,7 @@ export const profileSetupPreferencesSchema = z
   ])
   .transform((preferences) => ({
     biometricsEnabled: preferences.biometricsEnabled,
+    pinEnabled: 'pinEnabled' in preferences ? preferences.pinEnabled : false,
     pushNotificationsEnabled:
       'pushNotificationsEnabled' in preferences
         ? preferences.pushNotificationsEnabled
@@ -35,11 +38,17 @@ export const profileSetupPreferencesSchema = z
 
 export const profileSetupSnapshotSchema = z.object({
   payments: z.object({
+    accountHolderName: z.string(),
     iban: z.string(),
-    spinEnabled: z.boolean(),
   }),
-  personal: profilePersonalSchema,
+  personal: z.object({
+    email: z.string().email(),
+    name: z.string(),
+    nif: z.string(),
+    phoneNumber: z.string(),
+  }),
   preferences: profileSetupPreferencesSchema,
+  alertsEnabled: z.boolean(),
 })
 
 export type ProfileSetupSnapshot = z.infer<typeof profileSetupSnapshotSchema>
@@ -51,20 +60,72 @@ function resolveIdentityEmail(
   identity?: Pick<AppAuthIdentity, 'email'> | null,
   fallbackEmail?: string,
 ) {
-  return identity?.email ?? fallbackEmail ?? getProfileMockData().personal.email
+  return identity?.email ?? fallbackEmail ?? ''
+}
+
+function resolveSetupName(
+  identity?: Pick<AppAuthIdentity, 'email' | 'name'> | null,
+  fallbackName?: string | null,
+) {
+  if (!identity?.name) {
+    return fallbackName ?? null
+  }
+
+  const normalizedIdentityName = identity.name.trim()
+
+  if (!normalizedIdentityName) {
+    return fallbackName ?? null
+  }
+
+  const identityNameIsEmail = emailValueSchema.safeParse(
+    normalizedIdentityName,
+  ).success
+
+  if (identityNameIsEmail) {
+    return fallbackName ?? null
+  }
+
+  return normalizedIdentityName
+}
+
+function createEmptyProfileResponse() {
+  return profileResponseSchema.parse({
+    memberSince: '',
+    onboarding: {
+      completedAt: null,
+      status: 'in_progress',
+    },
+    payoutAccount: null,
+    personal: {
+      email: EMPTY_PROFILE_EMAIL,
+      name: null,
+      nif: null,
+      phoneNumber: null,
+    },
+    preferences: null,
+    stats: {
+      completedTransfersCount: 0,
+      creditsEarned: {
+        amountMinor: 0,
+        currency: 'EUR',
+      },
+      processingTransfersCount: 0,
+      returnedPackagesCount: 0,
+    },
+  })
 }
 
 export function getProfileSetupSeedState({
   deviceSettings = getDefaultDevicePrivacySettings(),
   identity,
-  profile = getProfileMockData(),
+  profile = createEmptyProfileResponse(),
 }: {
   deviceSettings?: DevicePrivacySettings
   identity?: Pick<AppAuthIdentity, 'email' | 'name'> | null
   profile?: ProfileResponse
 } = {}) {
   const resolvedEmail = resolveIdentityEmail(identity, profile.personal.email)
-  const resolvedName = identity?.name ?? profile.personal.name
+  const resolvedName = resolveSetupName(identity, profile.personal.name)
 
   return {
     deviceSettings: devicePrivacySettingsSchema.parse(deviceSettings),
@@ -80,7 +141,9 @@ export function getProfileSetupSeedState({
         name: resolvedName,
       },
       preferences: {
-        ...profile.preferences,
+        ...(profile.preferences ?? {
+          alertsEnabled: false,
+        }),
         alertsEmail: resolvedEmail,
       },
     }),
@@ -93,13 +156,21 @@ export function getProfileSetupSnapshotFromProfile(
 ): ProfileSetupSnapshot {
   return profileSetupSnapshotSchema.parse({
     payments: {
+      accountHolderName:
+        profile.payoutAccount?.accountHolderName ?? profile.personal.name ?? '',
       iban: '',
-      spinEnabled: profile.payoutAccount.spinEnabled,
     },
-    personal: profile.personal,
+    personal: {
+      email: profile.personal.email,
+      name: profile.personal.name ?? '',
+      nif: profile.personal.nif ?? '',
+      phoneNumber: profile.personal.phoneNumber ?? '',
+    },
     preferences: {
       biometricsEnabled: deviceSettings.biometricsEnabled,
+      pinEnabled: deviceSettings.pinEnabled,
       pushNotificationsEnabled: deviceSettings.pushNotificationsEnabled,
     },
+    alertsEnabled: profile.preferences?.alertsEnabled ?? false,
   })
 }

@@ -6,26 +6,26 @@ import { BarcodeQrCode } from './BarcodeQrCode'
 export type PersonalBarcodeCardProps = {
   action?: ReactNode
   barcode?: ReactNode
+  code: string
+  codeDisplay?: ReactNode
   description?: string
   eyebrow?: ReactNode
   footer?: ReactNode
-  reference: string
-  referenceDisplay?: ReactNode
   title: string
 }
 
 export function PersonalBarcodeCard({
   action,
   barcode,
+  code,
+  codeDisplay,
   description,
   eyebrow,
   footer,
-  reference,
-  referenceDisplay,
   title,
 }: PersonalBarcodeCardProps) {
-  const resolvedReferenceDisplay =
-    referenceDisplay === undefined ? (
+  const resolvedCodeDisplay =
+    codeDisplay === undefined ? (
       <Text
         color="$color12"
         fontSize={26}
@@ -33,10 +33,10 @@ export function PersonalBarcodeCard({
         letterSpacing={1}
         style={{ textAlign: 'center' }}
       >
-        {reference}
+        {code}
       </Text>
     ) : (
-      referenceDisplay
+      codeDisplay
     )
 
   return (
@@ -55,12 +55,12 @@ export function PersonalBarcodeCard({
 
       <YStack gap="$4" items="center" width="100%">
         <YStack gap="$3.5" items="center" width="100%">
-          {barcode ?? <BarcodeQrCode size={168} value={reference} />}
+          {barcode ?? <BarcodeQrCode size={168} value={code} />}
         </YStack>
 
-        {resolvedReferenceDisplay !== null ? (
+        {resolvedCodeDisplay !== null ? (
           <YStack gap="$1.5" items="center" width="100%">
-            {resolvedReferenceDisplay}
+            {resolvedCodeDisplay}
           </YStack>
         ) : null}
 

@@ -8,16 +8,17 @@ module.exports = {
   ],
   coverageThreshold: {
     global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+      branches: 89,
+      functions: 89,
+      lines: 89,
+      statements: 89,
     },
   },
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   transformIgnorePatterns: [],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@tests/(.*)$': '<rootDir>/tests/$1',
     '\\.svg$': '<rootDir>/tests/support/svg-mock.tsx',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/support/jest.setup.ts'],

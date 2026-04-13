@@ -21,6 +21,7 @@ import {
   authenticateWithAvailableBiometrics,
   useBiometricHardwareAvailability,
 } from '@/features/auth/biometrics'
+import { clearStoredAppPin, saveStoredAppPin } from '@/features/auth/pin'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { homeRoutes } from '@/features/home/routes'
 import { PushNotificationsPreferenceCard } from '@/features/notifications/components/PushNotificationsPreferenceCard'
@@ -41,22 +42,29 @@ import {
   getProfileSetupSnapshotFromProfile,
 } from '../models'
 import { SettingsToggleRow } from '../components/ProfilePreferenceControls'
+import { PinPreferenceCard } from '../components/PinPreferenceCard'
 import { getProfileValidationCopy } from '../presentation'
 
-const totalSteps = 3
+const totalSteps = 4
 
-type SetupStepId = 'payments' | 'personal' | 'security'
+type SetupStepId = 'notifications' | 'payments' | 'personal' | 'security'
 
 const setupStepFieldNames: Record<
   SetupStepId,
   (keyof ProfileSetupFormValues)[]
 > = {
-  payments: ['iban', 'spinEnabled'],
+  notifications: ['alertsEnabled', 'pushNotificationsEnabled'],
+  payments: ['accountHolderName', 'iban'],
   personal: ['email', 'name', 'phoneNumber', 'nif'],
-  security: ['biometricsEnabled', 'pushNotificationsEnabled'],
+  security: ['biometricsEnabled', 'pinEnabled'],
 }
 
-const setupStepOrder: SetupStepId[] = ['personal', 'payments', 'security']
+const setupStepOrder: SetupStepId[] = [
+  'personal',
+  'payments',
+  'notifications',
+  'security',
+]
 
 function getBiometricErrorToast(
   reason: 'cancelled' | 'failed' | 'not-available' | 'not-enrolled',
@@ -140,7 +148,6 @@ export function ProfileSetupScreen() {
     requestPushPermissionAndToken,
   } = usePushNotifications()
   const [activeStepIndex, setActiveStepIndex] = useState(0)
-  const [submissionError, setSubmissionError] = useState<string | null>(null)
   const { width } = useWindowDimensions()
   const validationCopy = getProfileValidationCopy(t)
   const isCompactWidth = width < 360
@@ -193,7 +200,7 @@ export function ProfileSetupScreen() {
       'tabScreens.profile.privacy.pushNotificationsDeviceRequiredHelper',
     ),
     idleHelper: t(
-      'tabScreens.profile.setup.steps.security.pushNotificationsHelper',
+      'tabScreens.profile.setup.steps.notifications.pushNotificationsHelper',
     ),
     openSettingsLabel: t(
       'tabScreens.profile.privacy.pushNotificationsOpenSettingsLabel',
@@ -212,6 +219,20 @@ export function ProfileSetupScreen() {
       t('tabScreens.profile.privacy.pushNotificationsTokenValue', {
         token,
       }),
+  } as const
+  const pinCopy = {
+    cancelLabel: t('tabScreens.profile.privacy.pinCancelLabel'),
+    changeLabel: t('tabScreens.profile.privacy.pinChangeLabel'),
+    confirmPinLabel: t('tabScreens.profile.privacy.pinConfirmLabel'),
+    enabledHelper: t('tabScreens.profile.privacy.pinEnabledHelper'),
+    invalidPinError: t('tabScreens.profile.privacy.pinInvalidError'),
+    label: t('tabScreens.profile.privacy.pinLabel'),
+    mismatchError: t('tabScreens.profile.privacy.pinMismatchError'),
+    pinHelper: t('tabScreens.profile.setup.steps.security.pinHelper'),
+    pinLabel: t('tabScreens.profile.privacy.pinInputLabel'),
+    removeLabel: t('tabScreens.profile.privacy.pinRemoveLabel'),
+    saveLabel: t('tabScreens.profile.privacy.pinSaveLabel'),
+    setLabel: t('tabScreens.profile.privacy.pinSetLabel'),
   } as const
 
   async function handlePushNotificationsToggleChange(
@@ -270,6 +291,47 @@ export function ProfileSetupScreen() {
     )
   }
 
+  async function handleSavePin(pin: string) {
+    try {
+      await saveStoredAppPin(pin)
+      setValue('pinEnabled', true)
+      setSettings({
+        ...settings,
+        pinEnabled: true,
+      })
+      showSuccess(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
+      )
+    } catch {
+      showError(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.pinSaveErrorToast'),
+      )
+      throw new Error('pin-save-failed')
+    }
+  }
+
+  async function handleRemovePin() {
+    try {
+      await clearStoredAppPin()
+      setValue('pinEnabled', false)
+      setSettings({
+        ...settings,
+        pinEnabled: false,
+      })
+      showSuccess(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
+      )
+    } catch {
+      showError(
+        t('tabScreens.profile.privacy.pinLabel'),
+        t('tabScreens.profile.privacy.pinRemoveErrorToast'),
+      )
+    }
+  }
+
   async function handleAdvance() {
     const isValid = await trigger(setupStepFieldNames[currentStepId])
 
@@ -279,7 +341,6 @@ export function ProfileSetupScreen() {
 
     if (currentStepId === 'security') {
       await handleSubmit(async (values) => {
-        setSubmissionError(null)
         try {
           await completeSetupMutation.mutateAsync({
             snapshot: toProfileSetupSnapshot(values),
@@ -290,23 +351,31 @@ export function ProfileSetupScreen() {
           )
           setSettings({
             biometricsEnabled: values.biometricsEnabled,
+            pinEnabled: values.pinEnabled,
             pushNotificationsEnabled: values.pushNotificationsEnabled,
           })
           router.replace(homeRoutes.index)
-        } catch (error) {
+        } catch {
           showError(
             t('tabScreens.profile.setup.actions.finishLabel'),
             t('tabScreens.profile.setup.submitError'),
-          )
-          setSubmissionError(
-            error instanceof Error
-              ? error.message
-              : t('tabScreens.profile.setup.submitError'),
           )
         }
       })()
 
       return
+    }
+
+    if (currentStepId === 'personal') {
+      const currentAccountHolderName = getValues('accountHolderName').trim()
+
+      if (currentAccountHolderName.length === 0) {
+        setValue('accountHolderName', getValues('name').trim(), {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+      }
     }
 
     setActiveStepIndex((currentIndex) =>
@@ -323,18 +392,6 @@ export function ProfileSetupScreen() {
       decorativeBackground={false}
       footer={
         <YStack gap="$3" pt="$5">
-          {submissionError ? (
-            <SurfaceCard
-              bg="$red2"
-              borderColor="$red8"
-              testID="profile-setup-error"
-            >
-              <Text color="$red11" fontWeight="700">
-                {submissionError}
-              </Text>
-            </SurfaceCard>
-          ) : null}
-
           {isCompactWidth ? (
             <YStack gap="$3">
               {activeStepIndex > 0 ? (
@@ -581,10 +638,36 @@ export function ProfileSetupScreen() {
                   </SetupSectionLabel>
                   <Controller
                     control={control}
+                    name="accountHolderName"
+                    render={({ field, fieldState }) => (
+                      <FormField
+                        autoCapitalize="words"
+                        errorText={fieldState.error?.message}
+                        helperText={
+                          fieldState.error
+                            ? undefined
+                            : t(
+                                'tabScreens.profile.payments.accountHolderNameHelper',
+                              )
+                        }
+                        label={t(
+                          'tabScreens.profile.payments.accountHolderNameLabel',
+                        )}
+                        onBlur={field.onBlur}
+                        onChangeText={field.onChange}
+                        required
+                        value={field.value}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
                     name="iban"
                     render={({ field, fieldState }) => (
                       <FormField
+                        autoComplete="off"
                         autoCapitalize="characters"
+                        autoCorrect={false}
                         errorText={fieldState.error?.message}
                         helperText={
                           fieldState.error
@@ -595,32 +678,122 @@ export function ProfileSetupScreen() {
                         onBlur={field.onBlur}
                         onChangeText={field.onChange}
                         required
+                        spellCheck={false}
                         value={field.value}
-                      />
-                    )}
-                  />
-                </YStack>
-                <YStack gap="$3">
-                  <SetupSectionLabel>
-                    {t(
-                      'tabScreens.profile.setup.steps.payments.speedSectionLabel',
-                    )}
-                  </SetupSectionLabel>
-                  <Controller
-                    control={control}
-                    name="spinEnabled"
-                    render={({ field }) => (
-                      <SettingsToggleRow
-                        checked={field.value}
-                        helperText={t('tabScreens.profile.payments.spinHelper')}
-                        label={t('tabScreens.profile.payments.spinLabel')}
-                        onCheckedChange={field.onChange}
                       />
                     )}
                   />
                 </YStack>
               </SeparatedStack>
             </SurfaceCard>
+          </>
+        ) : null}
+
+        {currentStepId === 'notifications' ? (
+          <>
+            <YStack gap="$2">
+              <Text
+                fontSize={stepTitleFontSize}
+                fontWeight="900"
+                lineHeight={stepTitleLineHeight}
+              >
+                {t('tabScreens.profile.setup.steps.notifications.title')}
+              </Text>
+              <Text
+                color="$color11"
+                fontSize={stepDescriptionFontSize}
+                lineHeight={stepDescriptionLineHeight}
+              >
+                {t('tabScreens.profile.setup.steps.notifications.description')}
+              </Text>
+            </YStack>
+
+            <YStack gap="$3">
+              <SetupSectionLabel>
+                {t(
+                  'tabScreens.profile.setup.steps.notifications.accountSectionLabel',
+                )}
+              </SetupSectionLabel>
+              <Controller
+                control={control}
+                name="pushNotificationsEnabled"
+                render={({ field }) => (
+                  <PushNotificationsPreferenceCard
+                    canAskAgain={canAskAgain}
+                    checked={field.value}
+                    copy={pushNotificationsCopy}
+                    disabled={completeSetupMutation.isPending}
+                    expoPushToken={expoPushToken}
+                    isPending={isSyncingPushNotifications}
+                    isPhysicalDevice={isPhysicalDevice}
+                    label={t(
+                      'tabScreens.profile.setup.steps.notifications.pushNotificationsLabel',
+                    )}
+                    permissionStatus={permissionStatus}
+                    registrationErrorCode={registrationErrorCode}
+                    testID="profile-setup-push-notifications-card"
+                    tone="neutral"
+                    onCheckedChange={(checked) => {
+                      void handlePushNotificationsToggleChange(
+                        checked,
+                        field.onChange,
+                      )
+                    }}
+                    onOpenSettings={() => {
+                      void Linking.openSettings()
+                    }}
+                  />
+                )}
+              />
+            </YStack>
+
+            <YStack gap="$3">
+              <SetupSectionLabel>
+                {t(
+                  'tabScreens.profile.setup.steps.notifications.emailSectionLabel',
+                )}
+              </SetupSectionLabel>
+              <SurfaceCard tone="accent">
+                <SeparatedStack
+                  separatorProps={{ tone: 'accent' }}
+                  separatorSpacing="$3"
+                >
+                  <YStack gap="$1">
+                    <Text fontSize={14} fontWeight="700">
+                      {t(
+                        'tabScreens.profile.setup.steps.notifications.emailAlertsTitle',
+                      )}
+                    </Text>
+                    <Text color="$color11" fontSize={13}>
+                      {t(
+                        'tabScreens.profile.setup.steps.notifications.emailAlertsHelper',
+                        {
+                          email: defaultSnapshot.personal.email,
+                        },
+                      )}
+                    </Text>
+                  </YStack>
+                  <Controller
+                    control={control}
+                    name="alertsEnabled"
+                    render={({ field }) => (
+                      <SettingsToggleRow
+                        checked={field.value}
+                        helperText={t(
+                          'tabScreens.profile.setup.steps.notifications.emailAlertsConsentLabel',
+                        )}
+                        label={t(
+                          'tabScreens.profile.setup.steps.notifications.emailAlertsLabel',
+                        )}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked)
+                        }}
+                      />
+                    )}
+                  />
+                </SeparatedStack>
+              </SurfaceCard>
+            </YStack>
           </>
         ) : null}
 
@@ -643,75 +816,47 @@ export function ProfileSetupScreen() {
               </Text>
             </YStack>
 
-            {hasBiometricHardware ? (
-              <SurfaceCard>
-                <SeparatedStack>
-                  <YStack gap="$3">
-                    <SetupSectionLabel>
-                      {t(
-                        'tabScreens.profile.setup.steps.security.deviceSectionLabel',
-                      )}
-                    </SetupSectionLabel>
-                    <Controller
-                      control={control}
-                      name="biometricsEnabled"
-                      render={({ field }) => (
-                        <SettingsToggleRow
-                          checked={field.value}
-                          helperText={t(
-                            'tabScreens.profile.setup.steps.security.biometricsHelper',
-                          )}
-                          label={t('tabScreens.profile.privacy.biometricLabel')}
-                          onCheckedChange={(checked) => {
-                            void handleBiometricsToggleChange(
-                              checked,
-                              field.onChange,
-                            )
-                          }}
-                        />
-                      )}
-                    />
-                  </YStack>
-                </SeparatedStack>
-              </SurfaceCard>
-            ) : null}
-
             <YStack gap="$3">
               <SetupSectionLabel>
                 {t(
-                  'tabScreens.profile.setup.steps.security.notificationsSectionLabel',
+                  'tabScreens.profile.setup.steps.security.deviceSectionLabel',
                 )}
               </SetupSectionLabel>
-              <Controller
-                control={control}
-                name="pushNotificationsEnabled"
-                render={({ field }) => (
-                  <PushNotificationsPreferenceCard
-                    canAskAgain={canAskAgain}
-                    checked={field.value}
-                    copy={pushNotificationsCopy}
-                    disabled={completeSetupMutation.isPending}
-                    expoPushToken={expoPushToken}
-                    isPending={isSyncingPushNotifications}
-                    isPhysicalDevice={isPhysicalDevice}
-                    label={t(
-                      'tabScreens.profile.setup.steps.security.pushNotificationsLabel',
-                    )}
-                    permissionStatus={permissionStatus}
-                    registrationErrorCode={registrationErrorCode}
-                    testID="profile-setup-push-notifications-card"
-                    tone="neutral"
-                    onCheckedChange={(checked) => {
-                      void handlePushNotificationsToggleChange(
-                        checked,
-                        field.onChange,
-                      )
-                    }}
-                    onOpenSettings={() => {
-                      void Linking.openSettings()
-                    }}
-                  />
-                )}
+              {hasBiometricHardware ? (
+                <SurfaceCard>
+                  <SeparatedStack>
+                    <YStack gap="$3">
+                      <Controller
+                        control={control}
+                        name="biometricsEnabled"
+                        render={({ field }) => (
+                          <SettingsToggleRow
+                            checked={field.value}
+                            helperText={t(
+                              'tabScreens.profile.setup.steps.security.biometricsHelper',
+                            )}
+                            label={t(
+                              'tabScreens.profile.privacy.biometricLabel',
+                            )}
+                            onCheckedChange={(checked) => {
+                              void handleBiometricsToggleChange(
+                                checked,
+                                field.onChange,
+                              )
+                            }}
+                          />
+                        )}
+                      />
+                    </YStack>
+                  </SeparatedStack>
+                </SurfaceCard>
+              ) : null}
+              <PinPreferenceCard
+                copy={pinCopy}
+                enabled={settings.pinEnabled}
+                onRemovePin={() => handleRemovePin()}
+                onSavePin={handleSavePin}
+                testIDPrefix="profile-setup-pin"
               />
             </YStack>
           </>
