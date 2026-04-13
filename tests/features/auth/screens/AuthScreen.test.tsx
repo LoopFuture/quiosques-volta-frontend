@@ -13,13 +13,12 @@ import {
   onboardingPreferenceStorage,
   ONBOARDING_COMPLETED_STORAGE_KEY,
 } from '@/features/app-data/storage/device/onboarding'
+import { authRoutes } from '@/features/auth/routes'
 import { i18n } from '@/i18n'
 import { createMockExpoConfig } from '@tests/support/expo-config'
 
 const mockCompleteSignIn = jest.fn()
 const mockSignOut = jest.fn()
-const mockUnlockWithBiometrics = jest.fn()
-const mockUnlockWithPin = jest.fn()
 
 jest.mock('expo-router', () => {
   const { createExpoRouterMock } = jest.requireActual(
@@ -40,8 +39,11 @@ jest.mock('@/features/auth/components/AuthSessionProvider', () => ({
 const { __getAuthRequests, __setNextPromptResults, exchangeCodeAsync } =
   jest.requireMock('expo-auth-session')
 const { __setExpoConfig } = jest.requireMock('expo-constants')
-const { __mockRouterReplace: mockRouterReplace } =
-  jest.requireMock('expo-router')
+const {
+  __mockRouterPush: mockRouterPush,
+  __mockRouterReplace: mockRouterReplace,
+  __mockUseLocalSearchParams: mockUseLocalSearchParams,
+} = jest.requireMock('expo-router')
 const { addBreadcrumb, captureException } = jest.requireMock(
   '@sentry/react-native',
 )
@@ -61,10 +63,10 @@ function createAuthSessionMock(overrides: Record<string, unknown> = {}) {
     session: null,
     signOut: mockSignOut.mockResolvedValue(undefined),
     status: 'anonymous',
-    unlockWithBiometrics: mockUnlockWithBiometrics.mockResolvedValue({
+    unlockWithBiometrics: jest.fn().mockResolvedValue({
       success: true,
     }),
-    unlockWithPin: mockUnlockWithPin.mockResolvedValue({
+    unlockWithPin: jest.fn().mockResolvedValue({
       success: true,
     }),
     ...overrides,
@@ -82,6 +84,7 @@ describe('auth screen', () => {
         },
       }),
     )
+    mockUseLocalSearchParams.mockReturnValue({})
     languagePreferenceStorage.clearAll()
     themePreferenceStorage.clearAll()
     onboardingPreferenceStorage.set(ONBOARDING_COMPLETED_STORAGE_KEY, 'true')
@@ -263,43 +266,18 @@ describe('auth screen', () => {
     })
   })
 
-  it('renders the login, biometric, and register actions on the auth screen', () => {
+  it('renders the login and register actions on the auth screen', () => {
     renderWithProvider(<AuthScreen />)
 
     expect(screen.getByTestId('auth-login-button')).toBeTruthy()
-    expect(screen.getByTestId('auth-biometric-button')).toBeTruthy()
     expect(screen.getByTestId('auth-register-button')).toBeTruthy()
+    expect(screen.queryByTestId('auth-open-unlock-button')).toBeNull()
+    expect(screen.queryByText(i18n.t('auth.dividerLabel'))).toBeNull()
   })
 
-  it('renders the biometric unlock actions on the shared auth surface when the session is locked', async () => {
+  it('redirects locked sessions to the dedicated unlock route on app open', async () => {
     mockUseAuthSession.mockReturnValue(
       createAuthSessionMock({
-        appLockRevision: 1,
-        consumePendingBiometricPrompt: jest.fn(() => true),
-        isBiometricUnlockEnabled: true,
-        isAppLocked: true,
-        isAuthenticated: true,
-        session: { accessToken: 'token', expiresAt: null },
-        signOut: mockSignOut.mockResolvedValue(undefined),
-        status: 'authenticated',
-      }),
-    )
-
-    renderWithProvider(<AuthScreen />)
-
-    expect(screen.getByTestId('auth-biometric-button')).toBeTruthy()
-    expect(screen.getByTestId('auth-login-button')).toBeTruthy()
-    expect(screen.getByTestId('auth-register-button')).toBeTruthy()
-
-    await waitFor(() => {
-      expect(mockUnlockWithBiometrics).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  it('renders the PIN unlock controls on the shared auth surface when the session is locked', () => {
-    mockUseAuthSession.mockReturnValue(
-      createAuthSessionMock({
-        consumePendingBiometricPrompt: jest.fn(() => false),
         isAppLocked: true,
         isAuthenticated: true,
         isPinUnlockEnabled: true,
@@ -310,18 +288,19 @@ describe('auth screen', () => {
 
     renderWithProvider(<AuthScreen />)
 
-    expect(screen.getByTestId('auth-pin-input')).toBeTruthy()
-    expect(screen.getByTestId('auth-pin-button')).toBeTruthy()
-    expect(screen.queryByTestId('auth-biometric-button')).toBeNull()
+    await waitFor(() => {
+      expect(mockRouterReplace).toHaveBeenCalledWith(authRoutes.unlock)
+    })
   })
 
-  it('renders both biometric and PIN unlock controls when both unlock methods are enabled', () => {
+  it('shows an explicit unlock entry action when returning to the login page from a locked session', () => {
+    mockUseLocalSearchParams.mockReturnValue({
+      showLogin: '1',
+    })
     mockUseAuthSession.mockReturnValue(
       createAuthSessionMock({
-        consumePendingBiometricPrompt: jest.fn(() => false),
         isAppLocked: true,
         isAuthenticated: true,
-        isBiometricUnlockEnabled: true,
         isPinUnlockEnabled: true,
         session: { accessToken: 'token', expiresAt: null },
         status: 'authenticated',
@@ -330,121 +309,12 @@ describe('auth screen', () => {
 
     renderWithProvider(<AuthScreen />)
 
-    expect(screen.getByTestId('auth-biometric-button')).toBeTruthy()
-    expect(screen.getByTestId('auth-pin-input')).toBeTruthy()
-    expect(screen.getByTestId('auth-pin-button')).toBeTruthy()
-  })
+    expect(screen.getByTestId('auth-open-unlock-button')).toBeTruthy()
+    expect(screen.getByText(i18n.t('auth.dividerLabel'))).toBeTruthy()
 
-  it.each([
-    ['invalid-pin', 'auth.lock.invalidPinError'],
-    ['too-many-attempts', 'auth.lock.tooManyPinAttemptsError'],
-  ] as const)(
-    'shows the translated PIN unlock error for %s',
-    async (reason, translationKey) => {
-      const unlockWithPin = jest.fn().mockResolvedValue({
-        reason,
-        success: false,
-      })
+    fireEvent.press(screen.getByTestId('auth-open-unlock-button'))
 
-      mockUseAuthSession.mockReturnValue(
-        createAuthSessionMock({
-          consumePendingBiometricPrompt: jest.fn(() => false),
-          isAppLocked: true,
-          isAuthenticated: true,
-          isPinUnlockEnabled: true,
-          session: { accessToken: 'token', expiresAt: null },
-          status: 'authenticated',
-          unlockWithPin,
-        }),
-      )
-
-      renderWithProvider(<AuthScreen />)
-
-      await act(async () => {
-        fireEvent.changeText(screen.getByTestId('auth-pin-input'), '9999')
-      })
-
-      await act(async () => {
-        fireEvent.press(screen.getByTestId('auth-pin-button'))
-      })
-
-      await waitFor(() => {
-        expect(unlockWithPin).toHaveBeenCalledWith('9999')
-        expect(screen.getByText(i18n.t(translationKey))).toBeTruthy()
-      })
-    },
-  )
-
-  it.each([
-    ['not-available', 'auth.lock.notAvailableError'],
-    ['not-enrolled', 'auth.lock.notEnrolledError'],
-    ['cancelled', 'auth.lock.cancelledError'],
-    ['failed', 'auth.lock.failedError'],
-  ] as const)(
-    'shows the translated biometric unlock error for %s',
-    async (reason, translationKey) => {
-      const unlockWithBiometrics = jest.fn().mockResolvedValue({
-        reason,
-        success: false,
-      })
-
-      mockUseAuthSession.mockReturnValue(
-        createAuthSessionMock({
-          consumePendingBiometricPrompt: jest.fn(() => false),
-          isBiometricUnlockEnabled: true,
-          isAppLocked: true,
-          isAuthenticated: true,
-          session: { accessToken: 'token', expiresAt: null },
-          status: 'authenticated',
-          unlockWithBiometrics,
-        }),
-      )
-
-      renderWithProvider(<AuthScreen />)
-
-      await act(async () => {
-        fireEvent.press(screen.getByTestId('auth-biometric-button'))
-      })
-
-      await waitFor(() => {
-        expect(unlockWithBiometrics).toHaveBeenCalledTimes(1)
-        expect(screen.getByTestId('auth-error-text')).toBeTruthy()
-        expect(screen.getByText(i18n.t(translationKey))).toBeTruthy()
-      })
-    },
-  )
-
-  it('does not auto-prompt biometrics again when the auth screen remounts without a new lock event', async () => {
-    const consumePendingBiometricPrompt = jest
-      .fn()
-      .mockReturnValueOnce(true)
-      .mockReturnValue(false)
-
-    mockUseAuthSession.mockReturnValue(
-      createAuthSessionMock({
-        appLockRevision: 1,
-        consumePendingBiometricPrompt,
-        isBiometricUnlockEnabled: true,
-        isAppLocked: true,
-        isAuthenticated: true,
-        session: { accessToken: 'token', expiresAt: null },
-        signOut: mockSignOut.mockResolvedValue(undefined),
-        status: 'authenticated',
-      }),
-    )
-
-    const firstView = renderWithProvider(<AuthScreen />)
-
-    await waitFor(() => {
-      expect(mockUnlockWithBiometrics).toHaveBeenCalledTimes(1)
-    })
-
-    firstView.unmount()
-
-    renderWithProvider(<AuthScreen />)
-
-    expect(mockUnlockWithBiometrics).toHaveBeenCalledTimes(1)
-    expect(consumePendingBiometricPrompt.mock.calls.length).toBeGreaterThan(1)
+    expect(mockRouterPush).toHaveBeenCalledWith(authRoutes.unlock)
   })
 
   it('exchanges the authorization code and routes home after login succeeds', async () => {
@@ -484,8 +354,6 @@ describe('auth screen', () => {
       expect(mockCompleteSignIn).toHaveBeenCalledTimes(1)
       expect(mockRouterReplace).toHaveBeenCalledWith('/')
     })
-
-    expect(mockUnlockWithBiometrics).not.toHaveBeenCalled()
   })
 
   it('opens registration with prompt=create', async () => {
@@ -524,7 +392,7 @@ describe('auth screen', () => {
     })
   })
 
-  it('signs out and forces the Keycloak login prompt when re-entering from a locked session', async () => {
+  it('signs out and forces the Keycloak login prompt when re-entering from the login page of a locked session', async () => {
     __setNextPromptResults([
       {
         authentication: null,
@@ -537,13 +405,14 @@ describe('auth screen', () => {
         url: 'voltafrontend://auth/callback?code=relogin-code',
       },
     ])
-
+    mockUseLocalSearchParams.mockReturnValue({
+      showLogin: '1',
+    })
     mockUseAuthSession.mockReturnValue(
       createAuthSessionMock({
-        appLockRevision: 1,
-        consumePendingBiometricPrompt: jest.fn(() => false),
         isAppLocked: true,
         isAuthenticated: true,
+        isPinUnlockEnabled: true,
         session: { accessToken: 'token', expiresAt: null },
         signOut: mockSignOut.mockResolvedValue(undefined),
         status: 'authenticated',
@@ -555,8 +424,6 @@ describe('auth screen', () => {
     const reloginRequest = __getAuthRequests()
       .slice(-3)
       .find((request: any) => request.config.extraParams.prompt === 'login')
-
-    expect(reloginRequest).toBeDefined()
 
     await act(async () => {
       fireEvent.press(screen.getByTestId('auth-login-button'))
@@ -602,7 +469,6 @@ describe('auth screen', () => {
 
     expect(exchangeCodeAsync).not.toHaveBeenCalled()
     expect(mockCompleteSignIn).not.toHaveBeenCalled()
-    expect(mockRouterReplace).not.toHaveBeenCalled()
   })
 
   it('shows the error state when code exchange fails', async () => {

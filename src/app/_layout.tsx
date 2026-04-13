@@ -148,6 +148,12 @@ function RootLayoutNav({ fontsReady }: { fontsReady: boolean }) {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="auth/unlock"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack.Protected>
         <Stack.Protected
           guard={canAccessProtectedApp && !hasCompletedProfileSetup}

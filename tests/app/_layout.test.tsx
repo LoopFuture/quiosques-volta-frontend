@@ -51,7 +51,7 @@ describe('app/_layout', () => {
     ).toEqual([true, false, false])
     expect(
       mockStackScreen.mock.calls.map((call: [any]) => call[0].name),
-    ).toEqual(['auth', 'setup', '(tabs)', 'profile', 'wallet'])
+    ).toEqual(['auth', 'auth/unlock', 'setup', '(tabs)', 'profile', 'wallet'])
   })
 
   it('renders the profile bootstrap error state and retries profile loading', async () => {
