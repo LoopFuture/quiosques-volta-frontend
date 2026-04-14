@@ -13,6 +13,11 @@ export const brandPrimary = '#0cc3d7'
 const brandNeutral = '#e0e0e0'
 export const brandWhite = '#ffffff'
 export const brandBlack = '#000000'
+// Scanner-critical QR colors stay fixed for reliability across themes.
+export const qrPresentationColors = {
+  background: brandWhite,
+  foreground: brandBlack,
+} as const
 export const lightTabBarBackground = '#F3F7FC'
 export const darkTabBarBackground = '#0D1B2E'
 
