@@ -101,6 +101,59 @@ describe('ProfileAlertsScreen', () => {
     )
   })
 
+  it('rolls back the email alerts toggle when the update fails', async () => {
+    const mutate = jest.fn(
+      (
+        _payload: unknown,
+        options?: { onSuccess?: () => void; onError?: () => void },
+      ) => {
+        options?.onError?.()
+      },
+    )
+
+    mockUseUpdateProfilePreferencesMutation.mockReturnValue({
+      isPending: false,
+      mutate,
+    })
+
+    renderWithProvider(<ProfileAlertsScreen />)
+
+    const emailAlertsToggle = screen.getByLabelText(
+      i18n.t('tabScreens.profile.alerts.emailAlertsLabel'),
+    )
+
+    fireEvent.press(emailAlertsToggle)
+
+    await waitFor(() => {
+      expect(mockShowError).toHaveBeenCalledWith(
+        i18n.t('tabScreens.profile.alerts.emailAlertsLabel'),
+        i18n.t('tabScreens.profile.alerts.emailAlertsErrorToast'),
+      )
+    })
+
+    fireEvent.press(
+      screen.getByLabelText(
+        i18n.t('tabScreens.profile.alerts.emailAlertsLabel'),
+      ),
+    )
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenNthCalledWith(
+        2,
+        {
+          preferences: {
+            alertsEmail: 'joao@volta.pt',
+            alertsEnabled: false,
+          },
+        },
+        expect.objectContaining({
+          onError: expect.any(Function),
+          onSuccess: expect.any(Function),
+        }),
+      )
+    })
+  })
+
   it('updates device settings for push notifications', async () => {
     renderWithProvider(<ProfileAlertsScreen />)
 

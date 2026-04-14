@@ -15,11 +15,16 @@ import {
   StepProgress,
   SurfaceCard,
 } from '@/components/ui'
+import { StackTopBar } from '@/features/app-shell/navigation/tab-header'
 import { useTranslation } from 'react-i18next'
 import { type OnboardingSlide, type OnboardingSlideIconKey } from '../models'
 
 type OnboardingScreenProps = {
+  backLabel?: string
+  onBackPress?: () => void
   onComplete: () => void
+  title?: string
+  variant?: 'full' | 'review'
 }
 
 const slideIconMap: Record<OnboardingSlideIconKey, unknown> = {
@@ -185,7 +190,11 @@ function OnboardingSlideCard({
 }
 
 export default function OnboardingScreen({
+  backLabel,
+  onBackPress,
   onComplete,
+  title,
+  variant = 'full',
 }: OnboardingScreenProps) {
   const { t } = useTranslation()
   const slides = getOnboardingSlides(t)
@@ -196,8 +205,11 @@ export default function OnboardingScreen({
   const pageWidth = Math.max(width, 1)
   const isCompactWidth = width < 360
   const isLastSlide = activeIndex === slides.length - 1
+  const isReviewMode = variant === 'review'
   const footerHelper = isLastSlide
-    ? t('onboarding.actions.finishHelper')
+    ? isReviewMode
+      ? t('onboarding.actions.progressHelper')
+      : t('onboarding.actions.finishHelper')
     : t('onboarding.actions.progressHelper')
 
   useEffect(() => {
@@ -238,6 +250,15 @@ export default function OnboardingScreen({
     <ScreenContainer
       bottomInset
       decorativeBackground={false}
+      header={
+        backLabel && onBackPress && title ? (
+          <StackTopBar
+            backLabel={backLabel}
+            onBackPress={onBackPress}
+            title={title}
+          />
+        ) : undefined
+      }
       contentProps={{ flex: 1, gap: '$3', px: '$0', pb: '$0', pt: '$3' }}
       footer={
         <YStack gap="$2" pt="$4">
@@ -253,24 +274,30 @@ export default function OnboardingScreen({
             onPress={handleNext}
             testID={
               isLastSlide
-                ? 'onboarding-get-started-button'
+                ? isReviewMode
+                  ? 'onboarding-close-button'
+                  : 'onboarding-get-started-button'
                 : 'onboarding-next-button'
             }
           >
             {isLastSlide
-              ? t('onboarding.actions.getStartedLabel')
+              ? isReviewMode
+                ? (backLabel ?? t('tabScreens.profile.common.backLabel'))
+                : t('onboarding.actions.getStartedLabel')
               : t('onboarding.actions.nextLabel')}
           </PrimaryButton>
-          <Button
-            chromeless
-            onPress={onComplete}
-            pressStyle={{ opacity: 0.7 }}
-            testID="onboarding-later-button"
-          >
-            <Button.Text color="$color10" fontWeight="700">
-              {t('onboarding.actions.laterLabel')}
-            </Button.Text>
-          </Button>
+          {!isReviewMode ? (
+            <Button
+              chromeless
+              onPress={onComplete}
+              pressStyle={{ opacity: 0.7 }}
+              testID="onboarding-later-button"
+            >
+              <Button.Text color="$color10" fontWeight="700">
+                {t('onboarding.actions.laterLabel')}
+              </Button.Text>
+            </Button>
+          ) : null}
         </YStack>
       }
       testID="onboarding-screen"

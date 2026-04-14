@@ -13,7 +13,6 @@ type PushNotificationsPreferenceCopy = {
   readyHelper: string
   registrationErrorHelper: string
   settingsHelper: string
-  tokenValue: (value: { token: string }) => string
 }
 
 type PushNotificationsPreferenceCardProps = {
@@ -21,7 +20,6 @@ type PushNotificationsPreferenceCardProps = {
   checked: boolean
   copy: PushNotificationsPreferenceCopy
   disabled?: boolean
-  expoPushToken: string | null
   framed?: boolean
   isPending?: boolean
   isPhysicalDevice: boolean
@@ -48,7 +46,6 @@ function getHelperText({
   canAskAgain,
   checked,
   copy,
-  expoPushToken,
   isPending,
   isPhysicalDevice,
   permissionStatus,
@@ -58,7 +55,6 @@ function getHelperText({
   | 'canAskAgain'
   | 'checked'
   | 'copy'
-  | 'expoPushToken'
   | 'isPending'
   | 'isPhysicalDevice'
   | 'permissionStatus'
@@ -92,9 +88,7 @@ function getHelperText({
     return {
       helperText: copy.readyHelper,
       showOpenSettings: false,
-      supportingText: expoPushToken
-        ? copy.tokenValue({ token: expoPushToken })
-        : undefined,
+      supportingText: undefined,
     }
   }
 
@@ -126,7 +120,6 @@ export function PushNotificationsPreferenceCard({
   checked,
   copy,
   disabled = false,
-  expoPushToken,
   framed = true,
   isPending = false,
   isPhysicalDevice,
@@ -138,8 +131,8 @@ export function PushNotificationsPreferenceCard({
   testID,
   tone = 'accent',
 }: PushNotificationsPreferenceCardProps) {
-  const { width } = useWindowDimensions()
-  const isCompactWidth = width < 360
+  const { fontScale, width } = useWindowDimensions()
+  const isCompactLayout = width < 360 || fontScale > 1.15
   const isBlocked = isPushNotificationsBlocked({
     canAskAgain,
     permissionStatus,
@@ -150,16 +143,18 @@ export function PushNotificationsPreferenceCard({
     canAskAgain,
     checked: effectiveChecked,
     copy,
-    expoPushToken,
     isPending,
     isPhysicalDevice,
     permissionStatus,
     registrationErrorCode,
   })
+  const accessibilityHint = [helperText, supportingText]
+    .filter(Boolean)
+    .join('. ')
 
   const content = (
     <YStack gap="$3">
-      {isCompactWidth ? (
+      {isCompactLayout ? (
         <YStack gap="$3">
           <YStack gap="$1" style={{ minWidth: 0 }}>
             <Text fontSize={15} fontWeight="700">
@@ -172,6 +167,7 @@ export function PushNotificationsPreferenceCard({
           <XStack justify="flex-end">
             <ToggleSwitch
               accessibilityLabel={label}
+              accessibilityHint={accessibilityHint}
               checked={effectiveChecked}
               disabled={isToggleDisabled}
               onCheckedChange={onCheckedChange}
@@ -190,6 +186,7 @@ export function PushNotificationsPreferenceCard({
           </YStack>
           <ToggleSwitch
             accessibilityLabel={label}
+            accessibilityHint={accessibilityHint}
             checked={effectiveChecked}
             disabled={isToggleDisabled}
             onCheckedChange={onCheckedChange}
@@ -205,8 +202,9 @@ export function PushNotificationsPreferenceCard({
 
       {showOpenSettings && onOpenSettings ? (
         <PrimaryButton
+          accessibilityHint={helperText}
           emphasis="outline"
-          fullWidth={isCompactWidth}
+          fullWidth={isCompactLayout}
           tone="neutral"
           onPress={onOpenSettings}
         >

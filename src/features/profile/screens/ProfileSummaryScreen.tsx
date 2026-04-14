@@ -12,15 +12,14 @@ function ProfileSummarySkeleton() {
       <SurfaceCard gap="$4" p="$5" tone="accent">
         <YStack gap="$2">
           <SkeletonBlock height={16} width="34%" />
-          <SkeletonBlock height={44} width="42%" />
-          <SkeletonBlock height={14} width="48%" />
           <SkeletonBlock height={14} width="82%" />
         </YStack>
         <YStack borderColor="$borderColor" borderTopWidth={1} gap="$3" pt="$4">
-          <SkeletonBlock height={22} width="100%" />
+          <SkeletonBlock height={24} width="100%" />
+          <SkeletonBlock height={20} width="100%" />
           <SkeletonBlock height={16} width="70%" />
-          <SkeletonBlock height={22} width="100%" />
-          <SkeletonBlock height={22} width="100%" />
+          <SkeletonBlock height={20} width="100%" />
+          <SkeletonBlock height={20} width="100%" />
         </YStack>
       </SurfaceCard>
     </YStack>

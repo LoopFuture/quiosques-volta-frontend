@@ -61,6 +61,7 @@ function ProfilePrivacyScreenSkeleton() {
 function ProfilePrivacyForm() {
   const hasBiometricHardware = useBiometricHardwareAvailability()
   const { settings, setSettings } = useDevicePrivacySettings()
+  const { biometricsEnabled, pinEnabled } = settings
   const { showError, showSuccess } = useActionToast()
   const { t } = useTranslation()
   const validationCopy = getProfileValidationCopy(t)
@@ -68,7 +69,9 @@ function ProfilePrivacyForm() {
     defaultValues: getProfilePrivacyFormDefaultValues({
       alertsEmail: '',
       alertsEnabled: false,
-      ...settings,
+      biometricsEnabled,
+      pinEnabled,
+      pushNotificationsEnabled: false,
     }),
     mode: 'onSubmit',
     reValidateMode: 'onChange',
@@ -78,9 +81,9 @@ function ProfilePrivacyForm() {
   })
 
   useEffect(() => {
-    setValue('biometricsEnabled', settings.biometricsEnabled)
-    setValue('pinEnabled', settings.pinEnabled)
-  }, [setValue, settings.biometricsEnabled, settings.pinEnabled])
+    setValue('biometricsEnabled', biometricsEnabled)
+    setValue('pinEnabled', pinEnabled)
+  }, [biometricsEnabled, pinEnabled, setValue])
   const pinCopy = {
     cancelLabel: t('tabScreens.profile.privacy.pinCancelLabel'),
     changeLabel: t('tabScreens.profile.privacy.pinChangeLabel'),

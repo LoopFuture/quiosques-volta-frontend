@@ -1,5 +1,5 @@
 import { Text, YStack, XStack } from 'tamagui'
-import { SurfaceCard } from '@/components/ui'
+import { SeparatedStack, SurfaceCard } from '@/components/ui'
 import type { ProfileSummaryStat } from '../models'
 
 type ProfileHeroCardProps = {
@@ -28,26 +28,31 @@ export function ProfileHeroCard({
         >
           {title}
         </Text>
-        <Text fontSize={42} fontWeight="900">
-          {headlineValue}
-        </Text>
-        <Text color="$color11" fontSize={15}>
-          {headlineLabel}
-        </Text>
         <Text color="$color11" fontSize={14}>
           {supportingText}
         </Text>
       </YStack>
 
-      {detailStats ? (
-        <YStack borderColor="$borderColor" borderTopWidth={1} gap="$3" pt="$4">
-          {detailStats.map((stat) => (
+      <YStack borderColor="$borderColor" borderTopWidth={1} pt="$4">
+        <SeparatedStack separatorSpacing="$2">
+          <YStack gap="$1">
+            <XStack items="center" justify="space-between" gap="$3">
+              <Text color="$color10" fontSize={14} fontWeight="700">
+                {headlineLabel}
+              </Text>
+              <Text color="$color" fontSize={28} fontWeight="900">
+                {headlineValue}
+              </Text>
+            </XStack>
+          </YStack>
+
+          {detailStats?.map((stat) => (
             <YStack key={stat.label} gap="$1">
               <XStack items="center" justify="space-between" gap="$3">
                 <Text color="$color10" fontSize={13} fontWeight="700">
                   {stat.label}
                 </Text>
-                <Text color="$color" fontSize={22} fontWeight="900">
+                <Text color="$color" fontSize={18} fontWeight="800">
                   {stat.value}
                 </Text>
               </XStack>
@@ -58,8 +63,8 @@ export function ProfileHeroCard({
               ) : null}
             </YStack>
           ))}
-        </YStack>
-      ) : null}
+        </SeparatedStack>
+      </YStack>
     </SurfaceCard>
   )
 }

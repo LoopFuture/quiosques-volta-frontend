@@ -140,7 +140,6 @@ export function ProfileSetupScreen() {
   const { settings, setSettings } = useDevicePrivacySettings()
   const {
     canAskAgain,
-    expoPushToken,
     isPhysicalDevice,
     isSyncing: isSyncingPushNotifications,
     permissionStatus,
@@ -215,10 +214,6 @@ export function ProfileSetupScreen() {
     settingsHelper: t(
       'tabScreens.profile.privacy.pushNotificationsSettingsHelper',
     ),
-    tokenValue: ({ token }: { token: string }) =>
-      t('tabScreens.profile.privacy.pushNotificationsTokenValue', {
-        token,
-      }),
   } as const
   const pinCopy = {
     cancelLabel: t('tabScreens.profile.privacy.pinCancelLabel'),
@@ -723,7 +718,6 @@ export function ProfileSetupScreen() {
                     checked={field.value}
                     copy={pushNotificationsCopy}
                     disabled={completeSetupMutation.isPending}
-                    expoPushToken={expoPushToken}
                     isPending={isSyncingPushNotifications}
                     isPhysicalDevice={isPhysicalDevice}
                     label={t(

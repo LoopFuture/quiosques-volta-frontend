@@ -55,12 +55,12 @@ function ProfileAlertsForm({
 }) {
   const updatePreferencesMutation = useUpdateProfilePreferencesMutation()
   const { settings, setSettings } = useDevicePrivacySettings()
+  const { biometricsEnabled, pinEnabled, pushNotificationsEnabled } = settings
   const { showError, showSuccess } = useActionToast()
   const { t } = useTranslation()
   const validationCopy = getProfileValidationCopy(t)
   const {
     canAskAgain,
-    expoPushToken,
     isPhysicalDevice,
     isSyncing: isSyncingPushNotifications,
     permissionStatus,
@@ -72,7 +72,9 @@ function ProfileAlertsForm({
       defaultValues: getProfilePrivacyFormDefaultValues({
         alertsEmail: currentEmail,
         alertsEnabled,
-        ...settings,
+        biometricsEnabled,
+        pinEnabled,
+        pushNotificationsEnabled,
       }),
       mode: 'onSubmit',
       reValidateMode: 'onChange',
@@ -90,28 +92,46 @@ function ProfileAlertsForm({
       setValue('pushNotificationsEnabled', false)
     }
 
-    if (!settings.pushNotificationsEnabled) {
+    if (!pushNotificationsEnabled) {
       return
     }
 
     setSettings({
-      ...settings,
+      biometricsEnabled,
+      pinEnabled,
       pushNotificationsEnabled: false,
     })
-  }, [getValues, permissionStatus, setSettings, setValue, settings])
+  }, [
+    biometricsEnabled,
+    getValues,
+    permissionStatus,
+    pinEnabled,
+    pushNotificationsEnabled,
+    setSettings,
+    setValue,
+  ])
 
   useEffect(() => {
     reset(
       getProfilePrivacyFormDefaultValues({
         alertsEmail: currentEmail,
         alertsEnabled,
-        ...settings,
+        biometricsEnabled,
+        pinEnabled,
+        pushNotificationsEnabled,
       }),
       {
         keepDirtyValues: true,
       },
     )
-  }, [alertsEnabled, currentEmail, reset, settings])
+  }, [
+    alertsEnabled,
+    biometricsEnabled,
+    currentEmail,
+    pinEnabled,
+    pushNotificationsEnabled,
+    reset,
+  ])
 
   const pushNotificationsCopy = {
     deniedHelper: t('tabScreens.profile.privacy.pushNotificationsDeniedHelper'),
@@ -132,16 +152,13 @@ function ProfileAlertsForm({
     settingsHelper: t(
       'tabScreens.profile.privacy.pushNotificationsSettingsHelper',
     ),
-    tokenValue: ({ token }: { token: string }) =>
-      t('tabScreens.profile.privacy.pushNotificationsTokenValue', {
-        token,
-      }),
   } as const
 
   async function handlePushNotificationsToggleChange(nextValue: boolean) {
     if (!nextValue) {
       setSettings({
-        ...settings,
+        biometricsEnabled,
+        pinEnabled,
         pushNotificationsEnabled: false,
       })
       showSuccess(
@@ -156,7 +173,8 @@ function ProfileAlertsForm({
     if (!result.isEnabled) {
       setValue('pushNotificationsEnabled', false)
       setSettings({
-        ...settings,
+        biometricsEnabled,
+        pinEnabled,
         pushNotificationsEnabled: false,
       })
       showError(
@@ -167,7 +185,8 @@ function ProfileAlertsForm({
     }
 
     setSettings({
-      ...settings,
+      biometricsEnabled,
+      pinEnabled,
       pushNotificationsEnabled: true,
     })
     showSuccess(
@@ -176,7 +195,10 @@ function ProfileAlertsForm({
     )
   }
 
-  function handleEmailAlertsToggleChange(nextValue: boolean) {
+  function handleEmailAlertsToggleChange(
+    nextValue: boolean,
+    previousValue: boolean,
+  ) {
     setValue('alertsEnabled', nextValue)
     updatePreferencesMutation.mutate(
       {
@@ -188,6 +210,7 @@ function ProfileAlertsForm({
       },
       {
         onError: () => {
+          setValue('alertsEnabled', previousValue)
           showError(
             t('tabScreens.profile.alerts.emailAlertsLabel'),
             t('tabScreens.profile.alerts.emailAlertsErrorToast'),
@@ -224,7 +247,6 @@ function ProfileAlertsForm({
                   checked={field.value}
                   copy={pushNotificationsCopy}
                   disabled={false}
-                  expoPushToken={expoPushToken}
                   framed={false}
                   isPending={isSyncingPushNotifications}
                   isPhysicalDevice={isPhysicalDevice}
@@ -262,8 +284,7 @@ function ProfileAlertsForm({
                   helperText={t('tabScreens.profile.alerts.emailAlertsHelper')}
                   label={t('tabScreens.profile.alerts.emailAlertsLabel')}
                   onCheckedChange={(checked) => {
-                    field.onChange(checked)
-                    handleEmailAlertsToggleChange(checked)
+                    handleEmailAlertsToggleChange(checked, field.value)
                   }}
                 />
               )}

@@ -159,6 +159,7 @@ export function TopBar(props: TopBarProps) {
               </Text>
             ) : null}
             <Text
+              accessibilityRole="header"
               ellipsizeMode="tail"
               fontSize={isCompactWidth ? 24 : 28}
               fontWeight="900"
@@ -200,6 +201,7 @@ export function TopBar(props: TopBarProps) {
           </Text>
         ) : null}
         <Text
+          accessibilityRole="header"
           fontSize={isCompactWidth ? 22 : 24}
           fontWeight="800"
           style={{ flexShrink: 1, textAlign: 'center' }}

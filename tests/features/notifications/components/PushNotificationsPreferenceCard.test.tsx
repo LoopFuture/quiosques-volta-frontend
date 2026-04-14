@@ -12,11 +12,10 @@ const copy = {
   readyHelper: 'Ready helper',
   registrationErrorHelper: 'Registration error helper',
   settingsHelper: 'Settings helper',
-  tokenValue: ({ token }: { token: string }) => `token:${token}`,
 } as const
 
 describe('push notifications preference card', () => {
-  it('shows the ready state, token copy, and forwards toggle changes', () => {
+  it('shows the ready state and forwards toggle changes', () => {
     const onCheckedChange = jest.fn()
 
     renderWithProvider(
@@ -24,7 +23,6 @@ describe('push notifications preference card', () => {
         canAskAgain
         checked
         copy={copy}
-        expoPushToken="ExponentPushToken[token]"
         isPhysicalDevice
         label="Push notifications"
         onCheckedChange={onCheckedChange}
@@ -34,7 +32,6 @@ describe('push notifications preference card', () => {
     )
 
     expect(screen.getByText('Ready helper')).toBeTruthy()
-    expect(screen.getByText('token:ExponentPushToken[token]')).toBeTruthy()
 
     fireEvent.press(screen.getByLabelText('Push notifications'))
 
@@ -50,7 +47,6 @@ describe('push notifications preference card', () => {
         canAskAgain={false}
         checked
         copy={copy}
-        expoPushToken={null}
         isPhysicalDevice
         label="Push notifications"
         onCheckedChange={onCheckedChange}
@@ -74,7 +70,6 @@ describe('push notifications preference card', () => {
         canAskAgain
         checked={false}
         copy={copy}
-        expoPushToken={null}
         isPhysicalDevice
         label="Push notifications"
         onCheckedChange={jest.fn()}
@@ -91,7 +86,6 @@ describe('push notifications preference card', () => {
         canAskAgain
         checked={false}
         copy={copy}
-        expoPushToken={null}
         isPhysicalDevice={false}
         label="Push notifications"
         onCheckedChange={jest.fn()}
@@ -107,7 +101,6 @@ describe('push notifications preference card', () => {
         canAskAgain
         checked={false}
         copy={copy}
-        expoPushToken={null}
         isPhysicalDevice
         label="Push notifications"
         onCheckedChange={jest.fn()}
@@ -127,7 +120,6 @@ describe('push notifications preference card', () => {
         canAskAgain
         checked={false}
         copy={copy}
-        expoPushToken={null}
         framed={false}
         isPending
         isPhysicalDevice
@@ -146,13 +138,35 @@ describe('push notifications preference card', () => {
     widthSpy.mockRestore()
   })
 
+  it('switches to the compact layout when font scaling is increased', () => {
+    const dimensionsSpy = mockWindowDimensions({ fontScale: 1.2, width: 390 })
+
+    renderWithProvider(
+      <PushNotificationsPreferenceCard
+        canAskAgain
+        checked={false}
+        copy={copy}
+        isPhysicalDevice
+        label="Push notifications"
+        onCheckedChange={jest.fn()}
+        permissionStatus="undetermined"
+        registrationErrorCode={null}
+      />,
+    )
+
+    const openSettingsButton = screen.queryByText('Open settings')
+    expect(openSettingsButton).toBeNull()
+    expect(screen.getByText('Idle helper')).toBeTruthy()
+
+    dimensionsSpy.mockRestore()
+  })
+
   it('shows the idle helper when no permission flow has started', () => {
     renderWithProvider(
       <PushNotificationsPreferenceCard
         canAskAgain
         checked={false}
         copy={copy}
-        expoPushToken={null}
         isPhysicalDevice
         label="Push notifications"
         onCheckedChange={jest.fn()}

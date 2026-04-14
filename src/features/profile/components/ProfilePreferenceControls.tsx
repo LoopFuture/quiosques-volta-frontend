@@ -1,3 +1,4 @@
+import { useWindowDimensions } from 'react-native'
 import { Text, XStack, YStack } from 'tamagui'
 import {
   SegmentedTabs,
@@ -19,8 +20,16 @@ export function SettingsToggleRow({
   label: string
   onCheckedChange: (value: boolean) => void
 }) {
+  const { fontScale, width } = useWindowDimensions()
+  const isCompactLayout = width < 360 || fontScale > 1.15
+
   return (
-    <XStack gap="$3" items="flex-start" justify="space-between">
+    <XStack
+      gap="$3"
+      items={isCompactLayout ? 'stretch' : 'flex-start'}
+      justify="space-between"
+      flexDirection={isCompactLayout ? 'column' : 'row'}
+    >
       <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
         <Text fontSize={15} fontWeight="700">
           {label}
@@ -29,12 +38,15 @@ export function SettingsToggleRow({
           {helperText}
         </Text>
       </YStack>
-      <ToggleSwitch
-        accessibilityLabel={label}
-        checked={checked}
-        disabled={disabled}
-        onCheckedChange={onCheckedChange}
-      />
+      <XStack justify={isCompactLayout ? 'flex-end' : undefined}>
+        <ToggleSwitch
+          accessibilityLabel={label}
+          accessibilityHint={helperText}
+          checked={checked}
+          disabled={disabled}
+          onCheckedChange={onCheckedChange}
+        />
+      </XStack>
     </XStack>
   )
 }
@@ -60,7 +72,7 @@ export function SettingsSectionHeader({
           {eyebrow}
         </Text>
       ) : null}
-      <Text fontSize={18} fontWeight="800">
+      <Text accessibilityRole="header" fontSize={18} fontWeight="800">
         {title}
       </Text>
       {helperText ? (
@@ -121,6 +133,7 @@ export function PreferenceCard<TValue extends string>({
         <SegmentedTabs
           onValueChange={onValueChange}
           options={options}
+          scrollable={false}
           value={value}
         />
       </YStack>

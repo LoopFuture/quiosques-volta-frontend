@@ -27,15 +27,19 @@ export function ProfileSectionCard({
   title,
   tone = 'neutral',
 }: ProfileSectionCardProps) {
-  const { width } = useWindowDimensions()
+  const { fontScale, width } = useWindowDimensions()
   const isCompactWidth = width < 360
-  const accessibilityLabel = [
-    title,
-    ...previewRows.map((row) => `${row.label}: ${row.value}`),
-  ].join('. ')
+  const prefersStackedRows = isCompactWidth || fontScale > 1.15
+  const accessibilityLabel = [title, previewRows[0]?.value]
+    .filter(Boolean)
+    .join('. ')
+  const accessibilityHint = previewRows
+    .map((row) => `${row.label}: ${row.value}`)
+    .join('. ')
 
   return (
     <SurfaceCard
+      accessibilityHint={accessibilityHint}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
       decorativeAccent={decorativeAccent}
@@ -68,7 +72,7 @@ export function ProfileSectionCard({
       <SeparatedStack separatorSpacing="$2">
         {previewRows.map((row, index) => (
           <YStack key={`${row.label}-${index}`}>
-            {isCompactWidth ? (
+            {prefersStackedRows ? (
               <YStack gap="$1.5" py="$2.5">
                 <Text
                   color={index < 2 ? '$color10' : '$color11'}

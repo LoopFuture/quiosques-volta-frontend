@@ -1,3 +1,4 @@
+import { useWindowDimensions } from 'react-native'
 import { ScrollView, Text, ToggleGroup } from 'tamagui'
 import type { SegmentOption } from './types'
 
@@ -14,6 +15,9 @@ export function SegmentedTabs<TValue extends string>({
   scrollable = true,
   value,
 }: SegmentedTabsProps<TValue>) {
+  const { fontScale, width } = useWindowDimensions()
+  const shouldScroll = scrollable || width < 360 || fontScale > 1.15
+
   const tabs = (
     <ToggleGroup
       accessibilityRole="tablist"
@@ -29,7 +33,7 @@ export function SegmentedTabs<TValue extends string>({
       orientation="horizontal"
       type="single"
       value={value}
-      width={scrollable ? undefined : '100%'}
+      width={shouldScroll ? undefined : '100%'}
     >
       {options.map((option) => {
         const active = option.value === value
@@ -44,14 +48,15 @@ export function SegmentedTabs<TValue extends string>({
             borderColor={active ? '$accent7' : '$color8'}
             borderWidth={1}
             display="flex"
-            height={44}
             items="center"
             justify="center"
             key={option.value}
+            minHeight={52}
             px="$4"
+            py="$2.5"
             rounded={999}
             style={{
-              flexGrow: scrollable ? 0 : 1,
+              flexGrow: shouldScroll ? 0 : 1,
               flexShrink: 0,
             }}
             unstyled
@@ -61,7 +66,8 @@ export function SegmentedTabs<TValue extends string>({
               color={textColor}
               fontSize={15}
               fontWeight="700"
-              numberOfLines={1}
+              lineHeight={18}
+              numberOfLines={2}
               style={{ textAlign: 'center' }}
             >
               {option.label}
@@ -72,7 +78,7 @@ export function SegmentedTabs<TValue extends string>({
     </ToggleGroup>
   )
 
-  if (!scrollable) {
+  if (!shouldScroll) {
     return tabs
   }
 

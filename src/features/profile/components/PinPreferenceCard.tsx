@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useWindowDimensions } from 'react-native'
 import { Text, XStack, YStack } from 'tamagui'
 import { FormField, PrimaryButton, SurfaceCard } from '@/components/ui'
 import { APP_PIN_LENGTH } from '@/features/auth/pin'
@@ -31,6 +32,8 @@ export function PinPreferenceCard({
   onSavePin: (pin: string) => Promise<void>
   testIDPrefix?: string
 }) {
+  const { fontScale, width } = useWindowDimensions()
+  const isCompactLayout = width < 360 || fontScale > 1.15
   const [confirmPin, setConfirmPin] = useState('')
   const [errorText, setErrorText] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -129,7 +132,7 @@ export function PinPreferenceCard({
               textContentType="oneTimeCode"
               value={confirmPin}
             />
-            <XStack gap="$3">
+            <XStack gap="$3" flexDirection={isCompactLayout ? 'column' : 'row'}>
               <PrimaryButton
                 flex={1}
                 fullWidth={false}
@@ -158,7 +161,7 @@ export function PinPreferenceCard({
             </XStack>
           </YStack>
         ) : (
-          <XStack gap="$3">
+          <XStack gap="$3" flexDirection={isCompactLayout ? 'column' : 'row'}>
             <PrimaryButton
               emphasis="outline"
               flex={1}

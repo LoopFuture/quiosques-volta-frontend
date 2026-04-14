@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useRouter, type Href } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import {
@@ -128,6 +129,9 @@ export default function ProfileScreen() {
       section.id === 'payments' ||
       section.id === 'alerts',
   )
+  const accountSecondarySections = orderedSections?.filter(
+    (section) => section.id === 'personal' || section.id === 'alerts',
+  )
   const deviceSections = orderedSections?.filter(
     (section) => section.id === 'privacy' || section.id === 'appSettings',
   )
@@ -147,6 +151,23 @@ export default function ProfileScreen() {
     void WebBrowser.openBrowserAsync(
       getProfileLegalLinkUrl(PROFILE_LEGAL_LINK_PATHS.termsAndConditions),
     )
+  }
+  const toMenuSummary = (
+    section: NonNullable<typeof orderedSections>[number],
+  ): {
+    helper?: string
+    summary: ReactNode
+  } => {
+    const [primaryRow, secondaryRow] = section.previewRows
+
+    return {
+      helper: secondaryRow
+        ? `${secondaryRow.label}: ${secondaryRow.value}`
+        : undefined,
+      summary: primaryRow
+        ? `${primaryRow.label}: ${primaryRow.value}`
+        : t('tabScreens.profile.hub.summaries.summary'),
+    }
   }
 
   return (
@@ -190,18 +211,20 @@ export default function ProfileScreen() {
                 tone="accent"
               />
             ) : null}
-            {accountSections && accountSections.length > 1 ? (
-              <YStack gap="$3">
-                {accountSections.slice(1).map((section) => (
-                  <ProfileSectionCard
-                    key={section.id}
-                    leading={hubIcons[section.id]}
-                    onPress={() => router.push(hubRoutes[section.id])}
-                    previewRows={section.previewRows}
-                    title={section.title}
-                  />
-                ))}
-              </YStack>
+            {accountSecondarySections?.length ? (
+              <ProfileMenuCard
+                rows={accountSecondarySections.map((section) => {
+                  const { helper, summary } = toMenuSummary(section)
+
+                  return {
+                    helper,
+                    icon: hubIcons[section.id],
+                    onPress: () => router.push(hubRoutes[section.id]),
+                    summary,
+                    title: section.title,
+                  }
+                })}
+              />
             ) : null}
           </YStack>
 
@@ -214,17 +237,21 @@ export default function ProfileScreen() {
                 {t('tabScreens.profile.hub.sections.deviceDescription')}
               </Text>
             </YStack>
-            <YStack gap="$3">
-              {deviceSections?.map((section) => (
-                <ProfileSectionCard
-                  key={section.id}
-                  leading={hubIcons[section.id]}
-                  onPress={() => router.push(hubRoutes[section.id])}
-                  previewRows={section.previewRows}
-                  title={section.title}
-                />
-              ))}
-            </YStack>
+            {deviceSections?.length ? (
+              <ProfileMenuCard
+                rows={deviceSections.map((section) => {
+                  const { helper, summary } = toMenuSummary(section)
+
+                  return {
+                    helper,
+                    icon: hubIcons[section.id],
+                    onPress: () => router.push(hubRoutes[section.id]),
+                    summary,
+                    title: section.title,
+                  }
+                })}
+              />
+            ) : null}
           </YStack>
 
           <YStack gap="$3.5">
