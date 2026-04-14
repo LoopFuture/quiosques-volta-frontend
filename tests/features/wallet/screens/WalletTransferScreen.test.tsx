@@ -441,9 +441,18 @@ describe('WalletTransferScreen', () => {
 
     expect(
       screen.getByText(
-        i18n.t('tabScreens.wallet.transfer.destinationReadyTitle'),
+        i18n.t('tabScreens.wallet.transfer.destinationReadyHelper'),
       ),
     ).toBeTruthy()
+    expect(
+      screen.getAllByText(
+        i18n.t('tabScreens.wallet.transfer.accountHolderLabel'),
+      ).length,
+    ).toBeGreaterThan(0)
+    expect(screen.getAllByText('Joao Ferreira').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('PT50************1234').length).toBeGreaterThan(
+      0,
+    )
     expect(
       screen.getByText(
         i18n.t('tabScreens.wallet.transfer.reviewDestinationActionLabel'),

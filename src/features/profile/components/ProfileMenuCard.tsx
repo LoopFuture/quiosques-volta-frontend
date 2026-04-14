@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react'
-import { ChevronRight } from '@tamagui/lucide-icons'
+import { ArrowUpRight, ChevronRight } from '@tamagui/lucide-icons'
 import { Text, XStack, YStack } from 'tamagui'
 import { SeparatedStack, SurfaceCard } from '@/components/ui'
 
 export type ProfileMenuRow = {
+  accessibilityLabel?: string
+  external?: boolean
   helper?: string
   icon: ReactNode
   onPress: () => void
@@ -20,8 +22,8 @@ function renderSummary(summary: ReactNode) {
     return (
       <Text
         color="$color"
-        fontSize={16}
-        fontWeight="800"
+        fontSize={15}
+        fontWeight="700"
         style={{ flexShrink: 1 }}
       >
         {summary}
@@ -39,7 +41,7 @@ export function ProfileMenuCard({ rows }: ProfileMenuCardProps) {
         {rows.map((row, index) => (
           <YStack key={`${row.title}-${index}`}>
             <XStack
-              accessibilityLabel={row.title}
+              accessibilityLabel={row.accessibilityLabel ?? row.title}
               accessibilityRole="button"
               gap="$3"
               items="center"
@@ -59,8 +61,8 @@ export function ProfileMenuCard({ rows }: ProfileMenuCardProps) {
                 {row.icon}
               </XStack>
 
-              <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
-                <Text color="$color10" fontSize={13} fontWeight="700">
+              <YStack flex={1} gap="$0.5" style={{ minWidth: 0 }}>
+                <Text color="$color10" fontSize={12} fontWeight="700">
                   {row.title}
                 </Text>
                 {renderSummary(row.summary)}
@@ -71,7 +73,11 @@ export function ProfileMenuCard({ rows }: ProfileMenuCardProps) {
                 ) : null}
               </YStack>
 
-              <ChevronRight color="$color10" size={18} />
+              {row.external ? (
+                <ArrowUpRight color="$color10" size={18} />
+              ) : (
+                <ChevronRight color="$color10" size={18} />
+              )}
             </XStack>
           </YStack>
         ))}

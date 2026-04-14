@@ -1,4 +1,10 @@
-import { Check, CreditCard, LockKeyhole, Bell } from '@tamagui/lucide-icons'
+import {
+  Bell,
+  Check,
+  CircleAlert,
+  CreditCard,
+  LockKeyhole,
+} from '@tamagui/lucide-icons'
 import { Text, XStack, YStack } from 'tamagui'
 import {
   PrimaryButton,
@@ -41,7 +47,11 @@ function ReadinessIcon({ tone }: { tone: Tone }) {
         rounded={18}
         width={36}
       >
-        <Check color="$color" size={18} strokeWidth={3} />
+        {tone === 'warning' ? (
+          <CircleAlert color="$color" size={18} strokeWidth={2.4} />
+        ) : (
+          <Check color="$color" size={18} strokeWidth={3} />
+        )}
       </XStack>
     </ToneScope>
   )

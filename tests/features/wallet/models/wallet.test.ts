@@ -471,6 +471,7 @@ describe('wallet models, forms, and presentation', () => {
     const validation = {
       amountFieldHelper: 'helper',
       exceedsBalanceError: 'exceeds',
+      minimumAmountError: 'minimum',
       zeroAmountError: 'zero',
     }
 
@@ -480,29 +481,41 @@ describe('wallet models, forms, and presentation', () => {
     expect(parseTransferAmountCents('0,99')).toBe(99)
     expect(parseTransferAmountCents('12.5')).toBe(1250)
     expect(parseTransferAmountCents('abc')).toBeNull()
-    expect(getWalletTransferAmountError('', 470, validation)).toBeUndefined()
-    expect(getWalletTransferAmountError('0,00', 470, validation)).toBe('zero')
-    expect(getWalletTransferAmountError('9,99', 470, validation)).toBe(
+    expect(
+      getWalletTransferAmountError('', 100, 470, validation),
+    ).toBeUndefined()
+    expect(getWalletTransferAmountError('0,00', 100, 470, validation)).toBe(
+      'zero',
+    )
+    expect(getWalletTransferAmountError('0,50', 100, 470, validation)).toBe(
+      'minimum',
+    )
+    expect(getWalletTransferAmountError('9,99', 100, 470, validation)).toBe(
       'exceeds',
     )
     expect(
-      getWalletTransferAmountError('1,25', 470, validation),
+      getWalletTransferAmountError('1,25', 100, 470, validation),
     ).toBeUndefined()
     expect(getWalletTransferFormDefaultValues()).toEqual({
       amount: '',
     })
     expect(
-      getWalletTransferFormSchema(470, validation).safeParse({
+      getWalletTransferFormSchema(100, 470, validation).safeParse({
         amount: '0,00',
       }).success,
     ).toBe(false)
     expect(
-      getWalletTransferFormSchema(470, validation).safeParse({
+      getWalletTransferFormSchema(100, 470, validation).safeParse({
+        amount: '0,50',
+      }).success,
+    ).toBe(false)
+    expect(
+      getWalletTransferFormSchema(100, 470, validation).safeParse({
         amount: '9,99',
       }).success,
     ).toBe(false)
     expect(
-      getWalletTransferFormSchema(470, validation).safeParse({
+      getWalletTransferFormSchema(100, 470, validation).safeParse({
         amount: '1,25',
       }).success,
     ).toBe(true)
