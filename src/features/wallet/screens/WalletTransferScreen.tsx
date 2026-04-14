@@ -420,9 +420,6 @@ function WalletTransferScreenContent({
                         accessibilityLabel={t(
                           'tabScreens.wallet.transfer.amountFieldLabel',
                         )}
-                        accessibilityState={{
-                          invalid: Boolean(transferAmountError),
-                        }}
                         color="$color"
                         flex={1}
                         fontSize={isLargeText ? 44 : 52}
