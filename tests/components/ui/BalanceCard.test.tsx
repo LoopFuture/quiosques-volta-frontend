@@ -8,6 +8,7 @@ import { TamaguiProvider } from 'tamagui'
 import { BalanceCard } from '@/components/ui/BalanceCard'
 import { config } from '@/tamagui.config'
 import { themes } from '@/themes'
+import { mockWindowDimensions } from '@tests/support/react-native'
 import { renderWithProvider, renderWithTheme } from '@tests/support/test-utils'
 
 const fallbackSafeAreaMetrics = {
@@ -89,5 +90,14 @@ describe('BalanceCard', () => {
     expect(view.getByText('Saldo atual')).toBeTruthy()
     expect(view.getByText('4,70€')).toBeTruthy()
     expect(view.queryByText('Receber')).toBeNull()
+  })
+
+  it('switches to the compact amount scale when larger text is enabled', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+    const view = renderWithProvider(<BalanceCard amount="4,70€" />)
+
+    expect(view.getByText('4,70€')).toBeTruthy()
+
+    windowSpy.mockRestore()
   })
 })

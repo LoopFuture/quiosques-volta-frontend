@@ -96,7 +96,6 @@ export const FormField = forwardRef<ElementRef<typeof Input>, FormFieldProps>(
               accessibilityHint={supportingText}
               accessibilityState={{
                 disabled,
-                invalid: Boolean(errorText),
               }}
               color={disabled ? '$color10' : '$color'}
               disabled={disabled}

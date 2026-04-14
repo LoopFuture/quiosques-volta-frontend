@@ -204,6 +204,7 @@
           "emptyStateDescription": "As soon as you receive new credits or request a transfer, this list updates automatically.",
           "emptyStateLabel": "No movements yet",
           "emptyStateTitle": "Your next movements will show up here",
+          "openMovementHint": "Opens movement details",
           "title": "Recent activity",
           "transactions": {
             "colomboTitle": "Continente - Colombo",

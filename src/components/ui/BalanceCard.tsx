@@ -26,8 +26,8 @@ export function BalanceCard({
   title,
   tone = 'accent',
 }: BalanceCardProps) {
-  const { width } = useWindowDimensions()
-  const isCompactWidth = width < 360
+  const { fontScale, width } = useWindowDimensions()
+  const isCompactWidth = width < 360 || fontScale > 1.15
 
   return (
     <SurfaceCard gap="$4" p="$5" tone={tone}>
@@ -37,6 +37,7 @@ export function BalanceCard({
             color="$color10"
             fontSize={13}
             fontWeight="700"
+            letterSpacing={0.2}
             textTransform="uppercase"
           >
             {eyebrow}
@@ -65,8 +66,10 @@ export function BalanceCard({
           color="$color"
           fontSize={isCompactWidth ? 38 : 44}
           fontWeight="900"
+          lineHeight={isCompactWidth ? 42 : 48}
           minimumFontScale={0.85}
           numberOfLines={1}
+          style={{ fontVariant: ['tabular-nums'] }}
         >
           {amount}
         </Text>

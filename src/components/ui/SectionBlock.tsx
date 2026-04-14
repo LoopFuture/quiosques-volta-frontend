@@ -15,8 +15,8 @@ export function SectionBlock({
   action,
   children,
 }: SectionBlockProps) {
-  const { width } = useWindowDimensions()
-  const shouldStackHeader = Boolean(action) && width < 360
+  const { fontScale, width } = useWindowDimensions()
+  const shouldStackHeader = Boolean(action) && (width < 360 || fontScale > 1.15)
 
   return (
     <YStack gap="$3">
@@ -28,11 +28,12 @@ export function SectionBlock({
               color="$color"
               fontSize={18}
               fontWeight="800"
+              lineHeight={23}
             >
               {title}
             </Text>
             {description ? (
-              <Text color="$color11" fontSize={15}>
+              <Text color="$color11" fontSize={15} lineHeight={21}>
                 {description}
               </Text>
             ) : null}
@@ -47,11 +48,12 @@ export function SectionBlock({
               color="$color"
               fontSize={18}
               fontWeight="800"
+              lineHeight={23}
             >
               {title}
             </Text>
             {description ? (
-              <Text color="$color11" fontSize={15}>
+              <Text color="$color11" fontSize={15} lineHeight={21}>
                 {description}
               </Text>
             ) : null}

@@ -166,7 +166,7 @@ export default function ProfileScreen() {
         : undefined,
       summary: primaryRow
         ? `${primaryRow.label}: ${primaryRow.value}`
-        : t('tabScreens.profile.hub.summaries.summary'),
+        : t('tabScreens.profile.hub.cards.summary'),
     }
   }
 

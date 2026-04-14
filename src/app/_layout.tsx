@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { useEffect, useRef } from 'react'
 import * as Sentry from '@sentry/react-native'
 import { StatusBar } from 'expo-status-bar'
-import { useFonts } from 'expo-font'
 import {
   ErrorBoundary as ExpoRouterErrorBoundary,
   SplashScreen,
@@ -56,16 +55,9 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
 function RootLayout() {
-  const [interLoaded, interError] = useFonts({
-    Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
-    InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
-  })
-  if (!interLoaded && !interError) {
-    return null
-  }
   return (
     <Providers>
-      <RootLayoutNav fontsReady={Boolean(interLoaded || interError)} />
+      <RootLayoutNav />
     </Providers>
   )
 }
@@ -82,7 +74,7 @@ export default sentryRuntimeConfig.enabled
 const Providers = ({ children }: { children: ReactNode }) => {
   return <Provider>{children}</Provider>
 }
-function RootLayoutNav({ fontsReady }: { fontsReady: boolean }) {
+function RootLayoutNav() {
   const { canAccessProtectedApp, status } = useAuthSession()
   const {
     data: profile,
@@ -97,7 +89,6 @@ function RootLayoutNav({ fontsReady }: { fontsReady: boolean }) {
   const isProfileBootstrapReady =
     !canAccessProtectedApp || (!isProfileBootstrapPending && Boolean(profile))
   const isNavigationReady =
-    fontsReady &&
     status !== 'hydrating' &&
     (isProfileBootstrapReady || isProfileBootstrapError)
 

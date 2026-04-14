@@ -32,10 +32,10 @@ export function TransactionListItem({
   subtitle,
   title,
 }: TransactionListItemProps) {
-  const { width } = useWindowDimensions()
+  const { fontScale, width } = useWindowDimensions()
   const hasLongBadgeLabel = (badgeLabel?.length ?? 0) > 18
   const hasVeryLongBadgeLabel = (badgeLabel?.length ?? 0) > 26
-  const isCompactWidth = width < 380
+  const isCompactWidth = width < 380 || fontScale > 1.15
 
   const iconNode = (
     <XStack
@@ -65,7 +65,11 @@ export function TransactionListItem({
           color="$color"
           fontSize={isCompactWidth ? 22 : 24}
           fontWeight="900"
-          style={{ textAlign: isCompactWidth ? 'left' : 'right' }}
+          lineHeight={isCompactWidth ? 27 : 29}
+          style={{
+            fontVariant: ['tabular-nums'],
+            textAlign: isCompactWidth ? 'left' : 'right',
+          }}
         >
           {amount}
         </Text>
@@ -88,7 +92,8 @@ export function TransactionListItem({
               color="$color"
               fontSize={hasLongBadgeLabel ? 11 : 12}
               fontWeight="800"
-              numberOfLines={2}
+              lineHeight={hasLongBadgeLabel ? 15 : 16}
+              numberOfLines={isCompactWidth ? 3 : 2}
               style={{ flexShrink: 1, textAlign: 'center' }}
             >
               {badgeLabel}
@@ -105,11 +110,22 @@ export function TransactionListItem({
         {iconNode}
 
         <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
-          <Text color="$color" fontSize={17} fontWeight="800" numberOfLines={3}>
+          <Text
+            color="$color"
+            fontSize={17}
+            fontWeight="800"
+            lineHeight={22}
+            numberOfLines={4}
+          >
             {title}
           </Text>
           {subtitle ? (
-            <Text color="$color11" fontSize={14} numberOfLines={2}>
+            <Text
+              color="$color11"
+              fontSize={15}
+              lineHeight={20}
+              numberOfLines={3}
+            >
               {subtitle}
             </Text>
           ) : null}
@@ -123,11 +139,22 @@ export function TransactionListItem({
       {iconNode}
 
       <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
-        <Text color="$color" fontSize={17} fontWeight="800" numberOfLines={2}>
+        <Text
+          color="$color"
+          fontSize={17}
+          fontWeight="800"
+          lineHeight={22}
+          numberOfLines={fontScale > 1.15 ? 3 : 2}
+        >
           {title}
         </Text>
         {subtitle ? (
-          <Text color="$color11" fontSize={14} numberOfLines={2}>
+          <Text
+            color="$color11"
+            fontSize={15}
+            lineHeight={20}
+            numberOfLines={fontScale > 1.15 ? 3 : 2}
+          >
             {subtitle}
           </Text>
         ) : null}

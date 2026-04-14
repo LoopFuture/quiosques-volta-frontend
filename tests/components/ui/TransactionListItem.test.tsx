@@ -104,4 +104,27 @@ describe('TransactionListItem', () => {
 
     windowSpy.mockRestore()
   })
+
+  it('uses the compact stacked layout when larger text is enabled at regular width', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+    const view = renderWithProvider(
+      <TransactionListItem
+        amount="-4,70€"
+        badgeLabel="Transferência em processamento"
+        icon={<Text>T</Text>}
+        subtitle="Conta terminada em 4321"
+        title="Transferência"
+      />,
+    )
+
+    expect(view.getByText('Transferência').props.numberOfLines).toBe(4)
+    expect(view.getByText('Conta terminada em 4321').props.numberOfLines).toBe(
+      3,
+    )
+    expect(
+      view.getByText('Transferência em processamento').props.numberOfLines,
+    ).toBe(3)
+
+    windowSpy.mockRestore()
+  })
 })

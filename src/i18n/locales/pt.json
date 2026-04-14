@@ -204,6 +204,7 @@
           "emptyStateDescription": "Quando receberes novos créditos ou pedires uma transferência, esta lista atualiza-se automaticamente.",
           "emptyStateLabel": "Sem movimentos",
           "emptyStateTitle": "Os próximos movimentos vão aparecer aqui",
+          "openMovementHint": "Abre os detalhes do movimento",
           "title": "Atividade recente",
           "transactions": {
             "colomboTitle": "Continente - Colombo",

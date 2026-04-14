@@ -33,11 +33,14 @@ describe('ProfileSectionCard', () => {
     expect(screen.getByText('Dados pessoais')).toBeTruthy()
     expect(screen.getByText('lead')).toBeTruthy()
 
-    fireEvent.press(
-      screen.getByLabelText(
-        'Dados pessoais. Nome: Joao Ferreira. Email: joao@volta.pt. Telefone: +351 912 345 678',
+    expect(screen.getByLabelText('Dados pessoais. Joao Ferreira')).toBeTruthy()
+    expect(
+      screen.getByHintText(
+        'Nome: Joao Ferreira. Email: joao@volta.pt. Telefone: +351 912 345 678',
       ),
-    )
+    ).toBeTruthy()
+
+    fireEvent.press(screen.getByLabelText('Dados pessoais. Joao Ferreira'))
     expect(onPress).toHaveBeenCalled()
 
     widthSpy.mockRestore()
@@ -95,5 +98,32 @@ describe('ProfileSectionCard', () => {
     expect(view.queryByText('lead')).toBeNull()
 
     compactSpy.mockRestore()
+  })
+
+  it('prefers stacked rows when larger text is enabled at regular width', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+    const onPress = jest.fn()
+    const view = renderWithProvider(
+      <ProfileSectionCard
+        onPress={onPress}
+        previewRows={[
+          {
+            label: 'Email',
+            value: 'joao@volta.pt',
+          },
+          {
+            label: 'Telefone',
+            value: '+351 912 345 678',
+          },
+        ]}
+        title="Acessibilidade"
+      />,
+    )
+
+    expect(view.getByText('Acessibilidade')).toBeTruthy()
+    expect(view.getByText('Email')).toBeTruthy()
+    expect(view.getByText('joao@volta.pt')).toBeTruthy()
+
+    windowSpy.mockRestore()
   })
 })

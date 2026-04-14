@@ -55,6 +55,25 @@ describe('SectionBlock', () => {
     windowSpy.mockRestore()
   })
 
+  it('also stacks the header when larger text is enabled at regular width', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+    const view = renderWithProvider(
+      <SectionBlock
+        action={<Text>Editar</Text>}
+        description="Resumo do estado atual."
+        title="Pagamentos"
+      >
+        <Text>Conteudo interno</Text>
+      </SectionBlock>,
+    )
+
+    expect(view.getByText('Pagamentos')).toBeTruthy()
+    expect(view.getByText('Resumo do estado atual.')).toBeTruthy()
+    expect(view.getByText('Editar')).toBeTruthy()
+
+    windowSpy.mockRestore()
+  })
+
   it('keeps the regular header layout when no action or description is provided', () => {
     const windowSpy = mockWindowDimensions({ width: 320 })
     const view = renderWithProvider(

@@ -52,18 +52,38 @@ function HomeSummaryRow({
   return (
     <XStack items="center" justify="space-between" gap="$4">
       <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
-        <Text color="$color" fontSize={16} fontWeight="800">
+        <Text color="$color" fontSize={16} fontWeight="800" lineHeight={21}>
           {label}
         </Text>
-        <Text color="$color11" fontSize={14}>
+        <Text color="$color11" fontSize={15} lineHeight={20}>
           {helper}
         </Text>
       </YStack>
-      <Text color="$color" fontSize={26} fontWeight="900">
+      <Text
+        color="$color"
+        fontSize={26}
+        fontWeight="900"
+        lineHeight={30}
+        style={{ fontVariant: ['tabular-nums'] }}
+      >
         {value}
       </Text>
     </XStack>
   )
+}
+
+function buildMovementAccessibilityLabel({
+  amount,
+  badgeLabel,
+  subtitle,
+  title,
+}: {
+  amount: string
+  badgeLabel?: string
+  subtitle?: string
+  title: string
+}) {
+  return [title, subtitle, amount, badgeLabel].filter(Boolean).join('. ')
 }
 
 function HomeScreenSkeleton() {
@@ -303,7 +323,21 @@ export default function HomeScreen() {
                 {homeScreenState.recentActivity.map((movement) => (
                   <TransactionListItem
                     key={movement.id}
-                    accessibilityLabel={getWalletMovementTitle(t, movement)}
+                    accessibilityHint={t(
+                      'tabScreens.home.recentActivity.openMovementHint',
+                    )}
+                    accessibilityLabel={buildMovementAccessibilityLabel({
+                      amount: formatWalletAmount(
+                        movement.amount.amountMinor,
+                        i18n.language,
+                      ),
+                      badgeLabel: getWalletMovementBadgeLabel(t, movement),
+                      subtitle: getWalletMovementSubtitle(
+                        i18n.language,
+                        movement,
+                      ),
+                      title: getWalletMovementTitle(t, movement),
+                    })}
                     amount={formatWalletAmount(
                       movement.amount.amountMinor,
                       i18n.language,

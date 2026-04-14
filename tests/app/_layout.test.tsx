@@ -7,7 +7,6 @@ import {
   mockStackProtected,
   mockStackScreen,
   mockUseAuthSession,
-  mockUseFonts,
   mockUseProfileQuery,
   resetAppLayoutMocks,
 } from '@tests/support/app-layout-mocks'
@@ -27,14 +26,11 @@ describe('app/_layout', () => {
     resetAppLayoutMocks()
   })
 
-  it('declares auth as the initial route and waits for fonts before rendering', () => {
-    mockUseFonts.mockReturnValue([false, null])
-
+  it('declares auth as the initial route and can render immediately', () => {
     const view = render(<RootLayout />)
 
     expect(unstable_settings.initialRouteName).toBe('auth')
-    expect(view.toJSON()).toBeNull()
-    expect(mockHideAsync).not.toHaveBeenCalled()
+    expect(view.toJSON()).not.toBeNull()
   })
 
   it('renders the root stack and hides the splash screen when navigation is ready', async () => {
