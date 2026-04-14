@@ -21,6 +21,10 @@ describe('ProfileSectionCard', () => {
             label: 'Email',
             value: 'joao@volta.pt',
           },
+          {
+            label: 'Telefone',
+            value: '+351 912 345 678',
+          },
         ]}
         title="Dados pessoais"
       />,
@@ -29,7 +33,11 @@ describe('ProfileSectionCard', () => {
     expect(screen.getByText('Dados pessoais')).toBeTruthy()
     expect(screen.getByText('lead')).toBeTruthy()
 
-    fireEvent.press(screen.getByLabelText('Dados pessoais'))
+    fireEvent.press(
+      screen.getByLabelText(
+        'Dados pessoais. Nome: Joao Ferreira. Email: joao@volta.pt. Telefone: +351 912 345 678',
+      ),
+    )
     expect(onPress).toHaveBeenCalled()
 
     widthSpy.mockRestore()
@@ -66,6 +74,14 @@ describe('ProfileSectionCard', () => {
             label: 'Email',
             value: 'joao@volta.pt',
           },
+          {
+            label: 'Telefone',
+            value: '+351 912 345 678',
+          },
+          {
+            label: 'Morada',
+            value: 'Rua da Volta, 1',
+          },
         ]}
         title="Compact card"
       />,
@@ -74,6 +90,8 @@ describe('ProfileSectionCard', () => {
     expect(view.getByText('Compact card')).toBeTruthy()
     expect(view.getByText('Email')).toBeTruthy()
     expect(view.getByText('joao@volta.pt')).toBeTruthy()
+    expect(view.getByText('Morada')).toBeTruthy()
+    expect(view.getByText('Rua da Volta, 1')).toBeTruthy()
     expect(view.queryByText('lead')).toBeNull()
 
     compactSpy.mockRestore()
