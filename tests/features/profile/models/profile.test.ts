@@ -243,7 +243,6 @@ describe('profile models and forms', () => {
       profile: {
         ...profile,
         payoutAccount: {
-          accountHolderName: null,
           ibanMasked: 'PT50************90123',
           rail: 'sepa',
         },
