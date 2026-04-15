@@ -221,6 +221,110 @@ describe('profile models and forms', () => {
     expect(snapshot.alertsEnabled).toBe(false)
   })
 
+  it('builds payment readiness copy when payout details are missing or unnamed', () => {
+    const reviewReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: true,
+        pinEnabled: true,
+        pushNotificationsEnabled: true,
+      },
+      profile: {
+        ...profile,
+        payoutAccount: null,
+      },
+    })
+
+    const unnamedReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: true,
+        pinEnabled: true,
+        pushNotificationsEnabled: true,
+      },
+      profile: {
+        ...profile,
+        payoutAccount: {
+          accountHolderName: null,
+          ibanMasked: 'PT50************90123',
+          rail: 'sepa',
+        },
+        personal: {
+          ...profile.personal,
+          name: null,
+        },
+      },
+    })
+
+    expect(
+      reviewReadiness.items.find((item) => item.id === 'payments')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.paymentsReviewValue'))
+    expect(
+      unnamedReadiness.items.find((item) => item.id === 'payments')?.value,
+    ).toBe('PT50************90123 associado')
+  })
+
+  it('builds readiness copy for combined, email-only, push-only, and review-only security states', () => {
+    const allEnabledReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: true,
+        pinEnabled: true,
+        pushNotificationsEnabled: false,
+      },
+      profile: {
+        ...profile,
+        preferences: {
+          alertsEmail: 'joao.ferreira@volta.pt',
+          alertsEnabled: true,
+        },
+      },
+    })
+
+    const pushOnlyReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: true,
+      },
+      profile: {
+        ...profile,
+        preferences: {
+          alertsEmail: 'joao.ferreira@volta.pt',
+          alertsEnabled: false,
+        },
+      },
+    })
+
+    const reviewOnlyReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      },
+      profile: {
+        ...profile,
+        preferences: {
+          alertsEmail: 'joao.ferreira@volta.pt',
+          alertsEnabled: false,
+        },
+      },
+    })
+
+    expect(
+      allEnabledReadiness.items.find((item) => item.id === 'security')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.securityAllValue'))
+    expect(
+      allEnabledReadiness.items.find((item) => item.id === 'alerts')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.alertsEmailValue'))
+    expect(
+      pushOnlyReadiness.items.find((item) => item.id === 'alerts')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.alertsPushValue'))
+    expect(
+      reviewOnlyReadiness.items.find((item) => item.id === 'security')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.securityReviewValue'))
+    expect(
+      reviewOnlyReadiness.items.find((item) => item.id === 'alerts')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.alertsReviewValue'))
+  })
+
   it('builds defaults and normalizes personal, payments, privacy, app settings, and setup payloads', () => {
     const setupSnapshot = getProfileSetupSnapshotFromProfile(profile, {
       biometricsEnabled: true,

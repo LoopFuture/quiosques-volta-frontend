@@ -18,4 +18,27 @@ describe('native intent redirects', () => {
       }),
     ).toBe('/wallet')
   })
+
+  it('returns the original path when the native event path is empty or invalid', () => {
+    expect(
+      redirectSystemPath({
+        initial: false,
+        path: null,
+      }),
+    ).toBeNull()
+
+    expect(
+      redirectSystemPath({
+        initial: false,
+        path: 'voltafrontend://%',
+      }),
+    ).toBe('voltafrontend://%')
+
+    expect(
+      redirectSystemPath({
+        initial: false,
+        path: '%%%',
+      }),
+    ).toBe('%%%')
+  })
 })
