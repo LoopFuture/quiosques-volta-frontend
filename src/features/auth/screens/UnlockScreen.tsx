@@ -4,10 +4,14 @@ import { useRouter } from 'expo-router'
 import { Delete, Fingerprint, X } from '@tamagui/lucide-icons'
 import { useTranslation } from 'react-i18next'
 import { Button, Paragraph, Text, XStack, YStack } from 'tamagui'
-import { ScreenContainer, SurfaceCard } from '@/components/ui'
+import { PrimaryButton, ScreenContainer, SurfaceCard } from '@/components/ui'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { APP_PIN_LENGTH } from '@/features/auth/pin'
 import { authRoutes } from '@/features/auth/routes'
+import {
+  getPinUnlockErrorMessage,
+  getUnlockErrorMessage,
+} from './auth-screen-shared'
 
 const PIN_PAD_ROWS = [
   ['1', '2', '3'],
@@ -16,11 +20,23 @@ const PIN_PAD_ROWS = [
   ['biometric', '0', 'delete'],
 ] as const
 
+type UnlockErrorState =
+  | {
+      kind: 'biometric'
+      reason: 'cancelled' | 'failed' | 'not-available' | 'not-enrolled'
+    }
+  | {
+      kind: 'pin'
+      reason: 'failed' | 'invalid-pin' | 'not-configured' | 'too-many-attempts'
+    }
+
 function PinDot({
+  accessibilityLabel,
   filled,
   isError,
   testID,
 }: {
+  accessibilityLabel: string
   filled: boolean
   isError: boolean
   testID: string
@@ -30,7 +46,7 @@ function PinDot({
 
   return (
     <YStack
-      accessibilityLabel={isError ? 'error' : filled ? 'filled' : 'empty'}
+      accessibilityLabel={accessibilityLabel}
       bg={dotColor}
       borderColor={borderColor}
       borderWidth={1}
@@ -55,7 +71,7 @@ export default function UnlockScreen() {
     unlockWithBiometrics,
     unlockWithPin,
   } = useAuthSession()
-  const { height, width } = useWindowDimensions()
+  const { fontScale, height, width } = useWindowDimensions()
   const lastAutoPromptedLockRevisionRef = useRef<number | null>(null)
   const pinValueRef = useRef('')
   const pinFailureResetTimeoutRef = useRef<ReturnType<
@@ -67,17 +83,53 @@ export default function UnlockScreen() {
     useState(false)
   const [isUnlockingBiometrics, setIsUnlockingBiometrics] = useState(false)
   const [isUnlockingPin, setIsUnlockingPin] = useState(false)
+  const [unlockError, setUnlockError] = useState<UnlockErrorState | null>(null)
   const [pin, setPin] = useState('')
   const isLockedSession = isAuthenticated && isAppLocked
-  const isShortHeight = height < 780
-  const isVeryShortHeight = height < 700
+  const prefersExpandedTextLayout = fontScale > 1.15
+  const isShortHeight = height < 780 || prefersExpandedTextLayout
+  const isVeryShortHeight = height < 700 || fontScale > 1.3
+  const isCompactWidth = width < 360 || prefersExpandedTextLayout
   const cardGap = isVeryShortHeight ? '$3' : '$4'
   const keypadGap = isVeryShortHeight ? '$2.5' : '$3'
   const closeButtonSize = isVeryShortHeight ? '$3.5' : '$4'
-  const keypadButtonSize = isVeryShortHeight ? 60 : isShortHeight ? 66 : 72
+  const keypadButtonSize =
+    isVeryShortHeight || isCompactWidth ? 60 : isShortHeight ? 66 : 72
   const cardPadding = isVeryShortHeight ? '$4' : '$5'
-  const titleSize = isVeryShortHeight ? 24 : 28
+  const titleSize = isVeryShortHeight || isCompactWidth ? 24 : 28
   const cardMaxWidth = Math.min(width - 32, 360)
+  const currentErrorMessage = unlockError
+    ? unlockError.kind === 'biometric'
+      ? getUnlockErrorMessage(unlockError.reason, t)
+      : getPinUnlockErrorMessage(unlockError.reason, t)
+    : null
+  const getPinDotAccessibilityLabel = useCallback(
+    (index: number, filled: boolean, isError: boolean) => {
+      if (isError) {
+        return t('auth.lock.pinProgressError', {
+          currentDigit: index,
+          totalDigits: APP_PIN_LENGTH,
+        })
+      }
+
+      if (filled) {
+        return t('auth.lock.pinProgressEntered', {
+          currentDigit: index,
+          totalDigits: APP_PIN_LENGTH,
+        })
+      }
+
+      return t('auth.lock.pinProgressEmpty', {
+        currentDigit: index,
+        totalDigits: APP_PIN_LENGTH,
+      })
+    },
+    [t],
+  )
+  const hasPinBlockingError =
+    unlockError?.kind === 'pin' &&
+    (unlockError.reason === 'not-configured' ||
+      unlockError.reason === 'too-many-attempts')
 
   useEffect(() => {
     if (!isLockedSession) {
@@ -145,6 +197,7 @@ export default function UnlockScreen() {
     }
 
     setIsUnlockingBiometrics(true)
+    setUnlockError(null)
 
     try {
       const result = await unlockWithBiometrics()
@@ -159,6 +212,11 @@ export default function UnlockScreen() {
       ) {
         setHasBiometricUnavailableError(true)
       }
+
+      setUnlockError({
+        kind: 'biometric',
+        reason: result.reason,
+      })
     } finally {
       setIsUnlockingBiometrics(false)
     }
@@ -171,6 +229,7 @@ export default function UnlockScreen() {
       }
 
       setIsUnlockingPin(true)
+      setUnlockError(null)
 
       try {
         const result = await unlockWithPin(currentPin)
@@ -184,20 +243,15 @@ export default function UnlockScreen() {
         triggerPinFailureFeedback()
         pinValueRef.current = ''
         setPin('')
-
-        if (result.reason === 'too-many-attempts') {
-          router.replace({
-            params: {
-              showLogin: '1',
-            },
-            pathname: authRoutes.index,
-          })
-        }
+        setUnlockError({
+          kind: 'pin',
+          reason: result.reason,
+        })
       } finally {
         setIsUnlockingPin(false)
       }
     },
-    [isLockedSession, router, triggerPinFailureFeedback, unlockWithPin],
+    [isLockedSession, triggerPinFailureFeedback, unlockWithPin],
   )
 
   useEffect(() => {
@@ -237,6 +291,7 @@ export default function UnlockScreen() {
       pinValueRef.current = nextPin
       setPin(nextPin)
       setHasPinFailureFeedback(false)
+      setUnlockError(null)
 
       if (nextPin.length === APP_PIN_LENGTH) {
         void submitPin(nextPin)
@@ -257,6 +312,7 @@ export default function UnlockScreen() {
     pinValueRef.current = pinValueRef.current.slice(0, -1)
     setPin(pinValueRef.current)
     setHasPinFailureFeedback(false)
+    setUnlockError(null)
   }, [isUnlockingBiometrics, isUnlockingPin])
 
   const handleClose = useCallback(() => {
@@ -274,11 +330,16 @@ export default function UnlockScreen() {
     !isUnlockingPin &&
     !isUnlockingBiometrics
   const canUsePin =
-    isPinUnlockEnabled && !isUnlockingPin && !isUnlockingBiometrics
+    isPinUnlockEnabled &&
+    !hasPinBlockingError &&
+    !isUnlockingPin &&
+    !isUnlockingBiometrics
 
   return (
     <ScreenContainer
-      contentProps={{ flex: 1, justify: 'flex-start', pb: '$0', pt: '$0' }}
+      bottomInset
+      contentProps={{ flex: 1, justify: 'flex-start', pb: '$4', pt: '$0' }}
+      scrollable
       testID="auth-unlock-screen"
     >
       <YStack flex={1} gap={cardGap} justify="flex-start" py="$3">
@@ -317,9 +378,38 @@ export default function UnlockScreen() {
               size="$4"
               style={{ textAlign: 'center' }}
             >
-              {t('auth.lock.pinLabel')}
+              {t('auth.lock.description')}
             </Paragraph>
           </YStack>
+
+          {currentErrorMessage ? (
+            <YStack gap="$3">
+              <SurfaceCard
+                accessibilityLiveRegion="polite"
+                accessibilityRole="alert"
+                accessible
+                bg="$red2"
+                borderColor="$red8"
+                gap="$2"
+                p="$3"
+                rounded={24}
+                testID="auth-error-text"
+              >
+                <Text color="$red11" fontWeight="700">
+                  {currentErrorMessage}
+                </Text>
+              </SurfaceCard>
+
+              <PrimaryButton
+                emphasis="outline"
+                onPress={handleClose}
+                testID="auth-unlock-login-again-button"
+                tone="neutral"
+              >
+                {t('auth.lock.loginAgainLabel')}
+              </PrimaryButton>
+            </YStack>
+          ) : null}
 
           <Animated.View
             style={{
@@ -338,6 +428,11 @@ export default function UnlockScreen() {
             >
               {Array.from({ length: APP_PIN_LENGTH }, (_, index) => (
                 <PinDot
+                  accessibilityLabel={getPinDotAccessibilityLabel(
+                    index + 1,
+                    index < pin.length,
+                    hasPinFailureFeedback,
+                  )}
                   filled={index < pin.length}
                   isError={hasPinFailureFeedback}
                   key={`pin-dot-${index + 1}`}
@@ -351,6 +446,14 @@ export default function UnlockScreen() {
             gap={keypadGap}
             style={{ alignSelf: 'center', width: '100%' }}
           >
+            <Paragraph
+              color="$color11"
+              size="$3"
+              style={{ textAlign: 'center' }}
+            >
+              {t('auth.lock.pinHelper')}
+            </Paragraph>
+
             {PIN_PAD_ROWS.map((row, rowIndex) => (
               <XStack
                 gap={keypadGap}
@@ -396,7 +499,7 @@ export default function UnlockScreen() {
                   if (item === 'delete') {
                     return (
                       <Button
-                        accessibilityLabel={t('auth.lock.retryLabel')}
+                        accessibilityLabel={t('auth.lock.deleteDigitLabel')}
                         accessibilityState={{
                           disabled: isUnlockingPin || isUnlockingBiometrics,
                         }}

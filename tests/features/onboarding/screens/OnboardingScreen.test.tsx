@@ -77,6 +77,10 @@ describe('onboarding screen', () => {
     fireEvent.press(screen.getByTestId('onboarding-next-button'))
     fireEvent.press(screen.getByTestId('onboarding-next-button'))
 
+    expect(screen.getByText('Fechar introdução')).toBeTruthy()
+    expect(
+      screen.getByText('Tudo pronto. Fecha esta introdução quando quiseres.'),
+    ).toBeTruthy()
     expect(screen.getByTestId('onboarding-close-button')).toBeTruthy()
     expect(screen.queryByTestId('onboarding-later-button')).toBeNull()
 

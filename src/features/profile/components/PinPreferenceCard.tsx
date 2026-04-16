@@ -39,6 +39,10 @@ export function PinPreferenceCard({
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [pin, setPin] = useState('')
+  const pinErrorText =
+    errorText === copy.invalidPinError ? errorText : undefined
+  const confirmPinErrorText =
+    errorText === copy.mismatchError ? errorText : undefined
 
   useEffect(() => {
     if (!enabled) {
@@ -100,7 +104,7 @@ export function PinPreferenceCard({
         {isEditing ? (
           <YStack gap="$3">
             <FormField
-              errorText={errorText ?? undefined}
+              errorText={pinErrorText}
               keyboardType="number-pad"
               label={copy.pinLabel}
               maxLength={APP_PIN_LENGTH}
@@ -116,6 +120,7 @@ export function PinPreferenceCard({
               value={pin}
             />
             <FormField
+              errorText={confirmPinErrorText}
               keyboardType="number-pad"
               label={copy.confirmPinLabel}
               maxLength={APP_PIN_LENGTH}

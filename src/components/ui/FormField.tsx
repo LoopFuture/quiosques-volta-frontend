@@ -96,6 +96,7 @@ export const FormField = forwardRef<ElementRef<typeof Input>, FormFieldProps>(
               accessibilityHint={supportingText}
               accessibilityState={{
                 disabled,
+                invalid: Boolean(errorText),
               }}
               color={disabled ? '$color10' : '$color'}
               disabled={disabled}
@@ -133,7 +134,13 @@ export const FormField = forwardRef<ElementRef<typeof Input>, FormFieldProps>(
 
         {errorText ? (
           <ToneScope tone={fieldTone}>
-            <Text color="$color11" fontSize={15} fontWeight="700">
+            <Text
+              accessibilityLiveRegion="polite"
+              accessibilityRole="alert"
+              color="$color11"
+              fontSize={15}
+              fontWeight="700"
+            >
               {errorText}
             </Text>
           </ToneScope>

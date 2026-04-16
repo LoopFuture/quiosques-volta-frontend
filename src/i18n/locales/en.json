@@ -9,6 +9,7 @@
         "cancelLabel": "Cancel",
         "cancelledError": "Biometric verification was cancelled. Try again or log in again.",
         "closeLabel": "Close unlock",
+        "deleteDigitLabel": "Delete last PIN digit",
         "description": "Use biometrics or your app PIN to reopen your account on this phone.",
         "failedError": "We couldn't confirm your biometrics. Try again or log in again.",
         "invalidPinError": "That app PIN wasn't right. Try again.",
@@ -20,6 +21,9 @@
         "pinHelper": "Enter the 4-digit app PIN for this phone.",
         "pinLabel": "App PIN",
         "pinNotConfiguredError": "App PIN is not set on this device. Log in again to continue.",
+        "pinProgressEmpty": "PIN digit {{currentDigit}} of {{totalDigits}} empty",
+        "pinProgressEntered": "PIN digit {{currentDigit}} of {{totalDigits}} entered",
+        "pinProgressError": "PIN digit {{currentDigit}} of {{totalDigits}} error",
         "promptMessage": "Use Face ID or fingerprint for Volta",
         "retryLabel": "Try again",
         "tooManyPinAttemptsError": "Too many wrong PIN attempts. Log in again to continue.",
@@ -29,12 +33,14 @@
       "loginLabel": "Log in",
       "registerLabel": "Register",
       "registerPrompt": "Don't have an account yet?",
-      "subtitle": "Welcome back to the sustainable future",
+      "subtitle": "Access your returns and balance quickly on this phone.",
       "titleLeading": "Volta",
       "titleTrailing": "Portugal"
     },
     "onboarding": {
       "actions": {
+        "closeLabel": "Close introduction",
+        "closeHelper": "You're all set. Close this introduction when you're ready.",
         "finishHelper": "You're all set. You can revisit this introduction later in Profile.",
         "getStartedLabel": "Enter app",
         "laterLabel": "Skip introduction",
@@ -217,32 +223,32 @@
       },
       "map": {
         "comingSoon": {
-          "actionHint": "What you can do now",
-          "description": "Map search is not available in the app yet. Until then, you can review expected Volta locations and open your code before you reach the machine.",
+          "actionHint": "What you will find here",
+          "description": "Soon you will be able to see the Volta map and available locations here before you leave for your next return. Until then, use your code now so you reach the machine ready to identify yourself.",
           "statusLabel": "Map coming soon",
-          "title": "Use your code now. The map comes next."
+          "title": "The Volta map and locations will appear here"
         },
         "emptyState": {
-          "description": "Search the map to see the closest locations and find the best spot for your next return.",
-          "title": "Volta machines near you will appear here"
+          "description": "We do not have nearby Volta locations to show for this area yet. Meanwhile, keep your code ready before you reach the machine.",
+          "title": "We have not found nearby locations yet"
         },
         "errors": {
-          "description": "We couldn't prepare the Volta location preview right now.",
-          "recoveryHint": "Try again to review the expected locations and keep using your code at the machine.",
+          "description": "We couldn't prepare the Volta location list right now.",
+          "recoveryHint": "Try again to review the expected locations before your next return.",
           "title": "Map unavailable"
         },
         "fallback": {
           "actionLabel": "Show my code",
-          "description": "Identify yourself at the machine with your Volta code so you do not need to stop and search when you arrive.",
+          "description": "Identify yourself at the machine with your Volta code so you do not need to stop when you reach the return point.",
+          "statusLabel": "Code ready",
           "title": "Be ready for your next return"
         },
         "nearby": {
-          "description": "Explore the map and choose the most convenient machine for your next return.",
-          "searchActionLabel": "Search Volta machines",
-          "title": "Find a Volta machine"
+          "description": "Check Volta locations here when the map becomes available.",
+          "title": "Volta locations"
         },
         "preview": {
-          "description": "Upcoming Volta locations will appear here with a clear status before the full map arrives.",
+          "description": "Expected Volta locations will appear here with a clear status when this feature is ready.",
           "title": "Volta location preview",
           "status": {
             "active": "Available",

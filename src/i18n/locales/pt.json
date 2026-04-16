@@ -9,6 +9,7 @@
         "cancelLabel": "Cancelar",
         "cancelledError": "A verificação biométrica foi cancelada. Tenta novamente ou entra de novo.",
         "closeLabel": "Fechar desbloqueio",
+        "deleteDigitLabel": "Apagar o último dígito do PIN",
         "description": "Usa biometria ou o teu PIN da app para voltares a abrir a tua conta neste telemóvel.",
         "failedError": "Não foi possível confirmar a tua biometria. Tenta novamente ou entra de novo.",
         "invalidPinError": "Esse PIN da app não está correto. Tenta novamente.",
@@ -20,21 +21,26 @@
         "pinHelper": "Introduz o PIN de 4 dígitos desta app neste telemóvel.",
         "pinLabel": "PIN da app",
         "pinNotConfiguredError": "O PIN da app não está configurado neste dispositivo. Entra de novo para continuar.",
+        "pinProgressEmpty": "Dígito {{currentDigit}} de {{totalDigits}} do PIN vazio",
+        "pinProgressEntered": "Dígito {{currentDigit}} de {{totalDigits}} do PIN introduzido",
+        "pinProgressError": "Erro no dígito {{currentDigit}} de {{totalDigits}} do PIN",
         "promptMessage": "Usa Face ID ou impressão digital para a Volta",
         "retryLabel": "Tentar novamente",
-        "title": "Desbloquear a Volta",
         "tooManyPinAttemptsError": "Demasiadas tentativas erradas de PIN. Entra de novo para continuar.",
+        "title": "Desbloquear a Volta",
         "unlockWithPinLabel": "Desbloquear com PIN"
       },
       "loginLabel": "Entrar",
       "registerLabel": "Regista-te",
       "registerPrompt": "Ainda não tens conta?",
-      "subtitle": "Bem-vindo de volta ao futuro sustentável",
+      "subtitle": "Acede rapidamente às tuas devoluções e ao teu saldo neste telemóvel.",
       "titleLeading": "Volta",
       "titleTrailing": "Portugal"
     },
     "onboarding": {
       "actions": {
+        "closeLabel": "Fechar introdução",
+        "closeHelper": "Tudo pronto. Fecha esta introdução quando quiseres.",
         "finishHelper": "Tudo pronto. Podes rever esta introdução mais tarde no Perfil.",
         "getStartedLabel": "Entrar na app",
         "laterLabel": "Saltar introdução",
@@ -217,32 +223,32 @@
       },
       "map": {
         "comingSoon": {
-          "actionHint": "O que podes fazer agora",
-          "description": "A pesquisa no mapa ainda não está disponível na app. Enquanto isso, podes confirmar pontos Volta previstos e abrir o teu código antes de chegares à máquina.",
+          "actionHint": "O que vais encontrar aqui",
+          "description": "Em breve vais poder ver aqui o mapa Volta e os pontos disponíveis antes de saíres para a próxima devolução. Até lá, usa já o teu código para chegares à máquina pronto a identificar-te.",
           "statusLabel": "Mapa em breve",
-          "title": "Usa já o teu código. O mapa vem a seguir."
+          "title": "O mapa e os pontos Volta vão aparecer aqui"
         },
         "emptyState": {
-          "description": "Procura no mapa para veres os pontos mais próximos e encontrares o melhor local para a tua próxima devolução.",
-          "title": "As máquinas Volta perto de ti vão aparecer aqui"
+          "description": "Ainda não temos pontos Volta para mostrar nesta zona. Entretanto, mantém o teu código pronto antes de chegares à máquina.",
+          "title": "Ainda não encontrámos pontos próximos"
         },
         "errors": {
-          "description": "Não foi possível preparar a pré-visualização dos pontos Volta agora.",
-          "recoveryHint": "Tenta novamente para veres os locais previstos e continua a usar o teu código na máquina.",
+          "description": "Não foi possível preparar a lista de pontos Volta agora.",
+          "recoveryHint": "Tenta novamente para veres os locais previstos antes da próxima devolução.",
           "title": "Mapa indisponível"
         },
         "fallback": {
           "actionLabel": "Mostrar código",
-          "description": "Identifica-te logo na máquina com o teu código Volta e evita parar para procurar quando chegares.",
+          "description": "Identifica-te logo na máquina com o teu código Volta e evita parar quando chegares ao ponto de devolução.",
+          "statusLabel": "Código pronto",
           "title": "Identificação pronta para a próxima devolução"
         },
         "nearby": {
-          "description": "Explora o mapa e escolhe a máquina mais conveniente para a tua próxima devolução.",
-          "searchActionLabel": "Procurar máquinas Volta",
-          "title": "Encontra uma máquina Volta"
+          "description": "Consulta aqui os pontos Volta quando o mapa estiver disponível.",
+          "title": "Pontos Volta"
         },
         "preview": {
-          "description": "Os próximos pontos Volta vão aparecer aqui com estado claro antes do mapa completo chegar.",
+          "description": "Os pontos Volta previstos vão aparecer aqui com estado claro quando esta funcionalidade estiver pronta.",
           "title": "Pré-visualização de pontos Volta",
           "status": {
             "active": "Disponível",

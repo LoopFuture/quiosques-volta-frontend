@@ -18,7 +18,7 @@ describe('map screen', () => {
     jest.clearAllMocks()
   })
 
-  it('renders the map fallback without the preview card', async () => {
+  it('renders the coming soon message and routes the code action to barcode', async () => {
     renderWithProvider(<MapScreen />)
 
     expect(screen.getByTestId('map-screen')).toBeTruthy()
@@ -26,12 +26,18 @@ describe('map screen', () => {
     expect(await screen.findByTestId('map-coming-soon-card')).toBeTruthy()
     expect(screen.getByText('Mapa em breve')).toBeTruthy()
     expect(
-      screen.getByText('Usa já o teu código. O mapa vem a seguir.'),
+      screen.getByText('O mapa e os pontos Volta vão aparecer aqui'),
     ).toBeTruthy()
-    expect(screen.getByText('Mostrar código')).toBeTruthy()
+    expect(
+      screen.getByText(
+        'Em breve vais poder ver aqui o mapa Volta e os pontos disponíveis antes de saíres para a próxima devolução. Até lá, usa já o teu código para chegares à máquina pronto a identificar-te.',
+      ),
+    ).toBeTruthy()
+    expect(screen.getByTestId('map-screen-scroll-view')).toBeTruthy()
     expect(screen.queryByTestId('map-preview-card')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Mostrar código' })).toBeTruthy()
 
-    fireEvent.press(screen.getByText('Mostrar código'))
+    fireEvent.press(screen.getByRole('button', { name: 'Mostrar código' }))
 
     expect(mockRouterPush).toHaveBeenCalledWith(barcodeRoutes.index)
   })

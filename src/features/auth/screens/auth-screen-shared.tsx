@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Paragraph, SizableText, Text, XStack, YStack, useTheme } from 'tamagui'
 import AppLogo from '@/assets/images/logo.svg'
 import { useAppPreferences } from '@/hooks/useAppPreferences'
-import { brandBlack } from '@/themes'
 
 export function getUnlockErrorMessage(
   reason: 'cancelled' | 'failed' | 'not-available' | 'not-enrolled',
@@ -48,14 +47,17 @@ export function useAuthSurfaceMetrics() {
   const theme = useTheme()
   const { resolvedTheme } = useAppPreferences()
   const insets = useSafeAreaInsets()
-  const { width } = useWindowDimensions()
-  const isCompactWidth = width < 360
+  const { fontScale, width } = useWindowDimensions()
+  const prefersExpandedTextLayout = fontScale > 1.15
+  const isCompactWidth = width < 360 || prefersExpandedTextLayout
 
   return {
-    heroLogoColor: resolvedTheme === 'dark' ? theme.accent10.val : brandBlack,
+    heroLogoColor:
+      resolvedTheme === 'dark' ? theme.accent10.val : theme.color12.val,
     heroLogoSize: isCompactWidth ? 88 : 104,
-    heroTitleFontSize: isCompactWidth ? 44 : 56,
+    heroTitleFontSize: isCompactWidth ? 40 : 56,
     insets,
+    prefersExpandedTextLayout,
     subtitleMaxWidth: Math.max(Math.min(width - 32, 360), 240),
   }
 }
@@ -65,6 +67,7 @@ export function AuthHeader({
   heroLogoColor,
   heroLogoSize,
   heroTitleFontSize,
+  prefersExpandedTextLayout,
   subtitleMaxWidth,
   titleLeading,
   titleTrailing,
@@ -73,6 +76,7 @@ export function AuthHeader({
   heroLogoColor: string
   heroLogoSize: number
   heroTitleFontSize: number
+  prefersExpandedTextLayout: boolean
   subtitleMaxWidth: number
   titleLeading: string
   titleTrailing: string
@@ -88,11 +92,17 @@ export function AuthHeader({
       </YStack>
 
       <YStack gap="$3" items="center">
-        <XStack gap="$2" flexWrap="wrap" justify="center">
+        <XStack
+          gap="$2"
+          flexWrap="wrap"
+          justify="center"
+          maxWidth={subtitleMaxWidth}
+        >
           <Text
             fontSize={heroTitleFontSize}
             fontWeight="900"
             letterSpacing={-2}
+            textAlign="center"
           >
             {titleLeading}
           </Text>
@@ -101,6 +111,7 @@ export function AuthHeader({
             fontSize={heroTitleFontSize}
             fontWeight="900"
             letterSpacing={-2}
+            textAlign="center"
           >
             {titleTrailing}
           </Text>
@@ -108,7 +119,7 @@ export function AuthHeader({
 
         <Paragraph
           color="$color11"
-          size="$8"
+          size={prefersExpandedTextLayout ? '$7' : '$8'}
           style={{ maxWidth: subtitleMaxWidth, textAlign: 'center' }}
         >
           {description}
