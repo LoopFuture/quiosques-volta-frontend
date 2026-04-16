@@ -94,10 +94,8 @@ export const FormField = forwardRef<ElementRef<typeof Input>, FormFieldProps>(
               ref={ref}
               accessibilityLabel={accessibilityLabel ?? label}
               accessibilityHint={supportingText}
-              accessibilityState={{
-                disabled,
-                invalid: Boolean(errorText),
-              }}
+              accessibilityState={{ disabled }}
+              aria-invalid={Boolean(errorText)}
               color={disabled ? '$color10' : '$color'}
               disabled={disabled}
               flex={1}

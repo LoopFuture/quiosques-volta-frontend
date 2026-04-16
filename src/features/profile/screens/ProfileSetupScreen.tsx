@@ -519,7 +519,6 @@ export function ProfileSetupScreen() {
       <YStack gap="$4" testID={`profile-setup-step-${currentStepId}`}>
         <Text
           accessibilityLiveRegion="polite"
-          accessibilityRole="status"
           style={visuallyHiddenTextStyle}
           testID="profile-setup-step-announcement"
         >

@@ -31,7 +31,6 @@ export function StatusTimeline({ items }: StatusTimelineProps) {
 
         return (
           <XStack
-            accessibilityRole="listitem"
             accessibilityLabel={accessibilityLabel}
             accessibilityState={
               item.state === 'current' ? { selected: true } : undefined

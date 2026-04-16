@@ -96,13 +96,13 @@ export function AuthHeader({
           gap="$2"
           flexWrap="wrap"
           justify="center"
-          maxWidth={subtitleMaxWidth}
+          style={{ maxWidth: subtitleMaxWidth }}
         >
           <Text
             fontSize={heroTitleFontSize}
             fontWeight="900"
             letterSpacing={-2}
-            textAlign="center"
+            style={{ textAlign: 'center' }}
           >
             {titleLeading}
           </Text>
@@ -111,7 +111,7 @@ export function AuthHeader({
             fontSize={heroTitleFontSize}
             fontWeight="900"
             letterSpacing={-2}
-            textAlign="center"
+            style={{ textAlign: 'center' }}
           >
             {titleTrailing}
           </Text>

@@ -361,7 +361,7 @@ export default function OnboardingScreen({
 
       <YStack
         flex={shouldUseScrollableLayout ? undefined : 1}
-        minHeight={shouldUseScrollableLayout ? undefined : 380}
+        style={shouldUseScrollableLayout ? undefined : { minHeight: 380 }}
       >
         <Animated.FlatList
           ref={flatListRef}
