@@ -24,6 +24,7 @@ import {
   getDefaultDevicePrivacySettings,
   getProfileSetupSeedState,
   getProfileSetupSnapshotFromProfile,
+  payoutAccountSchema,
   payoutAccountInputSchema,
   serializeProfilePatchRequest,
   profilePatchRequestSchema,
@@ -551,6 +552,27 @@ describe('profile models and forms', () => {
         rail: 'sepa',
       },
     })
+    expect(
+      payoutAccountSchema.parse({
+        accountHolderName: '   ',
+        ibanMasked: 'PT50************90123',
+        rail: 'spin',
+      }),
+    ).toEqual({
+      ibanMasked: 'PT50************90123',
+      rail: 'sepa',
+    })
+    expect(
+      serializeProfilePatchRequest({
+        preferences: {
+          alertsEnabled: false,
+        },
+      }),
+    ).toEqual({
+      preferences: {
+        alertsEnabled: false,
+      },
+    })
     expect(profilePatchRequestSchema.safeParse({}).success).toBe(false)
   })
 
@@ -685,6 +707,45 @@ describe('profile models and forms', () => {
       personal: {
         email: 'jwt-email@volta.pt',
         name: '',
+        nif: '123456789',
+        phoneNumber: '+351911223344',
+      },
+      preferences: {
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      },
+      alertsEnabled: true,
+    })
+  })
+
+  it('falls back from blank identity names and default device settings in setup snapshots', () => {
+    const blankIdentitySeededProfile = getProfileSetupSeedState({
+      identity: {
+        email: 'jwt-email@volta.pt',
+        name: '   ',
+      },
+      profile: profileResponseSchema.parse({
+        ...profile,
+        personal: {
+          ...profile.personal,
+          name: 'Profile Name',
+        },
+        payoutAccount: null,
+      }),
+    }).profile
+
+    expect(blankIdentitySeededProfile.personal.name).toBe('Profile Name')
+    expect(
+      getProfileSetupSnapshotFromProfile(blankIdentitySeededProfile),
+    ).toEqual({
+      payments: {
+        accountHolderName: 'Profile Name',
+        iban: '',
+      },
+      personal: {
+        email: 'jwt-email@volta.pt',
+        name: 'Profile Name',
         nif: '123456789',
         phoneNumber: '+351911223344',
       },

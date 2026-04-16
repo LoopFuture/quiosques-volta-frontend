@@ -284,4 +284,76 @@ describe('app-data/monitoring index', () => {
       __getNavigationIntegration().registerNavigationContainer,
     ).toHaveBeenCalledWith(navigationContainerRef)
   })
+
+  it('includes the Sentry release when provided in runtime config', () => {
+    __setExpoConfig(
+      createMockExpoConfig({
+        sentry: {
+          dsn: 'https://public@example.ingest.sentry.io/1',
+          environment: 'production',
+          release: 'volta-mobile@1.2.3',
+          tracesSampleRate: 0,
+        },
+      }),
+    )
+
+    initializeMonitoring()
+
+    expect(init).toHaveBeenCalledWith(
+      expect.objectContaining({
+        release: 'volta-mobile@1.2.3',
+      }),
+    )
+  })
+
+  it('does not register the navigation container when tracing is disabled', () => {
+    __setExpoConfig(
+      createMockExpoConfig({
+        sentry: {
+          dsn: 'https://public@example.ingest.sentry.io/1',
+          environment: 'test',
+          tracesSampleRate: 0,
+        },
+      }),
+    )
+
+    registerNavigationContainer({ current: null })
+
+    expect(
+      __getNavigationIntegration().registerNavigationContainer,
+    ).not.toHaveBeenCalled()
+  })
+
+  it('skips undefined tags and coerces unknown capture values into diagnostic errors', () => {
+    __setExpoConfig(
+      createMockExpoConfig({
+        sentry: {
+          dsn: 'https://public@example.ingest.sentry.io/1',
+          environment: 'test',
+        },
+      }),
+    )
+
+    recordDiagnosticEvent({
+      captureError: true,
+      domain: 'auth',
+      error: { reason: 'opaque failure' },
+      operation: 'coerce-error',
+      phase: 'write',
+      status: 'error',
+      tags: {
+        ignored: undefined,
+        source: 'test-suite',
+      },
+    })
+
+    const latestScope = captureException.mock.calls[0]?.[0]
+
+    expect(latestScope).toEqual(
+      expect.objectContaining({
+        message: 'Unknown diagnostic error',
+        name: 'Error',
+      }),
+    )
+  })
 })

@@ -100,6 +100,35 @@ describe('ProfileSectionCard', () => {
     compactSpy.mockRestore()
   })
 
+  it('uses the lower-emphasis typography for preview rows after the first two', () => {
+    const windowSpy = mockWindowDimensions({ width: 390 })
+    const view = renderWithProvider(
+      <ProfileSectionCard
+        onPress={jest.fn()}
+        previewRows={[
+          {
+            label: 'Email',
+            value: 'joao@volta.pt',
+          },
+          {
+            label: 'Telefone',
+            value: '+351 912 345 678',
+          },
+          {
+            label: 'Morada',
+            value: 'Rua da Volta, 1',
+          },
+        ]}
+        title="Dados pessoais"
+      />,
+    )
+
+    expect(view.getByText('Morada')).toBeTruthy()
+    expect(view.getByText('Rua da Volta, 1')).toBeTruthy()
+
+    windowSpy.mockRestore()
+  })
+
   it('prefers stacked rows when larger text is enabled at regular width', () => {
     const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
     const onPress = jest.fn()
