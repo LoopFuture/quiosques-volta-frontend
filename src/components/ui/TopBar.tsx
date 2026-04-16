@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import AppLogo from '@/assets/images/logo.svg'
 import { Button, Text, XStack, YStack, useTheme, useThemeName } from 'tamagui'
 import { useOfflineStatus } from '@/hooks/useOfflineStatus'
-import { brandBlack } from '@/themes'
 import { getPlatformShadowProps } from './platformShadows'
 import { ToneScope } from './tone'
 
@@ -139,7 +138,7 @@ export function TopBar(props: TopBarProps) {
   const prefersExpandedTextLayout = fontScale > 1.15
   const isCompactWidth = width < 360 || prefersExpandedTextLayout
   const isDarkTheme = themeName.startsWith('dark')
-  const homeLogoColor = isDarkTheme ? theme.accent10.val : brandBlack
+  const homeLogoColor = isDarkTheme ? theme.accent10.val : theme.color12.val
   const offlineLabel = t('topBar.offline')
 
   if (props.variant === 'home') {
@@ -169,7 +168,7 @@ export function TopBar(props: TopBarProps) {
               fontSize={isCompactWidth ? 24 : 28}
               fontWeight="900"
               lineHeight={isCompactWidth ? 30 : 34}
-              numberOfLines={prefersExpandedTextLayout ? 2 : 1}
+              numberOfLines={2}
               style={{ flexShrink: 1 }}
             >
               {props.title}

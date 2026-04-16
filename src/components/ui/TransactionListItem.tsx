@@ -33,9 +33,16 @@ export function TransactionListItem({
   title,
 }: TransactionListItemProps) {
   const { fontScale, width } = useWindowDimensions()
+  const hasLongTitle = title.length > 32
+  const hasLongSubtitle = (subtitle?.length ?? 0) > 28
   const hasLongBadgeLabel = (badgeLabel?.length ?? 0) > 18
   const hasVeryLongBadgeLabel = (badgeLabel?.length ?? 0) > 26
-  const isCompactWidth = width < 380 || fontScale > 1.15
+  const shouldUseStackedLayout =
+    width < 420 ||
+    fontScale > 1.05 ||
+    hasLongTitle ||
+    hasLongSubtitle ||
+    hasVeryLongBadgeLabel
 
   const iconNode = (
     <XStack
@@ -53,22 +60,23 @@ export function TransactionListItem({
   const amountNode = (
     <YStack
       gap="$1.5"
-      items={isCompactWidth ? 'flex-start' : 'flex-end'}
+      items={shouldUseStackedLayout ? 'flex-start' : 'flex-end'}
       style={{
         flexShrink: 1,
-        maxWidth: isCompactWidth ? '100%' : '46%',
+        maxWidth: shouldUseStackedLayout ? '100%' : '50%',
         minWidth: 0,
+        width: shouldUseStackedLayout ? '100%' : undefined,
       }}
     >
       <ToneScope tone={amountTone}>
         <Text
           color="$color"
-          fontSize={isCompactWidth ? 22 : 24}
+          fontSize={shouldUseStackedLayout ? 22 : 24}
           fontWeight="900"
-          lineHeight={isCompactWidth ? 27 : 29}
+          lineHeight={shouldUseStackedLayout ? 27 : 29}
           style={{
             fontVariant: ['tabular-nums'],
-            textAlign: isCompactWidth ? 'left' : 'right',
+            textAlign: shouldUseStackedLayout ? 'left' : 'right',
           }}
         >
           {amount}
@@ -84,7 +92,7 @@ export function TransactionListItem({
             py={hasLongBadgeLabel ? '$0.75' : '$1'}
             rounded={999}
             style={{
-              alignSelf: isCompactWidth ? 'flex-start' : 'flex-end',
+              alignSelf: shouldUseStackedLayout ? 'flex-start' : 'flex-end',
               maxWidth: '100%',
             }}
           >
@@ -93,7 +101,7 @@ export function TransactionListItem({
               fontSize={hasLongBadgeLabel ? 11 : 12}
               fontWeight="800"
               lineHeight={hasLongBadgeLabel ? 15 : 16}
-              numberOfLines={isCompactWidth ? 3 : 2}
+              numberOfLines={shouldUseStackedLayout ? undefined : 2}
               style={{ flexShrink: 1, textAlign: 'center' }}
             >
               {badgeLabel}
@@ -104,7 +112,7 @@ export function TransactionListItem({
     </YStack>
   )
 
-  const content = isCompactWidth ? (
+  const content = shouldUseStackedLayout ? (
     <YStack gap="$3">
       <XStack gap="$3" items="flex-start">
         {iconNode}
@@ -115,7 +123,7 @@ export function TransactionListItem({
             fontSize={17}
             fontWeight="800"
             lineHeight={22}
-            numberOfLines={4}
+            numberOfLines={undefined}
           >
             {title}
           </Text>
@@ -124,7 +132,7 @@ export function TransactionListItem({
               color="$color11"
               fontSize={15}
               lineHeight={20}
-              numberOfLines={3}
+              numberOfLines={undefined}
             >
               {subtitle}
             </Text>

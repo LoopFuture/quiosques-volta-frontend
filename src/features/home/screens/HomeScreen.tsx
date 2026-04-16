@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { BackHandler, Platform } from 'react-native'
+import { BackHandler, Platform, useWindowDimensions } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { Clock3 } from '@tamagui/lucide-icons'
@@ -49,8 +49,16 @@ function HomeSummaryRow({
   label: string
   value: string
 }) {
+  const { fontScale, width } = useWindowDimensions()
+  const shouldStack = width < 380 || fontScale > 1.1
+
   return (
-    <XStack items="center" justify="space-between" gap="$4">
+    <XStack
+      items={shouldStack ? 'flex-start' : 'center'}
+      flexWrap={shouldStack ? 'wrap' : 'nowrap'}
+      justify="space-between"
+      gap="$4"
+    >
       <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
         <Text color="$color" fontSize={16} fontWeight="800" lineHeight={21}>
           {label}
@@ -60,10 +68,13 @@ function HomeSummaryRow({
         </Text>
       </YStack>
       <Text
+        adjustsFontSizeToFit={!shouldStack}
         color="$color"
         fontSize={26}
         fontWeight="900"
         lineHeight={30}
+        minimumFontScale={shouldStack ? undefined : 0.9}
+        numberOfLines={shouldStack ? undefined : 1}
         style={{ fontVariant: ['tabular-nums'] }}
       >
         {value}
@@ -194,6 +205,18 @@ export default function HomeScreen() {
     isRefetching,
     refetch,
   } = useHomeScreenQuery()
+  const recentActivityItems = homeScreenState?.recentActivity.map(
+    (movement) => ({
+      id: movement.id,
+      amount: formatWalletAmount(movement.amount.amountMinor, i18n.language),
+      amountTone: getWalletTransactionAmountTone(movement),
+      badgeLabel: getWalletMovementBadgeLabel(t, movement),
+      badgeTone: getWalletTransactionBadgeTone(movement),
+      iconType: movement.type,
+      subtitle: getWalletMovementSubtitle(i18n.language, movement),
+      title: getWalletMovementTitle(t, movement),
+    }),
+  )
 
   const handleRefresh = () => {
     void refetch()
@@ -243,6 +266,7 @@ export default function HomeScreen() {
 
   return (
     <ScreenContainer
+      decorativeBackground={false}
       header={
         <TabTopBar
           homeTitle={homeScreenState?.greeting.displayName}
@@ -318,43 +342,31 @@ export default function HomeScreen() {
             title={t('tabScreens.home.recentActivity.title')}
             description={t('tabScreens.home.recentActivity.description')}
           >
-            {homeScreenState.recentActivity.length > 0 ? (
+            {recentActivityItems && recentActivityItems.length > 0 ? (
               <YStack gap={10}>
-                {homeScreenState.recentActivity.map((movement) => (
+                {recentActivityItems.map((movement) => (
                   <TransactionListItem
                     key={movement.id}
                     accessibilityHint={t(
                       'tabScreens.home.recentActivity.openMovementHint',
                     )}
                     accessibilityLabel={buildMovementAccessibilityLabel({
-                      amount: formatWalletAmount(
-                        movement.amount.amountMinor,
-                        i18n.language,
-                      ),
-                      badgeLabel: getWalletMovementBadgeLabel(t, movement),
-                      subtitle: getWalletMovementSubtitle(
-                        i18n.language,
-                        movement,
-                      ),
-                      title: getWalletMovementTitle(t, movement),
+                      amount: movement.amount,
+                      badgeLabel: movement.badgeLabel,
+                      subtitle: movement.subtitle,
+                      title: movement.title,
                     })}
-                    amount={formatWalletAmount(
-                      movement.amount.amountMinor,
-                      i18n.language,
-                    )}
-                    amountTone={getWalletTransactionAmountTone(movement)}
-                    badgeLabel={getWalletMovementBadgeLabel(t, movement)}
-                    badgeTone={getWalletTransactionBadgeTone(movement)}
+                    amount={movement.amount}
+                    amountTone={movement.amountTone}
+                    badgeLabel={movement.badgeLabel}
+                    badgeTone={movement.badgeTone}
                     framed={false}
-                    icon={<WalletMovementIcon type={movement.type} />}
+                    icon={<WalletMovementIcon type={movement.iconType} />}
                     onPress={() =>
                       router.push(walletRoutes.movementDetail(movement.id))
                     }
-                    subtitle={getWalletMovementSubtitle(
-                      i18n.language,
-                      movement,
-                    )}
-                    title={getWalletMovementTitle(t, movement)}
+                    subtitle={movement.subtitle}
+                    title={movement.title}
                   />
                 ))}
               </YStack>
