@@ -58,5 +58,10 @@ describe('ProfileSummaryScreen', () => {
       ),
     ).toBeTruthy()
     expect(screen.getByText(/12,50/)).toBeTruthy()
+    expect(
+      screen.getByText(
+        i18n.t('tabScreens.profile.summary.sections.totals.title'),
+      ),
+    ).toBeTruthy()
   })
 })

@@ -157,6 +157,8 @@ describe('profile models and forms', () => {
     )
     expect(summarySections.hero.headlineValue).toContain('1,50')
     expect(summarySections.hero.supportingText).toContain('2023')
+    expect(summarySections.totals.title).toBe('Totais')
+    expect(summarySections.totals.stats).toHaveLength(3)
     expect(heroStats).toHaveLength(3)
     expect(formatProfileMemberSince('pt', profile.memberSince)).toContain(
       '2023',

@@ -3,6 +3,7 @@ import { YStack } from 'tamagui'
 import { QueryErrorState, SkeletonBlock, SurfaceCard } from '@/components/ui'
 import { ProfileHeroCard } from '../components/ProfileHeroCard'
 import { ProfileDetailScreenFrame } from '../components/ProfileDetailScreenFrame'
+import { ProfileSummaryTotalsCard } from '../components/ProfileSummaryTotalsCard'
 import { useProfileQuery } from '../hooks'
 import { getProfileSummarySections } from '../presentation'
 
@@ -20,6 +21,25 @@ function ProfileSummarySkeleton() {
           <SkeletonBlock height={16} width="70%" />
           <SkeletonBlock height={20} width="100%" />
           <SkeletonBlock height={20} width="100%" />
+        </YStack>
+      </SurfaceCard>
+      <SurfaceCard gap="$3.5" p="$4.5">
+        <YStack gap="$1.5">
+          <SkeletonBlock height={20} width="28%" />
+          <SkeletonBlock height={14} width="72%" />
+        </YStack>
+        <YStack gap="$2">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <YStack
+              key={`profile-summary-totals-skeleton-${index}`}
+              gap="$2"
+              py="$2.5"
+            >
+              <SkeletonBlock height={14} width={index === 0 ? '34%' : '46%'} />
+              <SkeletonBlock height={20} width={index === 1 ? '18%' : '24%'} />
+              {index === 1 ? <SkeletonBlock height={12} width="78%" /> : null}
+            </YStack>
+          ))}
         </YStack>
       </SurfaceCard>
     </YStack>
@@ -66,11 +86,15 @@ export default function ProfileSummaryScreen() {
       ) : (
         <YStack gap="$4">
           <ProfileHeroCard
-            detailStats={summarySections.hero.detailStats}
             headlineLabel={summarySections.hero.headlineLabel}
             headlineValue={summarySections.hero.headlineValue}
             supportingText={summarySections.hero.supportingText}
             title={summarySections.hero.title}
+          />
+          <ProfileSummaryTotalsCard
+            description={summarySections.totals.description}
+            stats={summarySections.totals.stats}
+            title={summarySections.totals.title}
           />
         </YStack>
       )}

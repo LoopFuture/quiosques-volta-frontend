@@ -46,8 +46,8 @@ export function WalletReceiptCard({
   testID,
   title,
 }: WalletReceiptCardProps) {
-  const { width } = useWindowDimensions()
-  const isCompactWidth = width < 360
+  const { fontScale, width } = useWindowDimensions()
+  const isCompactWidth = width < 360 || fontScale > 1.15
 
   return (
     <SurfaceCard gap="$3.5" p="$4.5" testID={testID}>
@@ -64,7 +64,12 @@ export function WalletReceiptCard({
       <SeparatedStack separatorSpacing="$0">
         {items.map((item, index) =>
           isCompactWidth ? (
-            <YStack key={`${item.label}-${index}`} gap="$1.5" py="$2.5">
+            <YStack
+              key={`${item.label}-${index}`}
+              gap="$1.5"
+              py="$2.5"
+              style={{ minWidth: 0 }}
+            >
               <YStack gap="$1">
                 <Text color="$color10" fontSize={14} fontWeight="700">
                   {item.label}

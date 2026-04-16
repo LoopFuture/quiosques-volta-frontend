@@ -478,7 +478,7 @@
               "headlineLabel": "Desde que aderiste",
               "pendingTransferActive": "Há uma transferência a caminho para o teu IBAN",
               "pendingTransferEmpty": "Não tens transferências por concluir",
-              "supportingText": "Membro desde {{memberSince}}. Transferências em processamento: {{pendingTransfers}}.",
+              "supportingText": "Membro desde {{memberSince}}.",
               "title": "Créditos recebidos"
             },
             "totals": {
@@ -514,6 +514,7 @@
         "payments": {
           "accountHolderNameHelper": "Usa o nome registado nesta conta bancária.",
           "accountHolderNameLabel": "Nome do titular",
+          "currentIbanHelper": "IBAN atual: {{iban}}. Introduz o IBAN completo para guardar alterações.",
           "description": "Gere a conta onde recebes os teus reembolsos.",
           "ibanHelper": "Usado para enviar pagamentos concluídos e reembolsos.",
           "ibanLabel": "IBAN associado",

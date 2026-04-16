@@ -478,7 +478,7 @@
               "headlineLabel": "Since you joined",
               "pendingTransferActive": "You still have a transfer on the way to your IBAN",
               "pendingTransferEmpty": "You have no transfers left to finish",
-              "supportingText": "Member since {{memberSince}}. Transfers in progress: {{pendingTransfers}}.",
+              "supportingText": "Member since {{memberSince}}.",
               "title": "Credits received"
             },
             "totals": {
@@ -514,6 +514,7 @@
         "payments": {
           "accountHolderNameHelper": "Use the name registered on this bank account.",
           "accountHolderNameLabel": "Account holder name",
+          "currentIbanHelper": "Current IBAN: {{iban}}. Enter the full IBAN to save changes.",
           "description": "Manage where refunds are paid.",
           "ibanHelper": "Used to send completed payments and refunds.",
           "ibanLabel": "Linked IBAN",

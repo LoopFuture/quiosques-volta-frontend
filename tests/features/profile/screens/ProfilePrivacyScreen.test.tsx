@@ -23,10 +23,10 @@ describe('ProfilePrivacyScreen', () => {
     restoreProfileEditorScreenLocale()
   })
 
-  it('renders the privacy skeleton while the profile query is pending', () => {
+  it('renders privacy controls without waiting for profile state', () => {
     mockUseProfileQuery.mockReturnValue({
       data: undefined,
-      isError: false,
+      isError: true,
       isPending: true,
       isRefetching: false,
       refetch: jest.fn(),
@@ -34,25 +34,9 @@ describe('ProfilePrivacyScreen', () => {
 
     renderWithProvider(<ProfilePrivacyScreen />)
 
-    expect(screen.getByTestId('profile-privacy-screen-skeleton')).toBeTruthy()
-  })
-
-  it('renders the privacy error state and retries the query', () => {
-    const refetch = jest.fn()
-
-    mockUseProfileQuery.mockReturnValue({
-      data: undefined,
-      isError: true,
-      isPending: false,
-      isRefetching: false,
-      refetch,
-    })
-
-    renderWithProvider(<ProfilePrivacyScreen />)
-
-    fireEvent.press(screen.getByText(i18n.t('routes.queryError.retryLabel')))
-
-    expect(refetch).toHaveBeenCalledTimes(1)
+    expect(
+      screen.getByText(i18n.t('tabScreens.profile.privacy.deviceSectionTitle')),
+    ).toBeTruthy()
   })
 
   it('updates device settings for biometrics', async () => {

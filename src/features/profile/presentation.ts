@@ -384,10 +384,10 @@ export function getProfileSummarySections(
   memberSince: string,
 ) {
   const memberSinceValue = formatProfileMemberSince(locale, memberSince)
+  const totalStats = getProfileHeroStats(t, locale, stats)
 
   return {
     hero: {
-      detailStats: getProfileHeroStats(t, locale, stats),
       headlineLabel: t(
         'tabScreens.profile.summary.sections.hero.headlineLabel',
       ),
@@ -399,13 +399,14 @@ export function getProfileSummarySections(
         'tabScreens.profile.summary.sections.hero.supportingText',
         {
           memberSince: memberSinceValue,
-          pendingTransfers: formatNumber(
-            stats.processingTransfersCount,
-            locale,
-          ),
         },
       ),
       title: t('tabScreens.profile.summary.sections.hero.title'),
+    },
+    totals: {
+      description: t('tabScreens.profile.summary.sections.totals.description'),
+      stats: totalStats,
+      title: t('tabScreens.profile.summary.sections.totals.title'),
     },
   } as const
 }

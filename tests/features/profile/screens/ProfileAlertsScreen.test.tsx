@@ -14,6 +14,7 @@ import {
 import { fireEvent, screen, waitFor } from '@testing-library/react-native'
 import { ProfileAlertsScreen } from '@/features/profile/screens/ProfileAlertsScreen'
 import { i18n } from '@/i18n'
+import { mockWindowDimensions } from '@tests/support/react-native'
 import { renderWithProvider } from '@tests/support/test-utils'
 
 describe('ProfileAlertsScreen', () => {
@@ -269,5 +270,22 @@ describe('ProfileAlertsScreen', () => {
     expect(openSettingsSpy).toHaveBeenCalledTimes(1)
 
     openSettingsSpy.mockRestore()
+  })
+
+  it('keeps alerts content readable with larger text settings', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+
+    renderWithProvider(<ProfileAlertsScreen />)
+
+    expect(
+      screen.getByText(i18n.t('tabScreens.profile.alerts.sectionTitle')),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(
+        i18n.t('tabScreens.profile.alerts.pushNotificationsLabel'),
+      ),
+    ).toBeTruthy()
+
+    windowSpy.mockRestore()
   })
 })
