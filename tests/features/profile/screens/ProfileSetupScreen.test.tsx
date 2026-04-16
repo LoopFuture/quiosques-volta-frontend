@@ -310,6 +310,101 @@ describe('ProfileSetupScreen', () => {
     windowSpy.mockRestore()
   })
 
+  it('keeps step headings exposed to assistive tech with larger text sizes', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+
+    renderWithProvider(<ProfileSetupScreen />)
+
+    expect(
+      screen.getByRole('header', {
+        name: i18n.t('tabScreens.profile.setup.steps.personal.title'),
+      }),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('header', {
+        name: i18n.t(
+          'tabScreens.profile.setup.steps.personal.contactSectionLabel',
+        ),
+      }),
+    ).toBeTruthy()
+
+    windowSpy.mockRestore()
+  })
+
+  it('announces the active step and keeps the verified email block intact with long content', async () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 320 })
+
+    mockUseAuthSession.mockReturnValue({
+      identity: {
+        email: 'maria.dos.santos.com.uma.morada.muito.comprida+setup@volta.pt',
+        name: 'Joao Ferreira',
+      },
+    })
+    mockUseProfileQuery.mockReturnValue({
+      data: profileResponseSchema.parse({
+        ...profileState,
+        personal: {
+          ...profileState.personal,
+          email:
+            'maria.dos.santos.com.uma.morada.muito.comprida+setup@volta.pt',
+        },
+      }),
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<ProfileSetupScreen />)
+
+    expect(
+      screen.getByTestId('profile-setup-step-announcement'),
+    ).toHaveTextContent(
+      new RegExp(
+        i18n.t('tabScreens.profile.setup.progressValue', {
+          currentStep: 1,
+          totalSteps: 4,
+        }),
+      ),
+    )
+    expect(
+      screen.getByTestId('profile-setup-step-announcement'),
+    ).toHaveTextContent(
+      new RegExp(i18n.t('tabScreens.profile.setup.steps.personal.title')),
+    )
+    expect(
+      screen.getByText(
+        'maria.dos.santos.com.uma.morada.muito.comprida+setup@volta.pt',
+      ),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(
+        i18n.t('tabScreens.profile.setup.steps.personal.verifiedBadgeLabel'),
+      ),
+    ).toBeTruthy()
+
+    fireEvent.press(screen.getByTestId('profile-setup-next-button'))
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('profile-setup-step-announcement'),
+      ).toHaveTextContent(
+        new RegExp(
+          i18n.t('tabScreens.profile.setup.progressValue', {
+            currentStep: 2,
+            totalSteps: 4,
+          }),
+        ),
+      )
+      expect(
+        screen.getByTestId('profile-setup-step-announcement'),
+      ).toHaveTextContent(
+        new RegExp(i18n.t('tabScreens.profile.setup.steps.payments.title')),
+      )
+    })
+
+    windowSpy.mockRestore()
+  })
+
   it('prefills account holder name from the entered personal name when payments is still blank', async () => {
     mockUseAuthSession.mockReturnValue({
       identity: {

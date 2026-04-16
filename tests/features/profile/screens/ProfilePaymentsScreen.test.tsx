@@ -9,6 +9,7 @@ import {
 import { fireEvent, screen, waitFor } from '@testing-library/react-native'
 import { ProfilePaymentsScreen } from '@/features/profile/screens/ProfilePaymentsScreen'
 import { i18n } from '@/i18n'
+import { mockWindowDimensions } from '@tests/support/react-native'
 import { renderWithProvider } from '@tests/support/test-utils'
 
 describe('ProfilePaymentsScreen', () => {
@@ -130,5 +131,21 @@ describe('ProfilePaymentsScreen', () => {
         i18n.t('tabScreens.profile.payments.saveErrorToast'),
       )
     })
+  })
+
+  it('shows the current masked IBAN explicitly instead of as placeholder-only state', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+
+    renderWithProvider(<ProfilePaymentsScreen />)
+
+    expect(
+      screen.getByText(
+        i18n.t('tabScreens.profile.payments.currentIbanHelper', {
+          iban: 'PT50************0154',
+        }),
+      ),
+    ).toBeTruthy()
+
+    windowSpy.mockRestore()
   })
 })

@@ -14,6 +14,7 @@ import {
 import { fireEvent, screen, waitFor } from '@testing-library/react-native'
 import { ProfileAlertsScreen } from '@/features/profile/screens/ProfileAlertsScreen'
 import { i18n } from '@/i18n'
+import { mockWindowDimensions } from '@tests/support/react-native'
 import { renderWithProvider } from '@tests/support/test-utils'
 
 describe('ProfileAlertsScreen', () => {
@@ -99,6 +100,59 @@ describe('ProfileAlertsScreen', () => {
       i18n.t('tabScreens.profile.alerts.emailAlertsLabel'),
       i18n.t('tabScreens.profile.alerts.emailAlertsSuccessToast'),
     )
+  })
+
+  it('rolls back the email alerts toggle when the update fails', async () => {
+    const mutate = jest.fn(
+      (
+        _payload: unknown,
+        options?: { onSuccess?: () => void; onError?: () => void },
+      ) => {
+        options?.onError?.()
+      },
+    )
+
+    mockUseUpdateProfilePreferencesMutation.mockReturnValue({
+      isPending: false,
+      mutate,
+    })
+
+    renderWithProvider(<ProfileAlertsScreen />)
+
+    const emailAlertsToggle = screen.getByLabelText(
+      i18n.t('tabScreens.profile.alerts.emailAlertsLabel'),
+    )
+
+    fireEvent.press(emailAlertsToggle)
+
+    await waitFor(() => {
+      expect(mockShowError).toHaveBeenCalledWith(
+        i18n.t('tabScreens.profile.alerts.emailAlertsLabel'),
+        i18n.t('tabScreens.profile.alerts.emailAlertsErrorToast'),
+      )
+    })
+
+    fireEvent.press(
+      screen.getByLabelText(
+        i18n.t('tabScreens.profile.alerts.emailAlertsLabel'),
+      ),
+    )
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenNthCalledWith(
+        2,
+        {
+          preferences: {
+            alertsEmail: 'joao@volta.pt',
+            alertsEnabled: false,
+          },
+        },
+        expect.objectContaining({
+          onError: expect.any(Function),
+          onSuccess: expect.any(Function),
+        }),
+      )
+    })
   })
 
   it('updates device settings for push notifications', async () => {
@@ -216,5 +270,22 @@ describe('ProfileAlertsScreen', () => {
     expect(openSettingsSpy).toHaveBeenCalledTimes(1)
 
     openSettingsSpy.mockRestore()
+  })
+
+  it('keeps alerts content readable with larger text settings', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+
+    renderWithProvider(<ProfileAlertsScreen />)
+
+    expect(
+      screen.getByText(i18n.t('tabScreens.profile.alerts.sectionTitle')),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(
+        i18n.t('tabScreens.profile.alerts.pushNotificationsLabel'),
+      ),
+    ).toBeTruthy()
+
+    windowSpy.mockRestore()
   })
 })

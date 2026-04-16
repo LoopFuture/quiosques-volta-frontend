@@ -10,22 +10,12 @@ import {
 } from '@tamagui/colors'
 
 export const brandPrimary = '#0cc3d7'
-const brandNeutral = '#e0e0e0'
-export const brandWhite = '#ffffff'
-export const brandBlack = '#000000'
-export const lightTabBarBackground = '#F3F7FC'
-export const darkTabBarBackground = '#0D1B2E'
-
-export function getTabBarBackground(themeName: string) {
-  return themeName.startsWith('dark')
-    ? darkTabBarBackground
-    : lightTabBarBackground
-}
-
-// Palette values
-const darkPalette = [
+const brandNeutral = '#dce2e5'
+export const brandWhite = '#fcfeff'
+export const brandBlack = '#091015'
+const neutralDarkScale = [
   '#050505',
-  '#0A1628',
+  '#0a1628',
   '#101010',
   '#171717',
   '#202020',
@@ -36,8 +26,8 @@ const darkPalette = [
   '#949494',
   brandNeutral,
   brandWhite,
-]
-const lightPalette = [
+] as const
+const neutralLightScale = [
   brandWhite,
   '#fcfcfc',
   '#f8f8f8',
@@ -50,9 +40,8 @@ const lightPalette = [
   '#737373',
   '#1f1f1f',
   brandBlack,
-]
-
-const accentLight = {
+] as const
+const accentLightScale = {
   accent1: '#effcff',
   accent2: '#daf9fd',
   accent3: '#c0f2f8',
@@ -65,9 +54,8 @@ const accentLight = {
   accent10: '#09a7b8',
   accent11: '#056b75',
   accent12: '#02353c',
-}
-
-const accentDark = {
+} as const
+const accentDarkScale = {
   accent1: '#02262b',
   accent2: '#033037',
   accent3: '#043b43',
@@ -80,15 +68,28 @@ const accentDark = {
   accent10: '#34d4e4',
   accent11: '#7fe5ef',
   accent12: '#d9fbff',
+} as const
+// Scanner-critical QR colors stay fixed for reliability across themes.
+export const qrPresentationColors = {
+  background: '#ffffff',
+  foreground: '#000000',
+} as const
+export const lightTabBarBackground = neutralLightScale[2]
+export const darkTabBarBackground = neutralDarkScale[1]
+
+export function getTabBarBackground(themeName: string) {
+  return themeName.startsWith('dark')
+    ? darkTabBarBackground
+    : lightTabBarBackground
 }
 
 const builtThemes = createV5Theme({
-  darkPalette,
-  lightPalette,
+  darkPalette: [...neutralDarkScale],
+  lightPalette: [...neutralLightScale],
   componentThemes: v5ComponentThemes,
   accent: {
-    light: accentLight,
-    dark: accentDark,
+    light: accentLightScale,
+    dark: accentDarkScale,
   },
   childrenThemes: {
     ...defaultChildrenThemes,

@@ -5,7 +5,11 @@ import { homeResponseSchema } from '@/features/home/models'
 import { profileRoutes } from '@/features/profile/routes'
 import { walletRoutes } from '@/features/wallet/routes'
 import { i18n, setLocaleOverrideForTests, syncLocale } from '@/i18n'
-import { restorePlatformOS, setPlatformOS } from '@tests/support/react-native'
+import {
+  mockWindowDimensions,
+  restorePlatformOS,
+  setPlatformOS,
+} from '@tests/support/react-native'
 import { renderWithProvider } from '@tests/support/test-utils'
 
 const mockShowToast = jest.fn()
@@ -180,8 +184,8 @@ describe('HomeScreen', () => {
     fireEvent.press(
       screen.getByText(i18n.t('tabScreens.home.overview.accountActionLabel')),
     )
-    fireEvent.press(screen.getByLabelText('Pingo Doce - Afragide'))
-    fireEvent.press(screen.getByLabelText('Transferência'))
+    fireEvent.press(screen.getByLabelText(/Pingo Doce - Afragide/))
+    fireEvent.press(screen.getByLabelText(/Transferência/))
 
     expect(mockRouterPush).toHaveBeenNthCalledWith(1, walletRoutes.transfer)
     expect(mockRouterPush).toHaveBeenNthCalledWith(2, profileRoutes.summary)
@@ -193,6 +197,27 @@ describe('HomeScreen', () => {
       4,
       walletRoutes.movementDetail(homeScreenState.recentActivity[1]!.id),
     )
+  })
+
+  it('announces recent movements with amount, status, and detail hint', () => {
+    mockUseHomeScreenQuery.mockReturnValue({
+      data: homeScreenState,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<HomeScreen />)
+
+    expect(
+      screen.getByLabelText(/Pingo Doce - Afragide.*0,30.*Recebido/i),
+    ).toBeTruthy()
+    expect(
+      screen.getAllByHintText(
+        i18n.t('tabScreens.home.recentActivity.openMovementHint'),
+      ),
+    ).toHaveLength(2)
   })
 
   it('renders an empty state when there is no recent activity', () => {
@@ -309,5 +334,33 @@ describe('HomeScreen', () => {
 
     expect(hardwareBackPressListener?.()).toBe(false)
     expect(mockShowToast).not.toHaveBeenCalled()
+  })
+
+  it('lets the home title wrap for larger text settings', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+
+    mockUseHomeScreenQuery.mockReturnValue({
+      data: {
+        ...homeScreenState,
+        greeting: {
+          ...homeScreenState.greeting,
+          displayName: 'Nome comprido para caber melhor com texto ampliado',
+        },
+      },
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<HomeScreen />)
+
+    const title = screen.getByText(
+      'Nome comprido para caber melhor com texto ampliado',
+    )
+
+    expect(title.props.numberOfLines).toBe(2)
+
+    windowSpy.mockRestore()
   })
 })

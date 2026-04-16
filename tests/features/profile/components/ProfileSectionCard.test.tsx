@@ -21,6 +21,10 @@ describe('ProfileSectionCard', () => {
             label: 'Email',
             value: 'joao@volta.pt',
           },
+          {
+            label: 'Telefone',
+            value: '+351 912 345 678',
+          },
         ]}
         title="Dados pessoais"
       />,
@@ -29,7 +33,14 @@ describe('ProfileSectionCard', () => {
     expect(screen.getByText('Dados pessoais')).toBeTruthy()
     expect(screen.getByText('lead')).toBeTruthy()
 
-    fireEvent.press(screen.getByLabelText('Dados pessoais'))
+    expect(screen.getByLabelText('Dados pessoais. Joao Ferreira')).toBeTruthy()
+    expect(
+      screen.getByHintText(
+        'Nome: Joao Ferreira. Email: joao@volta.pt. Telefone: +351 912 345 678',
+      ),
+    ).toBeTruthy()
+
+    fireEvent.press(screen.getByLabelText('Dados pessoais. Joao Ferreira'))
     expect(onPress).toHaveBeenCalled()
 
     widthSpy.mockRestore()
@@ -66,6 +77,14 @@ describe('ProfileSectionCard', () => {
             label: 'Email',
             value: 'joao@volta.pt',
           },
+          {
+            label: 'Telefone',
+            value: '+351 912 345 678',
+          },
+          {
+            label: 'Morada',
+            value: 'Rua da Volta, 1',
+          },
         ]}
         title="Compact card"
       />,
@@ -74,8 +93,66 @@ describe('ProfileSectionCard', () => {
     expect(view.getByText('Compact card')).toBeTruthy()
     expect(view.getByText('Email')).toBeTruthy()
     expect(view.getByText('joao@volta.pt')).toBeTruthy()
+    expect(view.getByText('Morada')).toBeTruthy()
+    expect(view.getByText('Rua da Volta, 1')).toBeTruthy()
     expect(view.queryByText('lead')).toBeNull()
 
     compactSpy.mockRestore()
+  })
+
+  it('uses the lower-emphasis typography for preview rows after the first two', () => {
+    const windowSpy = mockWindowDimensions({ width: 390 })
+    const view = renderWithProvider(
+      <ProfileSectionCard
+        onPress={jest.fn()}
+        previewRows={[
+          {
+            label: 'Email',
+            value: 'joao@volta.pt',
+          },
+          {
+            label: 'Telefone',
+            value: '+351 912 345 678',
+          },
+          {
+            label: 'Morada',
+            value: 'Rua da Volta, 1',
+          },
+        ]}
+        title="Dados pessoais"
+      />,
+    )
+
+    expect(view.getByText('Morada')).toBeTruthy()
+    expect(view.getByText('Rua da Volta, 1')).toBeTruthy()
+
+    windowSpy.mockRestore()
+  })
+
+  it('prefers stacked rows when larger text is enabled at regular width', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+    const onPress = jest.fn()
+    const view = renderWithProvider(
+      <ProfileSectionCard
+        onPress={onPress}
+        previewRows={[
+          {
+            label: 'Email',
+            value: 'joao@volta.pt',
+          },
+          {
+            label: 'Telefone',
+            value: '+351 912 345 678',
+          },
+        ]}
+        title="Acessibilidade"
+      />,
+    )
+
+    expect(view.getByText('Acessibilidade')).toBeTruthy()
+    expect(view.getByText('Email')).toBeTruthy()
+    expect(view.getByText('joao@volta.pt')).toBeTruthy()
+
+    windowSpy.mockRestore()
   })
 })

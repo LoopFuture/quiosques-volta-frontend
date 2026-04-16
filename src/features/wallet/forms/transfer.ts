@@ -10,6 +10,7 @@ export { walletTransferRequestSchema }
 export type WalletTransferValidationCopy = {
   amountFieldHelper: string
   exceedsBalanceError: string
+  minimumAmountError: string
   zeroAmountError: string
 }
 
@@ -64,6 +65,7 @@ export function parseTransferAmountCents(value: string) {
 
 export function getWalletTransferAmountError(
   value: string,
+  minimumTransferCents: number,
   availableBalanceCents: number,
   validation: WalletTransferValidationCopy,
 ) {
@@ -77,6 +79,10 @@ export function getWalletTransferAmountError(
     return validation.zeroAmountError
   }
 
+  if (amountCents < minimumTransferCents) {
+    return validation.minimumAmountError
+  }
+
   if (amountCents > availableBalanceCents) {
     return validation.exceedsBalanceError
   }
@@ -85,6 +91,7 @@ export function getWalletTransferAmountError(
 }
 
 export function getWalletTransferFormSchema(
+  minimumTransferCents: number,
   availableBalanceCents: number,
   validation: WalletTransferValidationCopy,
 ) {
@@ -96,6 +103,15 @@ export function getWalletTransferFormSchema(
 
         return amountCents !== null && amountCents > 0
       }, validation.zeroAmountError)
+      .refine((value) => {
+        const amountCents = parseTransferAmountCents(value)
+
+        return (
+          amountCents !== null &&
+          amountCents > 0 &&
+          amountCents >= minimumTransferCents
+        )
+      }, validation.minimumAmountError)
       .refine((value) => {
         const amountCents = parseTransferAmountCents(value)
 

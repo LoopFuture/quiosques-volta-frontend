@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Animated,
   type FlatList,
@@ -15,11 +15,16 @@ import {
   StepProgress,
   SurfaceCard,
 } from '@/components/ui'
+import { StackTopBar } from '@/features/app-shell/navigation/tab-header'
 import { useTranslation } from 'react-i18next'
 import { type OnboardingSlide, type OnboardingSlideIconKey } from '../models'
 
 type OnboardingScreenProps = {
+  backLabel?: string
+  onBackPress?: () => void
   onComplete: () => void
+  title?: string
+  variant?: 'full' | 'review'
 }
 
 const slideIconMap: Record<OnboardingSlideIconKey, unknown> = {
@@ -71,12 +76,14 @@ function OnboardingSlideCard({
   isCompactWidth,
   scrollX,
   slide,
+  stretchToFill,
   width,
 }: {
   index: number
   isCompactWidth: boolean
   scrollX: Animated.Value
   slide: OnboardingSlide
+  stretchToFill: boolean
   width: number
 }) {
   const Icon = slideIconMap[slide.iconKey] as typeof QrCode
@@ -93,19 +100,25 @@ function OnboardingSlideCard({
   })
 
   return (
-    <YStack flex={1} height="100%" px="$4" width={width}>
+    <YStack
+      flex={stretchToFill ? 1 : undefined}
+      height={stretchToFill ? '100%' : undefined}
+      px="$4"
+      width={width}
+    >
       <Animated.View
         style={{
-          flex: 1,
-          height: '100%',
+          flex: stretchToFill ? 1 : undefined,
+          height: stretchToFill ? '100%' : undefined,
           opacity,
           transform: [{ scale }],
         }}
       >
         <SurfaceCard
-          flex={1}
-          height="100%"
+          flex={stretchToFill ? 1 : undefined}
+          height={stretchToFill ? '100%' : undefined}
           justify="space-between"
+          minHeight={stretchToFill ? undefined : 320}
           p="$5"
           testID={`onboarding-slide-${slide.id}`}
         >
@@ -131,6 +144,7 @@ function OnboardingSlideCard({
                 </YStack>
 
                 <Text
+                  accessibilityRole="header"
                   color="$color12"
                   fontSize={isCompactWidth ? 22 : 24}
                   fontWeight="900"
@@ -185,30 +199,29 @@ function OnboardingSlideCard({
 }
 
 export default function OnboardingScreen({
+  backLabel,
+  onBackPress,
   onComplete,
+  title,
+  variant = 'full',
 }: OnboardingScreenProps) {
   const { t } = useTranslation()
   const slides = getOnboardingSlides(t)
   const flatListRef = useRef<FlatList<OnboardingSlide>>(null)
   const scrollX = useRef(new Animated.Value(0)).current
   const [activeIndex, setActiveIndex] = useState(0)
-  const { width } = useWindowDimensions()
+  const { fontScale, height, width } = useWindowDimensions()
   const pageWidth = Math.max(width, 1)
   const isCompactWidth = width < 360
   const isLastSlide = activeIndex === slides.length - 1
+  const isReviewMode = variant === 'review'
+  const prefersExpandedTextLayout = fontScale > 1.15
+  const shouldUseScrollableLayout = prefersExpandedTextLayout || height < 760
   const footerHelper = isLastSlide
-    ? t('onboarding.actions.finishHelper')
+    ? isReviewMode
+      ? t('onboarding.actions.closeHelper')
+      : t('onboarding.actions.finishHelper')
     : t('onboarding.actions.progressHelper')
-
-  useEffect(() => {
-    // Keep a matching JS subscription while the native-driven scroll value is
-    // active so React Native does not warn about unhandled value updates.
-    const listenerId = scrollX.addListener(() => {})
-
-    return () => {
-      scrollX.removeListener(listenerId)
-    }
-  }, [scrollX])
 
   function handleScrollEnd(event: NativeSyntheticEvent<NativeScrollEvent>) {
     const nextIndex = Math.round(
@@ -234,45 +247,69 @@ export default function OnboardingScreen({
     })
   }
 
+  const footerContent = (
+    <YStack gap="$2" pt="$4">
+      <Paragraph
+        color="$color10"
+        fontSize={13}
+        lineHeight={18}
+        style={{ textAlign: 'center' }}
+      >
+        {footerHelper}
+      </Paragraph>
+      <PrimaryButton
+        onPress={handleNext}
+        testID={
+          isLastSlide
+            ? isReviewMode
+              ? 'onboarding-close-button'
+              : 'onboarding-get-started-button'
+            : 'onboarding-next-button'
+        }
+      >
+        {isLastSlide
+          ? isReviewMode
+            ? t('onboarding.actions.closeLabel')
+            : t('onboarding.actions.getStartedLabel')
+          : t('onboarding.actions.nextLabel')}
+      </PrimaryButton>
+      {!isReviewMode ? (
+        <Button
+          chromeless
+          onPress={onComplete}
+          pressStyle={{ opacity: 0.7 }}
+          testID="onboarding-later-button"
+        >
+          <Button.Text color="$color10" fontWeight="700">
+            {t('onboarding.actions.laterLabel')}
+          </Button.Text>
+        </Button>
+      ) : null}
+    </YStack>
+  )
+
   return (
     <ScreenContainer
       bottomInset
       decorativeBackground={false}
-      contentProps={{ flex: 1, gap: '$3', px: '$0', pb: '$0', pt: '$3' }}
-      footer={
-        <YStack gap="$2" pt="$4">
-          <Paragraph
-            color="$color10"
-            fontSize={13}
-            lineHeight={18}
-            style={{ textAlign: 'center' }}
-          >
-            {footerHelper}
-          </Paragraph>
-          <PrimaryButton
-            onPress={handleNext}
-            testID={
-              isLastSlide
-                ? 'onboarding-get-started-button'
-                : 'onboarding-next-button'
-            }
-          >
-            {isLastSlide
-              ? t('onboarding.actions.getStartedLabel')
-              : t('onboarding.actions.nextLabel')}
-          </PrimaryButton>
-          <Button
-            chromeless
-            onPress={onComplete}
-            pressStyle={{ opacity: 0.7 }}
-            testID="onboarding-later-button"
-          >
-            <Button.Text color="$color10" fontWeight="700">
-              {t('onboarding.actions.laterLabel')}
-            </Button.Text>
-          </Button>
-        </YStack>
+      header={
+        backLabel && onBackPress && title ? (
+          <StackTopBar
+            backLabel={backLabel}
+            onBackPress={onBackPress}
+            title={title}
+          />
+        ) : undefined
       }
+      contentProps={{
+        flex: shouldUseScrollableLayout ? undefined : 1,
+        gap: '$3',
+        px: '$0',
+        pb: shouldUseScrollableLayout ? '$4' : '$0',
+        pt: '$3',
+      }}
+      footer={shouldUseScrollableLayout ? undefined : footerContent}
+      scrollable={shouldUseScrollableLayout}
       testID="onboarding-screen"
     >
       <YStack gap="$4" px="$4">
@@ -287,6 +324,7 @@ export default function OnboardingScreen({
         </Text>
         <YStack gap="$2.5">
           <Text
+            accessibilityRole="header"
             color="$color12"
             fontSize={isCompactWidth ? 30 : 34}
             fontWeight="900"
@@ -321,11 +359,18 @@ export default function OnboardingScreen({
         </YStack>
       </YStack>
 
-      <YStack flex={1}>
+      <YStack
+        flex={shouldUseScrollableLayout ? undefined : 1}
+        style={shouldUseScrollableLayout ? undefined : { minHeight: 380 }}
+      >
         <Animated.FlatList
           ref={flatListRef}
           bounces={false}
-          contentContainerStyle={{ flexGrow: 1, height: '100%' }}
+          contentContainerStyle={
+            shouldUseScrollableLayout
+              ? { flexGrow: 1 }
+              : { flexGrow: 1, height: '100%' }
+          }
           data={slides}
           getItemLayout={(_, index) => ({
             index,
@@ -347,15 +392,17 @@ export default function OnboardingScreen({
               isCompactWidth={isCompactWidth}
               scrollX={scrollX}
               slide={item}
+              stretchToFill={!shouldUseScrollableLayout}
               width={pageWidth}
             />
           )}
           scrollEventThrottle={16}
           showsHorizontalScrollIndicator={false}
-          style={{ flex: 1 }}
+          style={shouldUseScrollableLayout ? undefined : { flex: 1 }}
           testID="onboarding-list"
         />
       </YStack>
+      {shouldUseScrollableLayout ? footerContent : null}
     </ScreenContainer>
   )
 }

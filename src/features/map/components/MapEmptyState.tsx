@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react'
 import { MapPinned, QrCode } from '@tamagui/lucide-icons'
 import {
   PrimaryButton,
+  QueryErrorState,
   SkeletonBlock,
   StatusBadge,
   SurfaceCard,
@@ -13,9 +15,35 @@ type MapEmptyStateProps = {
   fallbackActionLabel: string
   fallbackActionTitle: string
   fallbackDescription: string
+  fallbackStatusLabel: string
   onActionPress: () => void
   statusLabel: string
   title: string
+}
+
+type MapScreenStateProps = MapEmptyStateProps & {
+  errorDescription: string
+  errorRecoveryHint: string
+  errorTitle: string
+  onRetry?: () => void
+  state?: 'error' | 'loading' | 'ready'
+}
+
+function MapSectionIcon({ children }: { children: ReactNode }) {
+  return (
+    <YStack
+      bg="$background"
+      borderColor="$borderColor"
+      borderWidth={1}
+      items="center"
+      justify="center"
+      rounded={999}
+      width={44}
+      height={44}
+    >
+      {children}
+    </YStack>
+  )
 }
 
 export function MapEmptyState({
@@ -24,27 +52,19 @@ export function MapEmptyState({
   fallbackActionLabel,
   fallbackActionTitle,
   fallbackDescription,
+  fallbackStatusLabel,
   onActionPress,
   statusLabel,
   title,
 }: MapEmptyStateProps) {
   return (
-    <YStack flex={1} bg="$background" gap="$4" px="$4" pb="$8" pt="$2">
+    <YStack flex={1} bg="$background" gap="$4" testID="map-empty-state">
       <SurfaceCard gap="$4" p="$5" testID="map-coming-soon-card" tone="accent">
         <XStack items="center" justify="space-between" gap="$3">
           <StatusBadge tone="accent">{statusLabel}</StatusBadge>
-          <XStack
-            bg="$background"
-            borderColor="$borderColor"
-            borderWidth={1}
-            items="center"
-            justify="center"
-            rounded={999}
-            width={44}
-            height={44}
-          >
+          <MapSectionIcon>
             <MapPinned color="$accent11" size={20} />
-          </XStack>
+          </MapSectionIcon>
         </XStack>
 
         <YStack gap="$2">
@@ -65,19 +85,13 @@ export function MapEmptyState({
         </YStack>
       </SurfaceCard>
 
-      <SurfaceCard gap="$3.5" p="$4.5">
+      <SurfaceCard gap="$3.5" p="$4.5" testID="map-code-card">
         <XStack gap="$3" items="center">
-          <YStack
-            bg="$accent3"
-            items="center"
-            justify="center"
-            rounded={999}
-            width={40}
-            height={40}
-          >
+          <MapSectionIcon>
             <QrCode color="$accent11" size={18} />
-          </YStack>
+          </MapSectionIcon>
           <YStack flex={1} gap="$1">
+            <StatusBadge>{fallbackStatusLabel}</StatusBadge>
             <Text fontSize={18} fontWeight="800">
               {fallbackActionTitle}
             </Text>
@@ -95,16 +109,36 @@ export function MapEmptyState({
   )
 }
 
+export function MapScreenState({
+  errorDescription,
+  errorRecoveryHint,
+  errorTitle,
+  onRetry,
+  state = 'ready',
+  ...emptyStateProps
+}: MapScreenStateProps) {
+  if (state === 'loading') {
+    return <MapScreenSkeleton />
+  }
+
+  if (state === 'error') {
+    return (
+      <QueryErrorState
+        description={errorDescription}
+        onRetry={onRetry ?? (() => undefined)}
+        recoveryHint={errorRecoveryHint}
+        testID="map-error-state"
+        title={errorTitle}
+      />
+    )
+  }
+
+  return <MapEmptyState {...emptyStateProps} />
+}
+
 export function MapScreenSkeleton() {
   return (
-    <YStack
-      flex={1}
-      gap="$4"
-      px="$4"
-      pb="$8"
-      pt="$2"
-      testID="map-screen-skeleton"
-    >
+    <YStack flex={1} gap="$4" testID="map-screen-skeleton">
       <SurfaceCard gap="$4" p="$5" tone="accent">
         <XStack items="center" justify="space-between">
           <SkeletonBlock height={30} rounded={999} width={132} />
@@ -120,7 +154,7 @@ export function MapScreenSkeleton() {
 
       <SurfaceCard gap="$3.5" p="$4.5">
         <XStack gap="$3" items="center">
-          <SkeletonBlock height={40} rounded={20} width={40} />
+          <SkeletonBlock height={44} rounded={22} width={44} />
           <YStack flex={1} gap="$2">
             <SkeletonBlock height={18} width="46%" />
             <SkeletonBlock height={14} width="80%" />

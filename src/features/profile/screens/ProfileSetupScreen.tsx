@@ -66,6 +66,15 @@ const setupStepOrder: SetupStepId[] = [
   'security',
 ]
 
+const visuallyHiddenTextStyle = {
+  height: 1,
+  left: 0,
+  opacity: 0,
+  position: 'absolute' as const,
+  top: 0,
+  width: 1,
+}
+
 function getBiometricErrorToast(
   reason: 'cancelled' | 'failed' | 'not-available' | 'not-enrolled',
   t: ReturnType<typeof useTranslation>['t'],
@@ -88,6 +97,7 @@ function getBiometricErrorToast(
 function SetupSectionLabel({ children }: { children: string }) {
   return (
     <Text
+      accessibilityRole="header"
       color="$color10"
       fontSize={13}
       fontWeight="700"
@@ -101,27 +111,39 @@ function SetupSectionLabel({ children }: { children: string }) {
 function VerifiedIdentityRow({
   email,
   helperText,
+  isCompactLayout,
   statusLabel,
   title,
 }: {
   email: string
   helperText: string
+  isCompactLayout: boolean
   statusLabel: string
   title: string
 }) {
   return (
     <SurfaceCard tone="accent">
       <YStack gap="$3">
-        <XStack items="center" justify="space-between" gap="$3">
-          <Text fontSize={16} fontWeight="800" style={{ flex: 1 }}>
+        <XStack
+          flexDirection={isCompactLayout ? 'column' : 'row'}
+          items={isCompactLayout ? 'flex-start' : 'center'}
+          justify="space-between"
+          gap="$3"
+          style={{ minWidth: 0 }}
+        >
+          <Text
+            fontSize={16}
+            fontWeight="800"
+            style={{ flex: isCompactLayout ? undefined : 1, minWidth: 0 }}
+          >
             {title}
           </Text>
           <StatusBadge tone="accent">{statusLabel}</StatusBadge>
         </XStack>
-        <Text fontSize={18} fontWeight="700">
+        <Text fontSize={18} fontWeight="700" style={{ flexShrink: 1 }}>
           {email}
         </Text>
-        <Text color="$color11" fontSize={14}>
+        <Text color="$color11" fontSize={14} style={{ flexShrink: 1 }}>
           {helperText}
         </Text>
       </YStack>
@@ -140,7 +162,6 @@ export function ProfileSetupScreen() {
   const { settings, setSettings } = useDevicePrivacySettings()
   const {
     canAskAgain,
-    expoPushToken,
     isPhysicalDevice,
     isSyncing: isSyncingPushNotifications,
     permissionStatus,
@@ -148,13 +169,14 @@ export function ProfileSetupScreen() {
     requestPushPermissionAndToken,
   } = usePushNotifications()
   const [activeStepIndex, setActiveStepIndex] = useState(0)
-  const { width } = useWindowDimensions()
+  const { fontScale, width } = useWindowDimensions()
   const validationCopy = getProfileValidationCopy(t)
-  const isCompactWidth = width < 360
-  const stepTitleFontSize = isCompactWidth ? 26 : 30
-  const stepTitleLineHeight = isCompactWidth ? 32 : 36
-  const stepDescriptionFontSize = isCompactWidth ? 16 : 17
-  const stepDescriptionLineHeight = isCompactWidth ? 23 : 25
+  const prefersExpandedTextLayout = fontScale > 1.15
+  const isCompactLayout = width < 360 || prefersExpandedTextLayout
+  const stepTitleFontSize = isCompactLayout ? 26 : 30
+  const stepTitleLineHeight = isCompactLayout ? 32 : 36
+  const stepDescriptionFontSize = 16
+  const stepDescriptionLineHeight = isCompactLayout ? 24 : 25
   const defaultSnapshot = useMemo(() => {
     const setupProfile = getProfileSetupSeedState({
       deviceSettings: settings,
@@ -165,6 +187,14 @@ export function ProfileSetupScreen() {
     return getProfileSetupSnapshotFromProfile(setupProfile, settings)
   }, [identity, profile, settings])
   const currentStepId = setupStepOrder[activeStepIndex]
+  const currentStepTitle = t(
+    `tabScreens.profile.setup.steps.${currentStepId}.title`,
+  )
+  const currentStepValueLabel = t('tabScreens.profile.setup.progressValue', {
+    currentStep: activeStepIndex + 1,
+    totalSteps,
+  })
+  const currentStepAnnouncement = `${currentStepValueLabel}. ${currentStepTitle}`
   const { control, getValues, handleSubmit, reset, setValue, trigger } =
     useForm<ProfileSetupFormValues>({
       defaultValues: getProfileSetupFormDefaultValues(defaultSnapshot),
@@ -215,10 +245,6 @@ export function ProfileSetupScreen() {
     settingsHelper: t(
       'tabScreens.profile.privacy.pushNotificationsSettingsHelper',
     ),
-    tokenValue: ({ token }: { token: string }) =>
-      t('tabScreens.profile.privacy.pushNotificationsTokenValue', {
-        token,
-      }),
   } as const
   const pinCopy = {
     cancelLabel: t('tabScreens.profile.privacy.pinCancelLabel'),
@@ -392,7 +418,7 @@ export function ProfileSetupScreen() {
       decorativeBackground={false}
       footer={
         <YStack gap="$3" pt="$5">
-          {isCompactWidth ? (
+          {isCompactLayout ? (
             <YStack gap="$3">
               {activeStepIndex > 0 ? (
                 <PrimaryButton
@@ -491,20 +517,26 @@ export function ProfileSetupScreen() {
       testID="profile-setup-screen"
     >
       <YStack gap="$4" testID={`profile-setup-step-${currentStepId}`}>
+        <Text
+          accessibilityLiveRegion="polite"
+          style={visuallyHiddenTextStyle}
+          testID="profile-setup-step-announcement"
+        >
+          {currentStepAnnouncement}
+        </Text>
+
         <StepProgress
           currentStep={activeStepIndex + 1}
           label={t('tabScreens.profile.setup.progressLabel')}
           totalSteps={totalSteps}
-          valueLabel={t('tabScreens.profile.setup.progressValue', {
-            currentStep: activeStepIndex + 1,
-            totalSteps,
-          })}
+          valueLabel={currentStepValueLabel}
         />
 
         {currentStepId === 'personal' ? (
           <>
             <YStack gap="$2">
               <Text
+                accessibilityRole="header"
                 fontSize={stepTitleFontSize}
                 fontWeight="900"
                 lineHeight={stepTitleLineHeight}
@@ -525,6 +557,7 @@ export function ProfileSetupScreen() {
               helperText={t(
                 'tabScreens.profile.setup.steps.personal.lockedEmailHelper',
               )}
+              isCompactLayout={isCompactLayout}
               statusLabel={t(
                 'tabScreens.profile.setup.steps.personal.verifiedBadgeLabel',
               )}
@@ -613,6 +646,7 @@ export function ProfileSetupScreen() {
           <>
             <YStack gap="$2">
               <Text
+                accessibilityRole="header"
                 fontSize={stepTitleFontSize}
                 fontWeight="900"
                 lineHeight={stepTitleLineHeight}
@@ -693,6 +727,7 @@ export function ProfileSetupScreen() {
           <>
             <YStack gap="$2">
               <Text
+                accessibilityRole="header"
                 fontSize={stepTitleFontSize}
                 fontWeight="900"
                 lineHeight={stepTitleLineHeight}
@@ -723,7 +758,6 @@ export function ProfileSetupScreen() {
                     checked={field.value}
                     copy={pushNotificationsCopy}
                     disabled={completeSetupMutation.isPending}
-                    expoPushToken={expoPushToken}
                     isPending={isSyncingPushNotifications}
                     isPhysicalDevice={isPhysicalDevice}
                     label={t(
@@ -801,6 +835,7 @@ export function ProfileSetupScreen() {
           <>
             <YStack gap="$2">
               <Text
+                accessibilityRole="header"
                 fontSize={stepTitleFontSize}
                 fontWeight="900"
                 lineHeight={stepTitleLineHeight}

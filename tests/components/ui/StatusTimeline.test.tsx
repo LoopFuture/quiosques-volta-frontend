@@ -39,6 +39,19 @@ describe('StatusTimeline', () => {
         'Transferencia em curso. Etapa atual. A enviar para SPIN.',
       ),
     ).toBeTruthy()
+    expect(
+      view.getByLabelText(
+        'Transferencia em curso. Etapa atual. A enviar para SPIN.',
+      ).props.accessibilityState,
+    ).toEqual({ selected: true })
+    expect(
+      view.getByLabelText('Identidade verificada. Etapa concluída').props
+        .accessibilityValue,
+    ).toEqual({ text: '1 of 3. Etapa concluída' })
+    expect(
+      view.getByLabelText('Registo no ledger. Próxima etapa').props
+        .accessibilityValue,
+    ).toEqual({ text: '3 of 3. Próxima etapa' })
   })
 
   it('falls back to state text when accessibility state labels are omitted', () => {

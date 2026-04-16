@@ -57,6 +57,7 @@ function AuthPromptScreen() {
     heroLogoSize,
     heroTitleFontSize,
     insets,
+    prefersExpandedTextLayout,
     subtitleMaxWidth,
   } = useAuthSurfaceMetrics()
   const [activeIntent, setActiveIntent] = useState<AuthIntent>(null)
@@ -299,6 +300,7 @@ function AuthPromptScreen() {
             heroLogoColor={heroLogoColor}
             heroLogoSize={heroLogoSize}
             heroTitleFontSize={heroTitleFontSize}
+            prefersExpandedTextLayout={prefersExpandedTextLayout}
             subtitleMaxWidth={subtitleMaxWidth}
             titleLeading={t('auth.titleLeading')}
             titleTrailing={t('auth.titleTrailing')}
@@ -308,6 +310,9 @@ function AuthPromptScreen() {
         <YStack gap="$4">
           {errorMessage ? (
             <SurfaceCard
+              accessibilityLiveRegion="polite"
+              accessibilityRole="alert"
+              accessible
               bg="$red2"
               borderColor="$red8"
               gap="$2"

@@ -1,9 +1,8 @@
-import { Text, YStack, XStack } from 'tamagui'
+import { useWindowDimensions } from 'react-native'
+import { Text, YStack } from 'tamagui'
 import { SurfaceCard } from '@/components/ui'
-import type { ProfileSummaryStat } from '../models'
 
 type ProfileHeroCardProps = {
-  detailStats?: ProfileSummaryStat[]
   headlineLabel: string
   headlineValue: string
   supportingText: string
@@ -11,12 +10,14 @@ type ProfileHeroCardProps = {
 }
 
 export function ProfileHeroCard({
-  detailStats,
   headlineLabel,
   headlineValue,
   supportingText,
   title,
 }: ProfileHeroCardProps) {
+  const { fontScale, width } = useWindowDimensions()
+  const prefersExpandedLayout = width < 360 || fontScale > 1.15
+
   return (
     <SurfaceCard gap="$4" p="$5" tone="accent">
       <YStack gap="$2">
@@ -28,38 +29,26 @@ export function ProfileHeroCard({
         >
           {title}
         </Text>
-        <Text fontSize={42} fontWeight="900">
-          {headlineValue}
-        </Text>
-        <Text color="$color11" fontSize={15}>
-          {headlineLabel}
-        </Text>
         <Text color="$color11" fontSize={14}>
           {supportingText}
         </Text>
       </YStack>
 
-      {detailStats ? (
-        <YStack borderColor="$borderColor" borderTopWidth={1} gap="$3" pt="$4">
-          {detailStats.map((stat) => (
-            <YStack key={stat.label} gap="$1">
-              <XStack items="center" justify="space-between" gap="$3">
-                <Text color="$color10" fontSize={13} fontWeight="700">
-                  {stat.label}
-                </Text>
-                <Text color="$color" fontSize={22} fontWeight="900">
-                  {stat.value}
-                </Text>
-              </XStack>
-              {stat.helper ? (
-                <Text color="$color11" fontSize={12}>
-                  {stat.helper}
-                </Text>
-              ) : null}
-            </YStack>
-          ))}
-        </YStack>
-      ) : null}
+      <YStack borderColor="$borderColor" borderTopWidth={1} gap="$1.5" pt="$4">
+        <Text color="$color10" fontSize={14} fontWeight="700">
+          {headlineLabel}
+        </Text>
+        <Text
+          color="$color"
+          fontSize={prefersExpandedLayout ? 32 : 36}
+          fontWeight="900"
+          lineHeight={prefersExpandedLayout ? 38 : 42}
+          numberOfLines={prefersExpandedLayout ? undefined : 2}
+          style={{ fontVariant: ['tabular-nums'] }}
+        >
+          {headlineValue}
+        </Text>
+      </YStack>
     </SurfaceCard>
   )
 }

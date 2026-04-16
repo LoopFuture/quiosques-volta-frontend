@@ -8,7 +8,7 @@ import {
 } from '@/features/auth/biometrics'
 import { clearStoredAppPin, saveStoredAppPin } from '@/features/auth/pin'
 import { YStack } from 'tamagui'
-import { QueryErrorState, SkeletonBlock, SurfaceCard } from '@/components/ui'
+import { SurfaceCard } from '@/components/ui'
 import { useActionToast } from '@/features/app-shell/hooks/useActionToast'
 import { ProfileDetailScreenFrame } from '../components/ProfileDetailScreenFrame'
 import {
@@ -16,7 +16,7 @@ import {
   getProfilePrivacyFormSchema,
   type ProfilePrivacyFormValues,
 } from '../forms'
-import { useDevicePrivacySettings, useProfileQuery } from '../hooks'
+import { useDevicePrivacySettings } from '../hooks'
 import { getProfileValidationCopy } from '../presentation'
 import {
   SettingsSectionHeader,
@@ -43,24 +43,10 @@ function getBiometricErrorToast(
   return t('tabScreens.profile.privacy.biometricFailedToast')
 }
 
-function ProfilePrivacyScreenSkeleton() {
-  return (
-    <SurfaceCard testID="profile-privacy-screen-skeleton">
-      <YStack gap="$3">
-        {Array.from({ length: 2 }).map((_, index) => (
-          <YStack key={`profile-privacy-skeleton-${index}`} gap="$3">
-            <SkeletonBlock height={14} width="36%" />
-            <SkeletonBlock height={index === 0 ? 54 : 42} width="100%" />
-          </YStack>
-        ))}
-      </YStack>
-    </SurfaceCard>
-  )
-}
-
 function ProfilePrivacyForm() {
   const hasBiometricHardware = useBiometricHardwareAvailability()
   const { settings, setSettings } = useDevicePrivacySettings()
+  const { biometricsEnabled, pinEnabled } = settings
   const { showError, showSuccess } = useActionToast()
   const { t } = useTranslation()
   const validationCopy = getProfileValidationCopy(t)
@@ -68,7 +54,9 @@ function ProfilePrivacyForm() {
     defaultValues: getProfilePrivacyFormDefaultValues({
       alertsEmail: '',
       alertsEnabled: false,
-      ...settings,
+      biometricsEnabled,
+      pinEnabled,
+      pushNotificationsEnabled: false,
     }),
     mode: 'onSubmit',
     reValidateMode: 'onChange',
@@ -78,9 +66,9 @@ function ProfilePrivacyForm() {
   })
 
   useEffect(() => {
-    setValue('biometricsEnabled', settings.biometricsEnabled)
-    setValue('pinEnabled', settings.pinEnabled)
-  }, [setValue, settings.biometricsEnabled, settings.pinEnabled])
+    setValue('biometricsEnabled', biometricsEnabled)
+    setValue('pinEnabled', pinEnabled)
+  }, [biometricsEnabled, pinEnabled, setValue])
   const pinCopy = {
     cancelLabel: t('tabScreens.profile.privacy.pinCancelLabel'),
     changeLabel: t('tabScreens.profile.privacy.pinChangeLabel'),
@@ -219,7 +207,6 @@ function ProfilePrivacyForm() {
 
 export function ProfilePrivacyScreen() {
   const { t } = useTranslation()
-  const { data: profile, isError, isPending, refetch } = useProfileQuery()
 
   return (
     <ProfileDetailScreenFrame
@@ -227,18 +214,7 @@ export function ProfilePrivacyScreen() {
       testID="profile-privacy-screen"
       title={t('tabScreens.profile.privacy.title')}
     >
-      {isError && !profile ? (
-        <QueryErrorState
-          onRetry={() => {
-            void refetch()
-          }}
-          testID="profile-privacy-screen-error-state"
-        />
-      ) : !profile || isPending ? (
-        <ProfilePrivacyScreenSkeleton />
-      ) : (
-        <ProfilePrivacyForm />
-      )}
+      <ProfilePrivacyForm />
     </ProfileDetailScreenFrame>
   )
 }

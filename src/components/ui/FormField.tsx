@@ -38,6 +38,7 @@ export const FormField = forwardRef<ElementRef<typeof Input>, FormFieldProps>(
     ref,
   ) {
     const inputId = useId()
+    const supportingText = errorText ?? helperText
     const [isFocused, setIsFocused] = useState(false)
     const themeName = useThemeName()
     const isDarkTheme = themeName.startsWith('dark')
@@ -92,6 +93,9 @@ export const FormField = forwardRef<ElementRef<typeof Input>, FormFieldProps>(
             <Input
               ref={ref}
               accessibilityLabel={accessibilityLabel ?? label}
+              accessibilityHint={supportingText}
+              accessibilityState={{ disabled }}
+              aria-invalid={Boolean(errorText)}
               color={disabled ? '$color10' : '$color'}
               disabled={disabled}
               flex={1}
@@ -128,7 +132,13 @@ export const FormField = forwardRef<ElementRef<typeof Input>, FormFieldProps>(
 
         {errorText ? (
           <ToneScope tone={fieldTone}>
-            <Text color="$color11" fontSize={15} fontWeight="700">
+            <Text
+              accessibilityLiveRegion="polite"
+              accessibilityRole="alert"
+              color="$color11"
+              fontSize={15}
+              fontWeight="700"
+            >
               {errorText}
             </Text>
           </ToneScope>

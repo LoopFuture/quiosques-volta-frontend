@@ -9,6 +9,7 @@
         "cancelLabel": "Cancelar",
         "cancelledError": "A verificação biométrica foi cancelada. Tenta novamente ou entra de novo.",
         "closeLabel": "Fechar desbloqueio",
+        "deleteDigitLabel": "Apagar o último dígito do PIN",
         "description": "Usa biometria ou o teu PIN da app para voltares a abrir a tua conta neste telemóvel.",
         "failedError": "Não foi possível confirmar a tua biometria. Tenta novamente ou entra de novo.",
         "invalidPinError": "Esse PIN da app não está correto. Tenta novamente.",
@@ -20,21 +21,26 @@
         "pinHelper": "Introduz o PIN de 4 dígitos desta app neste telemóvel.",
         "pinLabel": "PIN da app",
         "pinNotConfiguredError": "O PIN da app não está configurado neste dispositivo. Entra de novo para continuar.",
+        "pinProgressEmpty": "Dígito {{currentDigit}} de {{totalDigits}} do PIN vazio",
+        "pinProgressEntered": "Dígito {{currentDigit}} de {{totalDigits}} do PIN introduzido",
+        "pinProgressError": "Erro no dígito {{currentDigit}} de {{totalDigits}} do PIN",
         "promptMessage": "Usa Face ID ou impressão digital para a Volta",
         "retryLabel": "Tentar novamente",
-        "title": "Desbloquear a Volta",
         "tooManyPinAttemptsError": "Demasiadas tentativas erradas de PIN. Entra de novo para continuar.",
+        "title": "Desbloquear a Volta",
         "unlockWithPinLabel": "Desbloquear com PIN"
       },
       "loginLabel": "Entrar",
       "registerLabel": "Regista-te",
       "registerPrompt": "Ainda não tens conta?",
-      "subtitle": "Bem-vindo de volta ao futuro sustentável",
+      "subtitle": "Acede rapidamente às tuas devoluções e ao teu saldo neste telemóvel.",
       "titleLeading": "Volta",
       "titleTrailing": "Portugal"
     },
     "onboarding": {
       "actions": {
+        "closeLabel": "Fechar introdução",
+        "closeHelper": "Tudo pronto. Fecha esta introdução quando quiseres.",
         "finishHelper": "Tudo pronto. Podes rever esta introdução mais tarde no Perfil.",
         "getStartedLabel": "Entrar na app",
         "laterLabel": "Saltar introdução",
@@ -204,6 +210,7 @@
           "emptyStateDescription": "Quando receberes novos créditos ou pedires uma transferência, esta lista atualiza-se automaticamente.",
           "emptyStateLabel": "Sem movimentos",
           "emptyStateTitle": "Os próximos movimentos vão aparecer aqui",
+          "openMovementHint": "Abre os detalhes do movimento",
           "title": "Atividade recente",
           "transactions": {
             "colomboTitle": "Continente - Colombo",
@@ -216,32 +223,32 @@
       },
       "map": {
         "comingSoon": {
-          "actionHint": "O que podes fazer agora",
-          "description": "A pesquisa no mapa ainda não está disponível na app. Enquanto isso, podes confirmar pontos Volta previstos e abrir o teu código antes de chegares à máquina.",
+          "actionHint": "O que vais encontrar aqui",
+          "description": "Em breve vais poder ver aqui o mapa Volta e os pontos disponíveis antes de saíres para a próxima devolução. Até lá, usa já o teu código para chegares à máquina pronto a identificar-te.",
           "statusLabel": "Mapa em breve",
-          "title": "Usa já o teu código. O mapa vem a seguir."
+          "title": "O mapa e os pontos Volta vão aparecer aqui"
         },
         "emptyState": {
-          "description": "Procura no mapa para veres os pontos mais próximos e encontrares o melhor local para a tua próxima devolução.",
-          "title": "As máquinas Volta perto de ti vão aparecer aqui"
+          "description": "Ainda não temos pontos Volta para mostrar nesta zona. Entretanto, mantém o teu código pronto antes de chegares à máquina.",
+          "title": "Ainda não encontrámos pontos próximos"
         },
         "errors": {
-          "description": "Não foi possível preparar a pré-visualização dos pontos Volta agora.",
-          "recoveryHint": "Tenta novamente para veres os locais previstos e continua a usar o teu código na máquina.",
+          "description": "Não foi possível preparar a lista de pontos Volta agora.",
+          "recoveryHint": "Tenta novamente para veres os locais previstos antes da próxima devolução.",
           "title": "Mapa indisponível"
         },
         "fallback": {
           "actionLabel": "Mostrar código",
-          "description": "Identifica-te logo na máquina com o teu código Volta e evita parar para procurar quando chegares.",
+          "description": "Identifica-te logo na máquina com o teu código Volta e evita parar quando chegares ao ponto de devolução.",
+          "statusLabel": "Código pronto",
           "title": "Identificação pronta para a próxima devolução"
         },
         "nearby": {
-          "description": "Explora o mapa e escolhe a máquina mais conveniente para a tua próxima devolução.",
-          "searchActionLabel": "Procurar máquinas Volta",
-          "title": "Encontra uma máquina Volta"
+          "description": "Consulta aqui os pontos Volta quando o mapa estiver disponível.",
+          "title": "Pontos Volta"
         },
         "preview": {
-          "description": "Os próximos pontos Volta vão aparecer aqui com estado claro antes do mapa completo chegar.",
+          "description": "Os pontos Volta previstos vão aparecer aqui com estado claro quando esta funcionalidade estiver pronta.",
           "title": "Pré-visualização de pontos Volta",
           "status": {
             "active": "Disponível",
@@ -345,12 +352,6 @@
           }
         },
         "hub": {
-          "actions": {
-            "reviewAlerts": "Rever alertas",
-            "reviewPayments": "Rever pagamentos",
-            "reviewSecurity": "Rever segurança"
-          },
-          "accountDescription": "Confirma primeiro os pontos que afetam pagamentos, alertas e segurança antes da próxima devolução.",
           "cards": {
             "alerts": "Alertas da conta",
             "appSettings": "Definições da app",
@@ -359,12 +360,7 @@
             "privacy": "Privacidade e segurança",
             "summary": "Resumo"
           },
-          "hero": {
-            "memberSinceLabel": "Membro desde",
-            "memberSinceValue": "Out 2023"
-          },
           "helpRowLabel": "Como funciona a Volta",
-          "helpLinksDescription": "Abre apoio, privacidade e termos sem sair da app.",
           "logoutLabel": "Terminar sessão",
           "readiness": {
             "alertsAllValue": "E-mail + push ativos",
@@ -408,7 +404,10 @@
             "biometricsEnabledHelper": "Face ID / impressão digital",
             "biometricsTitle": "Biometria",
             "emailTitle": "E-mail",
+            "helpCenterBrowserHelper": "Respostas rápidas e apoio da conta no navegador.",
+            "helpCenterLabel": "Centro de ajuda",
             "helpCenterHelper": "Respostas rápidas e apoio com a conta.",
+            "helpCenterSummary": "Apoio rápido para a tua conta",
             "helpCenterTitle": "Centro de ajuda",
             "ibanHelper": "Conta bancária associada",
             "ibanTitle": "IBAN",
@@ -418,25 +417,37 @@
             "languageTitle": "Idioma",
             "nameTitle": "Nome",
             "nifTitle": "NIF",
-            "onboardingHelper": "Voltar a ver a introdução da app.",
-            "onboardingTitle": "Como funciona",
+            "onboardingHelper": "Volta a ver os passos principais da app.",
+            "onboardingTitle": "Guia curto",
+            "opensInBrowserLabel": "Abre no navegador",
             "pinDisabledHelper": "PIN da app desativado",
             "pinEnabledHelper": "PIN de 4 dígitos ativo",
             "pinTitle": "PIN da app",
             "phoneNumberTitle": "Telefone",
+            "privacyPolicyBrowserHelper": "Como tratamos os teus dados e permissões no navegador.",
+            "privacyPolicyLabel": "Política de privacidade",
             "privacyPolicyHelper": "Como tratamos os teus dados e permissões.",
+            "privacyPolicySummary": "Dados, permissões e privacidade",
             "privacyPolicyTitle": "Política de privacidade",
             "pushNotificationsDisabledHelper": "Notificações push desativadas.",
             "pushNotificationsEnabledHelper": "Notificações push ativas.",
             "pushNotificationsTitle": "Notificações push",
             "summaryHelper": "Atividade, créditos e transferências",
+            "termsBrowserHelper": "Condições de utilização e privacidade no navegador.",
+            "termsLabel": "Termos e condições",
             "termsHelper": "Condições de utilização e privacidade.",
+            "termsSummary": "Regras de utilização da app",
             "termsTitle": "Termos e condições"
           },
           "sections": {
             "account": "Conta",
+            "accountDescription": "Começa por Pagamentos para manter os reembolsos prontos. Aqui podes editar os dados principais da conta e os alertas associados.",
             "appSettings": "Definições da app",
+            "device": "Neste telemóvel",
+            "deviceDescription": "Gere privacidade, acesso, idioma e aspeto neste dispositivo.",
             "help": "Ajuda",
+            "helpDescription": "Encontra apoio rápido, revê a introdução e abre a informação legal quando precisares.",
+            "legal": "Legal",
             "payout": "Definições de pagamento",
             "primary": "O que rever agora",
             "profile": "Perfil",
@@ -444,10 +455,8 @@
             "profileData": "Dados do perfil",
             "secondary": "Mais opções"
           },
-          "sessionDescription": "Termina a sessão neste telemóvel quando acabares de usar a tua conta.",
-          "sessionLabel": "Sessão",
-          "supportDescription": "Vê novamente a introdução curta se quiseres um lembrete rápido.",
-          "supportLabel": "Precisas de rever?"
+          "sessionDescription": "Termina a sessão neste telemóvel se já não precisares desta conta neste dispositivo.",
+          "sessionLabel": "Sessão"
         },
         "alerts": {
           "description": "Escolhe como a Volta envia atualizações sobre a tua conta e pagamentos.",
@@ -469,7 +478,7 @@
               "headlineLabel": "Desde que aderiste",
               "pendingTransferActive": "Há uma transferência a caminho para o teu IBAN",
               "pendingTransferEmpty": "Não tens transferências por concluir",
-              "supportingText": "Membro desde {{memberSince}}. Transferências em processamento: {{pendingTransfers}}.",
+              "supportingText": "Membro desde {{memberSince}}.",
               "title": "Créditos recebidos"
             },
             "totals": {
@@ -505,6 +514,7 @@
         "payments": {
           "accountHolderNameHelper": "Usa o nome registado nesta conta bancária.",
           "accountHolderNameLabel": "Nome do titular",
+          "currentIbanHelper": "IBAN atual: {{iban}}. Introduz o IBAN completo para guardar alterações.",
           "description": "Gere a conta onde recebes os teus reembolsos.",
           "ibanHelper": "Usado para enviar pagamentos concluídos e reembolsos.",
           "ibanLabel": "IBAN associado",
@@ -760,48 +770,54 @@
         "transfer": {
           "actionLabel": "Pedir transferência",
           "addDestinationActionLabel": "Adicionar conta",
+          "accountHolderLabel": "Titular da conta",
           "amountPendingValue": "Insere um montante",
           "amountSummaryLabel": "Montante a transferir",
-          "amountFieldHelper": "Insere um valor até {{amount}}.",
+          "amountFieldHelper": "Escolhe um valor entre {{minimumAmount}} e {{amount}}.",
           "amountFieldLabel": "Quanto queres transferir?",
-          "balanceCaption": "Confirma o montante e a conta onde queres receber o saldo.",
+          "balanceCaption": "Escolhe o montante e confirma.",
           "balanceTitle": "Saldo disponível",
           "confirmActionLabel": "Confirmar transferência",
           "confirmActionAmountLabel": "Transferir {{amount}}",
           "confirmationBadge": "Transferência pedida",
           "confirmationDescription": "O teu pedido de transferência de {{amount}} foi enviado para a conta associada.",
           "confirmationTitle": "Transferência a caminho",
-          "description": "Revê a conta de destino e escolhe o montante.",
+          "description": "Escolhe o montante e confirma o pedido.",
           "destinationCardEyebrow": "Conta de destino",
           "destinationLabel": "Conta de destino",
-          "destinationMissingDescription": "Ainda não tens uma conta pronta para receber este saldo.",
-          "destinationMissingHelper": "Adiciona ou confirma o teu IBAN em Pagamentos para continuares.",
-          "destinationMissingSupportDescription": "Sem uma conta associada, a transferência não pode avançar.",
+          "destinationMissingDescription": "Ainda falta indicar a conta que vai receber este saldo.",
+          "destinationMissingHelper": "Abre Pagamentos para adicionar ou confirmar a conta onde queres receber o saldo.",
+          "destinationMissingSupportDescription": "Sem uma conta bancária confirmada em Pagamentos, este saldo não pode ser enviado.",
+          "destinationMissingReturnHelper": "Depois de confirmares a conta em Pagamentos, volta aqui para concluir a transferência.",
           "destinationMissingSupportTitle": "Falta confirmar a conta",
           "destinationMissingTitle": "Falta confirmar onde o saldo vai cair",
           "destinationMissingValue": "Conta por associar",
-          "destinationReadyDescription": "Este saldo vai seguir para a conta associada assim que confirmares.",
-          "destinationReadyHelper": "Se precisares, podes rever ou alterar esta conta em Pagamentos.",
+          "destinationReadyDescription": "O saldo segue para esta conta.",
+          "destinationReadyHelper": "Revê em Pagamentos se precisares de alterar.",
           "destinationReadyTitle": "O saldo vai seguir para esta conta",
-          "destinationReviewHelper": "Confirma a conta antes de pedires a transferência.",
+          "destinationReviewHelper": "Confere a conta antes de enviares o pedido.",
           "destinationSetupRequiredValue": "Depois de associares a conta",
           "errorToast": "Não foi possível pedir a transferência agora.",
           "estimatedArrivalValue": "Até 1 dia útil",
           "expectedArrivalLabel": "Chegada prevista",
           "exceedsBalanceError": "O montante não pode exceder {{amount}}.",
-          "frameDescription": "Confirma rapidamente a conta e o montante antes de enviares o saldo.",
+          "frameDescription": "Escolhe o montante, confirma a conta e envia o pedido.",
           "fullBalanceActionLabel": "Usar saldo total",
+          "minimumAmountError": "O montante mínimo é {{amount}}.",
           "newTransferActionLabel": "Pedir nova transferência",
+          "pendingActionLabel": "A enviar pedido...",
           "payoutOptionsTitle": "Escolhe como queres receber",
           "payoutOptionSepaCaption": "Disponível até 1 dia útil.",
           "payoutOptionUnavailableBadge": "Indisponível",
           "payoutMethodLabel": "Método de pagamento",
           "payoutMethodSepa": "Transferência SEPA",
-          "requestFailedDescription": "Volta a confirmar a conta associada ou tenta novamente dentro de momentos.",
+          "requestFailedDescription": "O pedido não seguiu. Confirma a conta associada e tenta novamente.",
           "requestFailedTitle": "Não conseguimos confirmar este pedido",
+          "reviewDescription": "Confirma antes de enviares.",
+          "reviewReadyDescription": "{{amount}} vai seguir para {{destination}}.",
           "reviewDestinationActionLabel": "Rever conta",
-          "reviewTitle": "Antes de confirmar",
-          "successToast": "O pedido de transferência foi enviado.",
+          "reviewTitle": "Confirmação",
+          "successToast": "Pedido enviado. Vamos processar a transferência.",
           "title": "Transferir saldo",
           "zeroAmountError": "Insere um valor acima de 0€."
         }

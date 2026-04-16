@@ -59,4 +59,33 @@ describe('onboarding screen', () => {
 
     expect(handleComplete).toHaveBeenCalledTimes(1)
   })
+
+  it('renders the review-mode close action on the last step', () => {
+    const handleComplete = jest.fn()
+
+    renderWithProvider(
+      <OnboardingScreen
+        backLabel="Back"
+        onBackPress={jest.fn()}
+        onComplete={handleComplete}
+        title="How Volta works"
+        variant="review"
+      />,
+    )
+
+    fireEvent.press(screen.getByTestId('onboarding-next-button'))
+    fireEvent.press(screen.getByTestId('onboarding-next-button'))
+    fireEvent.press(screen.getByTestId('onboarding-next-button'))
+
+    expect(screen.getByText('Fechar introdução')).toBeTruthy()
+    expect(
+      screen.getByText('Tudo pronto. Fecha esta introdução quando quiseres.'),
+    ).toBeTruthy()
+    expect(screen.getByTestId('onboarding-close-button')).toBeTruthy()
+    expect(screen.queryByTestId('onboarding-later-button')).toBeNull()
+
+    fireEvent.press(screen.getByTestId('onboarding-close-button'))
+
+    expect(handleComplete).toHaveBeenCalledTimes(1)
+  })
 })

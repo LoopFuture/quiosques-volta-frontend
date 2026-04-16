@@ -124,7 +124,7 @@ describe('unlock screen', () => {
   })
 
   it.each(['not-available', 'not-enrolled'] as const)(
-    'disables biometrics after %s is returned',
+    'disables biometrics and shows recovery guidance after %s is returned',
     async (reason) => {
       const unlockWithBiometrics = jest.fn().mockResolvedValue({
         reason,
@@ -150,12 +150,16 @@ describe('unlock screen', () => {
           screen.getByTestId('auth-biometric-button').props.accessibilityState
             .disabled,
         ).toBe(true)
+        expect(screen.getByTestId('auth-error-text')).toBeTruthy()
+        expect(
+          screen.getByTestId('auth-unlock-login-again-button'),
+        ).toBeTruthy()
       })
     },
   )
 
   it.each(['cancelled', 'failed'] as const)(
-    'does not surface a biometric error badge for %s',
+    'shows a biometric error message for %s',
     async (reason) => {
       const unlockWithBiometrics = jest.fn().mockResolvedValue({
         reason,
@@ -177,9 +181,8 @@ describe('unlock screen', () => {
 
       await waitFor(() => {
         expect(unlockWithBiometrics).toHaveBeenCalledTimes(1)
+        expect(screen.getByTestId('auth-error-text')).toBeTruthy()
       })
-
-      expect(screen.queryByTestId('auth-error-text')).toBeNull()
     },
   )
 
@@ -210,7 +213,7 @@ describe('unlock screen', () => {
   })
 
   it.each(['invalid-pin', 'too-many-attempts'] as const)(
-    'shows red PIN feedback for %s',
+    'shows red PIN feedback and recovery copy for %s',
     async (reason) => {
       const unlockWithPin = jest.fn().mockResolvedValue({
         reason,
@@ -237,19 +240,34 @@ describe('unlock screen', () => {
         expect(unlockWithPin).toHaveBeenCalledWith('9999')
         expect(
           screen.getByTestId('auth-pin-dot-1').props.accessibilityLabel,
-        ).toBe('error')
+        ).toBe('Erro no dígito 1 de 4 do PIN')
         expect(
           screen.getByTestId('auth-pin-dot-2').props.accessibilityLabel,
-        ).toBe('error')
+        ).toBe('Erro no dígito 2 de 4 do PIN')
         expect(
           screen.getByTestId('auth-pin-dot-3').props.accessibilityLabel,
-        ).toBe('error')
+        ).toBe('Erro no dígito 3 de 4 do PIN')
         expect(
           screen.getByTestId('auth-pin-dot-4').props.accessibilityLabel,
-        ).toBe('error')
+        ).toBe('Erro no dígito 4 de 4 do PIN')
+        expect(screen.getByTestId('auth-error-text')).toBeTruthy()
       })
     },
   )
+
+  it('uses a delete-specific accessibility label on the delete key', () => {
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        isPinUnlockEnabled: true,
+      }),
+    )
+
+    renderWithProvider(<UnlockScreen />)
+
+    expect(
+      screen.getByTestId('auth-pin-delete-button').props.accessibilityLabel,
+    ).toBe('Apagar o último dígito do PIN')
+  })
 
   it('clears the PIN failure feedback when the user starts entering a new PIN', async () => {
     const unlockWithPin = jest
@@ -281,13 +299,13 @@ describe('unlock screen', () => {
     await waitFor(() => {
       expect(
         screen.getByTestId('auth-pin-dot-1').props.accessibilityLabel,
-      ).toBe('error')
+      ).toBe('Erro no dígito 1 de 4 do PIN')
     })
 
     fireEvent.press(screen.getByTestId('auth-pin-key-1'))
 
     expect(screen.getByTestId('auth-pin-dot-1').props.accessibilityLabel).toBe(
-      'filled',
+      'Dígito 1 de 4 do PIN introduzido',
     )
   })
 

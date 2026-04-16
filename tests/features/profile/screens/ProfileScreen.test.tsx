@@ -161,7 +161,7 @@ describe('ProfileScreen', () => {
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 
-  it('renders the hub and routes readiness, section, help, and logout actions', async () => {
+  it('renders the hub and routes section, help, legal, and logout actions', async () => {
     const signOut = jest.fn().mockResolvedValue(undefined)
     const openBrowserAsync = jest.spyOn(WebBrowser, 'openBrowserAsync')
 
@@ -180,51 +180,71 @@ describe('ProfileScreen', () => {
 
     expect(screen.getByTestId('profile-screen')).toBeTruthy()
     expect(
-      screen.getByText(i18n.t('tabScreens.profile.hub.supportLabel')),
+      screen.getByText(i18n.t('tabScreens.profile.hub.sections.account')),
     ).toBeTruthy()
     expect(
-      screen.getByText(i18n.t('tabScreens.profile.hub.helpLinksDescription')),
+      screen.getByText(
+        i18n.t('tabScreens.profile.hub.sections.helpDescription'),
+      ),
     ).toBeTruthy()
-
     fireEvent.press(
-      screen.getByLabelText(i18n.t('tabScreens.profile.hub.cards.personal')),
+      screen.getByLabelText(
+        new RegExp(`^${i18n.t('tabScreens.profile.hub.cards.payments')}`),
+      ),
     )
     fireEvent.press(
-      screen.getByLabelText(i18n.t('tabScreens.profile.hub.cards.alerts')),
+      screen.getByLabelText(
+        new RegExp(`^${i18n.t('tabScreens.profile.hub.cards.personal')}`),
+      ),
     )
     fireEvent.press(
-      screen.getByLabelText(i18n.t('tabScreens.profile.hub.cards.privacy')),
+      screen.getByLabelText(
+        new RegExp(`^${i18n.t('tabScreens.profile.hub.cards.alerts')}`),
+      ),
     )
     fireEvent.press(
-      screen.getAllByLabelText(
-        i18n.t('tabScreens.profile.hub.cards.payments'),
-      )[0]!,
+      screen.getByLabelText(
+        new RegExp(`^${i18n.t('tabScreens.profile.hub.cards.privacy')}`),
+      ),
     )
     fireEvent.press(
-      screen.getByLabelText(i18n.t('tabScreens.profile.hub.cards.appSettings')),
+      screen.getByLabelText(
+        new RegExp(`^${i18n.t('tabScreens.profile.hub.cards.appSettings')}`),
+      ),
     )
     fireEvent.press(
       screen.getByLabelText(i18n.t('tabScreens.profile.hub.helpRowLabel')),
     )
     fireEvent.press(
       screen.getByLabelText(
-        i18n.t('tabScreens.profile.hub.rows.helpCenterTitle'),
+        [
+          i18n.t('tabScreens.profile.hub.rows.helpCenterTitle'),
+          i18n.t('tabScreens.profile.hub.rows.opensInBrowserLabel'),
+        ].join('. '),
       ),
     )
     fireEvent.press(
       screen.getByLabelText(
-        i18n.t('tabScreens.profile.hub.rows.privacyPolicyTitle'),
+        [
+          i18n.t('tabScreens.profile.hub.rows.privacyPolicyTitle'),
+          i18n.t('tabScreens.profile.hub.rows.opensInBrowserLabel'),
+        ].join('. '),
       ),
     )
     fireEvent.press(
-      screen.getByLabelText(i18n.t('tabScreens.profile.hub.rows.termsTitle')),
+      screen.getByLabelText(
+        [
+          i18n.t('tabScreens.profile.hub.rows.termsTitle'),
+          i18n.t('tabScreens.profile.hub.rows.opensInBrowserLabel'),
+        ].join('. '),
+      ),
     )
     fireEvent.press(screen.getByTestId('profile-logout-button'))
 
-    expect(mockRouterPush).toHaveBeenNthCalledWith(1, profileRoutes.personal)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(2, profileRoutes.alerts)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(3, profileRoutes.privacy)
-    expect(mockRouterPush).toHaveBeenNthCalledWith(4, profileRoutes.payments)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(1, profileRoutes.payments)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(2, profileRoutes.personal)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(3, profileRoutes.alerts)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(4, profileRoutes.privacy)
     expect(mockRouterPush).toHaveBeenNthCalledWith(5, profileRoutes.appSettings)
     expect(mockRouterPush).toHaveBeenNthCalledWith(6, profileRoutes.help)
     expect(openBrowserAsync).toHaveBeenNthCalledWith(

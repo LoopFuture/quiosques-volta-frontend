@@ -10,7 +10,11 @@ import { Provider } from '@/components/Provider'
 import BarcodeScreen from '@/features/barcode/screens/BarcodeScreen'
 import { barcodeResponseSchema } from '@/features/barcode/models'
 import { i18n, setLocaleOverrideForTests, syncLocale } from '@/i18n'
-import { restorePlatformOS, setPlatformOS } from '@tests/support/react-native'
+import {
+  mockWindowDimensions,
+  restorePlatformOS,
+  setPlatformOS,
+} from '@tests/support/react-native'
 
 const mockGetBrightnessAsync = jest.fn()
 const mockIsAvailableAsync = jest.fn()
@@ -71,6 +75,7 @@ let currentBarcodeQueryState: {
   isRefetching: boolean
   refetch: jest.Mock
 }
+let windowDimensionsSpy: jest.SpyInstance | undefined
 
 function renderBarcodeScreen() {
   return render(
@@ -113,6 +118,8 @@ describe('BarcodeScreen', () => {
   })
 
   afterEach(() => {
+    windowDimensionsSpy?.mockRestore()
+    windowDimensionsSpy = undefined
     act(() => {
       jest.runOnlyPendingTimers()
     })
@@ -164,6 +171,10 @@ describe('BarcodeScreen', () => {
     renderBarcodeScreen()
 
     expect(screen.getByText('00:45')).toBeTruthy()
+    expect(screen.getByTestId('barcode-inline-qr-button')).toBeTruthy()
+    expect(
+      screen.getAllByLabelText(i18n.t('tabScreens.barcode.card.qrExpandLabel')),
+    ).toHaveLength(2)
 
     fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
 
@@ -416,5 +427,35 @@ describe('BarcodeScreen', () => {
       expect(screen.queryByTestId('barcode-qr-modal')).toBeNull()
     })
     expect(removeBackHandlerListener).toHaveBeenCalled()
+  })
+
+  it('keeps the QR modal usable on compact screens with larger text', async () => {
+    currentBarcodeQueryState = {
+      data: activeBarcode,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    }
+    windowDimensionsSpy = mockWindowDimensions({
+      fontScale: 1.5,
+      height: 568,
+      width: 320,
+    })
+
+    renderBarcodeScreen()
+
+    fireEvent.press(screen.getByTestId('barcode-qr-trigger'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('barcode-qr-modal')).toBeTruthy()
+    })
+
+    expect(screen.getByTestId('barcode-modal-qr')).toBeTruthy()
+    expect(
+      screen.getByLabelText(
+        i18n.t('tabScreens.barcode.card.qrModalCloseLabel'),
+      ),
+    ).toBeTruthy()
   })
 })

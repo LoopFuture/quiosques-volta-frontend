@@ -107,7 +107,7 @@ describe('TopBar', () => {
     ).toBeTruthy()
   })
 
-  it('truncates long home titles to a single line with an ellipsis', () => {
+  it('renders long home titles in the default layout', () => {
     const view = renderWithProvider(
       <TopBar
         variant="home"
@@ -119,8 +119,25 @@ describe('TopBar', () => {
       'Nome muito comprido que nao deve partir em duas linhas no topo',
     )
 
-    expect(title.props.numberOfLines).toBe(1)
-    expect(title.props.ellipsizeMode).toBe('tail')
+    expect(title).toBeTruthy()
+  })
+
+  it('lets the home title wrap when larger text is enabled', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+    const view = renderWithProvider(
+      <TopBar
+        variant="home"
+        title="Nome muito comprido que deve poder partir em duas linhas com texto maior"
+      />,
+    )
+
+    const title = view.getByText(
+      'Nome muito comprido que deve poder partir em duas linhas com texto maior',
+    )
+
+    expect(title.props.numberOfLines).toBe(2)
+
+    windowSpy.mockRestore()
   })
 
   it('renders an offline warning when connectivity is unavailable', async () => {
@@ -177,6 +194,24 @@ describe('TopBar', () => {
 
     expect(view.getByText('Perfil')).toBeTruthy()
     expect(view.queryByTestId('top-bar-action-badge')).toBeNull()
+
+    windowSpy.mockRestore()
+  })
+
+  it('lets title-variant headers wrap when larger text is enabled', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.3, width: 390 })
+    const view = renderWithProvider(
+      <TopBar
+        variant="title"
+        title="Titulo bastante comprido para testar quebra com texto ampliado"
+      />,
+    )
+
+    const title = view.getByText(
+      'Titulo bastante comprido para testar quebra com texto ampliado',
+    )
+
+    expect(title.props.numberOfLines).toBe(2)
 
     windowSpy.mockRestore()
   })

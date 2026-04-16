@@ -43,4 +43,13 @@ describe('auth pin storage', () => {
     await expect(verifyStoredAppPin('1234')).resolves.toBe(false)
     expect(__getSecureStoreItem('auth.pinCredential')).toBeNull()
   })
+
+  it('rejects invalid pin formats before saving or verifying', async () => {
+    await expect(saveStoredAppPin('12ab')).rejects.toThrow(
+      'App PIN must be exactly four digits.',
+    )
+    await expect(verifyStoredAppPin('12ab')).resolves.toBe(false)
+    await expect(verifyStoredAppPin('12345')).resolves.toBe(false)
+    expect(__getSecureStoreItem('auth.pinCredential')).toBeNull()
+  })
 })

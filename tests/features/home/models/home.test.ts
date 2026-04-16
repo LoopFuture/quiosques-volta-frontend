@@ -5,6 +5,10 @@ describe('home model helpers', () => {
     expect(getHomeGreetingDisplayName('Volta')).toBe('Volta')
   })
 
+  it('returns an empty greeting name when the input is blank', () => {
+    expect(getHomeGreetingDisplayName('   ')).toBe('')
+  })
+
   it('reduces multi-part names to first and last names', () => {
     expect(getHomeGreetingDisplayName('Joao Pedro Ferreira')).toBe(
       'Joao Ferreira',

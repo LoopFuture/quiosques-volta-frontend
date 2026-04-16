@@ -1,4 +1,5 @@
 import { ArrowUpRight, Check, X } from '@tamagui/lucide-icons'
+import { useWindowDimensions } from 'react-native'
 import { Text, YStack } from 'tamagui'
 import { SurfaceCard } from '@/components/ui'
 import type { Tone } from '@/components/ui/types'
@@ -31,7 +32,11 @@ export function WalletMovementSummaryCard({
   title,
   tone,
 }: WalletMovementSummaryCardProps) {
+  const { fontScale, width } = useWindowDimensions()
   const Icon = getMovementStatusIcon(status)
+  const usesExpandedTextLayout = fontScale > 1.15 || width < 360
+  const amountFontSize = usesExpandedTextLayout ? 32 : 38
+  const amountLineHeight = usesExpandedTextLayout ? 38 : 44
 
   return (
     <SurfaceCard items="center" gap="$4.5" p="$5" tone={tone}>
@@ -52,10 +57,10 @@ export function WalletMovementSummaryCard({
 
       <YStack items="center" gap="$2" style={{ maxWidth: 320 }}>
         <Text
-          fontSize={38}
+          fontSize={amountFontSize}
           fontWeight="900"
-          lineHeight={44}
-          numberOfLines={2}
+          lineHeight={amountLineHeight}
+          numberOfLines={usesExpandedTextLayout ? undefined : 2}
           style={{ textAlign: 'center' }}
         >
           {amount}

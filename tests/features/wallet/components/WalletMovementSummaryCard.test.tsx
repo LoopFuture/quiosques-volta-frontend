@@ -1,5 +1,6 @@
 import { screen } from '@testing-library/react-native'
 import { WalletMovementSummaryCard } from '@/features/wallet/components/WalletMovementSummaryCard'
+import { mockWindowDimensions } from '@tests/support/react-native'
 import { renderWithProvider } from '@tests/support/test-utils'
 
 jest.mock('@tamagui/lucide-icons', () => ({
@@ -57,5 +58,25 @@ describe('WalletMovementSummaryCard', () => {
     )
 
     expect(screen.getByText('X')).toBeTruthy()
+  })
+
+  it('expands the amount text for larger accessibility text sizes', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.2, width: 390 })
+
+    renderWithProvider(
+      <WalletMovementSummaryCard
+        amount="1 234 567,89 €"
+        description="Descrição"
+        status="completed"
+        title="Transferência"
+        tone="accent"
+      />,
+    )
+
+    expect(
+      screen.getByText('1 234 567,89 €').props.numberOfLines,
+    ).toBeUndefined()
+
+    windowSpy.mockRestore()
   })
 })

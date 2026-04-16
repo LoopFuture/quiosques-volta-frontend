@@ -1,6 +1,6 @@
 import { YStack } from 'tamagui'
 import { BarcodeQrCode } from '@/features/barcode/components/BarcodeQrCode'
-import { brandWhite } from '@/themes'
+import { qrPresentationColors } from '@/themes'
 import { renderWithTheme } from '@tests/support/test-utils'
 
 jest.mock('react-native-qrcode-svg', () => {
@@ -39,7 +39,7 @@ describe('BarcodeQrCode', () => {
     const wrapper = view.UNSAFE_getByType(YStack)
 
     expect(view.getByTestId('barcode-qr-code-dark')).toBeTruthy()
-    expect(wrapper.props.bg).toBe(brandWhite)
+    expect(wrapper.props.bg).toBe(qrPresentationColors.background)
     expect(wrapper.props.borderColor).toBe('transparent')
     expect(wrapper.props.borderWidth).toBe(0)
   })

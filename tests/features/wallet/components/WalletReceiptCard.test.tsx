@@ -56,4 +56,27 @@ describe('WalletReceiptCard', () => {
 
     compactSpy.mockRestore()
   })
+
+  it('switches to the compact layout when accessibility text is enlarged', () => {
+    const windowSpy = mockWindowDimensions({ fontScale: 1.2, width: 390 })
+
+    renderWithProvider(
+      <WalletReceiptCard
+        items={[
+          {
+            helper: 'Conta para receber o montante transferido',
+            label: 'Conta associada',
+            value: 'PT50 0002 0123 1234 5678 9015 4',
+          },
+        ]}
+        title="Detalhes"
+      />,
+    )
+
+    expect(
+      screen.getByText('Conta para receber o montante transferido'),
+    ).toBeTruthy()
+
+    windowSpy.mockRestore()
+  })
 })

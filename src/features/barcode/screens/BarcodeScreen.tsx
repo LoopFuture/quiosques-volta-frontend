@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import {
   BackHandler,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   useWindowDimensions,
 } from 'react-native'
@@ -35,6 +36,10 @@ import { useQrPresentationBrightness } from '../hooks/useQrPresentationBrightnes
 const INLINE_QR_SIZE = 168
 const INLINE_QR_STAGE_MIN_HEIGHT = INLINE_QR_SIZE + 40
 const INLINE_QR_ACTION_HEIGHT = 56
+const MODAL_HORIZONTAL_PADDING = 16
+const MODAL_QR_FRAME_PADDING = 12
+const MODAL_MAX_CONTENT_WIDTH = 420
+const MODAL_MIN_QR_SIZE = 144
 
 function BarcodeScreenSkeleton() {
   return (
@@ -223,6 +228,48 @@ function BarcodeCountdownInlineStatus({
   )
 }
 
+const BarcodeInlineActiveQr = memo(function BarcodeInlineActiveQr({
+  accessibilityHint,
+  accessibilityLabel,
+  code,
+  onOpen,
+}: {
+  accessibilityHint: string
+  accessibilityLabel: string
+  code: string
+  onOpen: () => void
+}) {
+  return (
+    <Pressable
+      accessibilityHint={accessibilityHint}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      hitSlop={12}
+      onPress={onOpen}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.88 : 1,
+      })}
+      testID="barcode-inline-qr-button"
+    >
+      <BarcodeQrCode
+        size={INLINE_QR_SIZE}
+        testID="barcode-inline-qr"
+        value={code}
+      />
+    </Pressable>
+  )
+})
+
+const BarcodeModalActiveQr = memo(function BarcodeModalActiveQr({
+  code,
+  size,
+}: {
+  code: string
+  size: number
+}) {
+  return <BarcodeQrCode size={size} testID="barcode-modal-qr" value={code} />
+})
+
 export default function BarcodeScreen() {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false)
   const expiredPayloadRefetchKeyRef = useRef<string | null>(null)
@@ -241,13 +288,24 @@ export default function BarcodeScreen() {
   const barcodePayloadKey = barcodeScreenState
     ? `${barcodeScreenState.code}:${barcodeScreenState.expiresAt}`
     : null
+  const modalContentWidth = Math.min(
+    Math.max(width - MODAL_HORIZONTAL_PADDING * 2, 0),
+    MODAL_MAX_CONTENT_WIDTH,
+  )
   const modalQrSize = Math.floor(
-    Math.max(208, Math.min(width - 80, height * 0.42, 336)),
+    Math.max(
+      MODAL_MIN_QR_SIZE,
+      Math.min(
+        modalContentWidth - MODAL_QR_FRAME_PADDING * 2,
+        height * 0.42,
+        336,
+      ),
+    ),
   )
   const modalBottomPadding = Math.max(insets.bottom + 20, 28)
   const modalTopPadding = Math.max(insets.top, 16)
-  const closeQrModal = () => setIsQrModalOpen(false)
-  const openQrModal = () => setIsQrModalOpen(true)
+  const closeQrModal = useCallback(() => setIsQrModalOpen(false), [])
+  const openQrModal = useCallback(() => setIsQrModalOpen(true), [])
 
   useQrPresentationBrightness(isQrModalOpen)
 
@@ -315,7 +373,7 @@ export default function BarcodeScreen() {
     return () => {
       subscription.remove()
     }
-  }, [isQrModalOpen])
+  }, [closeQrModal, isQrModalOpen])
 
   const handleRetryExpiredBarcode = () => {
     void refetch()
@@ -329,20 +387,12 @@ export default function BarcodeScreen() {
       width="100%"
     >
       {isActiveBarcode ? (
-        <Pressable
+        <BarcodeInlineActiveQr
+          accessibilityHint={t('tabScreens.barcode.card.openFullscreenLabel')}
           accessibilityLabel={t('tabScreens.barcode.card.qrExpandLabel')}
-          hitSlop={12}
-          onPress={openQrModal}
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.88 : 1,
-          })}
-        >
-          <BarcodeQrCode
-            size={INLINE_QR_SIZE}
-            testID="barcode-inline-qr"
-            value={barcodeScreenState.code}
-          />
-        </Pressable>
+          code={barcodeScreenState.code}
+          onOpen={openQrModal}
+        />
       ) : isRefreshingExpiredCode ? (
         <BarcodeQrRefreshPlaceholder
           description={t('tabScreens.barcode.card.refreshingDescription')}
@@ -477,12 +527,15 @@ export default function BarcodeScreen() {
                   testID="barcode-qr-overlay"
                 />
 
-                <YStack
-                  flex={1}
-                  pb={modalBottomPadding}
-                  pt={modalTopPadding}
-                  px="$4"
-                  pointerEvents="box-none"
+                <ScrollView
+                  bounces={false}
+                  contentContainerStyle={{
+                    flexGrow: 1,
+                    paddingBottom: modalBottomPadding,
+                    paddingTop: modalTopPadding,
+                    paddingHorizontal: MODAL_HORIZONTAL_PADDING,
+                  }}
+                  showsVerticalScrollIndicator={false}
                 >
                   <YStack
                     flex={1}
@@ -491,10 +544,9 @@ export default function BarcodeScreen() {
                   >
                     <YStack gap="$4" items="center" pointerEvents="box-none">
                       {isActiveBarcode ? (
-                        <BarcodeQrCode
+                        <BarcodeModalActiveQr
+                          code={barcodeScreenState.code}
                           size={modalQrSize}
-                          testID="barcode-modal-qr"
-                          value={barcodeScreenState.code}
                         />
                       ) : isRefreshingExpiredCode ? (
                         <BarcodeQrRefreshPlaceholder
@@ -518,7 +570,10 @@ export default function BarcodeScreen() {
                       )}
 
                       {isActiveBarcode ? (
-                        <YStack style={{ maxWidth: 420 }} width="100%">
+                        <YStack
+                          style={{ maxWidth: MODAL_MAX_CONTENT_WIDTH }}
+                          width="100%"
+                        >
                           <BarcodeCountdownInlineStatus
                             formattedRemaining={
                               barcodeCountdown.formattedRemaining
@@ -583,7 +638,7 @@ export default function BarcodeScreen() {
                       </Button>
                     </YStack>
                   </YStack>
-                </YStack>
+                </ScrollView>
               </YStack>
             </Dialog.Content>
           </Dialog.Portal>

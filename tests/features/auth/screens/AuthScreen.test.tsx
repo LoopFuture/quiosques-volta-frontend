@@ -497,6 +497,10 @@ describe('auth screen', () => {
       expect(screen.getByText('Exchange failed')).toBeTruthy()
     })
 
+    expect(screen.getByTestId('auth-error-text').props.accessibilityRole).toBe(
+      'alert',
+    )
+
     expect(addBreadcrumb).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'sign-in.exchange.error',

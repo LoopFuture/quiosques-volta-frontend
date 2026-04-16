@@ -1,6 +1,12 @@
 import { useRouter } from 'expo-router'
-import { Platform } from 'react-native'
-import { Controller, useForm } from 'react-hook-form'
+import { Platform, useWindowDimensions } from 'react-native'
+import {
+  Controller,
+  useForm,
+  useFormState,
+  useWatch,
+  type Control,
+} from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { Input, Text, XStack, YStack } from 'tamagui'
 import { createZodResolver } from '@/features/app-data/forms'
@@ -9,14 +15,12 @@ import {
   QueryErrorState,
   SkeletonBlock,
   StatusBadge,
-  SurfaceSeparator,
   SurfaceCard,
   ToneScope,
 } from '@/components/ui'
 import { useActionToast } from '@/features/app-shell/hooks/useActionToast'
 import { useProfileQuery } from '@/features/profile/hooks'
 import { profileRoutes } from '@/features/profile/routes'
-import { WalletReceiptCard } from '../components/WalletReceiptCard'
 import { WalletDetailScreenFrame } from '../components/WalletDetailScreenFrame'
 import {
   getWalletTransferAmountError,
@@ -28,7 +32,7 @@ import {
   type WalletTransferRequest,
   type WalletTransferFormValues,
 } from '../forms'
-import { formatWalletAmount, formatWalletPaymentAccount } from '../models'
+import { formatWalletAmount } from '../models'
 import {
   useRequestWalletTransferMutation,
   useWalletOverviewQuery,
@@ -85,10 +89,156 @@ function WalletTransferScreenSkeleton() {
   )
 }
 
+function WalletTransferSummarySection({
+  control,
+  expectedArrivalValue,
+  fallbackAccountHolderName,
+  hasPayoutAccount,
+  isPending,
+  onSubmit,
+  payoutAccount,
+  t,
+}: {
+  control: Control<WalletTransferFormValues>
+  expectedArrivalValue: string
+  fallbackAccountHolderName?: string
+  hasPayoutAccount: boolean
+  isPending: boolean
+  onSubmit: () => void
+  payoutAccount: {
+    accountHolderName?: string
+    ibanMasked: string
+    rail: 'sepa'
+  } | null
+  t: ReturnType<typeof useTranslation>['t']
+}) {
+  const { i18n } = useTranslation()
+  const { isValid } = useFormState({ control })
+  const transferAmount = useWatch({
+    control,
+    name: 'amount',
+    defaultValue: '',
+  })
+  const transferAmountCents = parseTransferAmountCents(transferAmount)
+  const payoutAccountHolderName =
+    payoutAccount?.accountHolderName ?? fallbackAccountHolderName
+  const payoutDestination = payoutAccount
+    ? payoutAccount.ibanMasked
+    : t('tabScreens.wallet.transfer.destinationMissingValue')
+  const selectedTransferAmount =
+    transferAmount.length > 0 && transferAmountCents !== null && isValid
+      ? formatWalletAmount(transferAmountCents, i18n.language)
+      : t('tabScreens.wallet.transfer.amountPendingValue')
+  const canSubmitTransfer = hasPayoutAccount && isValid && !isPending
+  const transferActionLabel = canSubmitTransfer
+    ? t('tabScreens.wallet.transfer.confirmActionAmountLabel', {
+        amount: selectedTransferAmount,
+      })
+    : t('tabScreens.wallet.transfer.confirmActionLabel')
+  const reviewDescription = canSubmitTransfer
+    ? t('tabScreens.wallet.transfer.reviewReadyDescription', {
+        amount: selectedTransferAmount,
+        destination: payoutAccountHolderName
+          ? `${payoutAccountHolderName} (${payoutDestination})`
+          : payoutDestination,
+      })
+    : t('tabScreens.wallet.transfer.reviewDescription')
+
+  return (
+    <>
+      <SurfaceCard
+        gap="$3"
+        p="$4"
+        testID="wallet-transfer-review-card"
+        tone="accent"
+      >
+        <YStack gap="$0.5">
+          <Text
+            color="$color10"
+            fontSize={13}
+            fontWeight="800"
+            textTransform="uppercase"
+          >
+            {t('tabScreens.wallet.transfer.reviewTitle')}
+          </Text>
+          <Text fontSize={18} fontWeight="800">
+            {transferActionLabel}
+          </Text>
+          <Text color="$color11" fontSize={13} lineHeight={18}>
+            {reviewDescription}
+          </Text>
+        </YStack>
+
+        <YStack gap="$2">
+          {payoutAccountHolderName ? (
+            <XStack gap="$3" items="center" justify="space-between">
+              <Text color="$color10" flex={1} fontSize={14} fontWeight="700">
+                {t('tabScreens.wallet.transfer.accountHolderLabel')}
+              </Text>
+              <Text
+                fontSize={14}
+                fontWeight="700"
+                style={{ flexShrink: 1, textAlign: 'right' }}
+              >
+                {payoutAccountHolderName}
+              </Text>
+            </XStack>
+          ) : null}
+
+          <XStack gap="$3" items="center" justify="space-between">
+            <Text color="$color10" flex={1} fontSize={14} fontWeight="700">
+              {t('tabScreens.wallet.transfer.amountSummaryLabel')}
+            </Text>
+            <Text fontSize={18} fontWeight="900" style={{ textAlign: 'right' }}>
+              {selectedTransferAmount}
+            </Text>
+          </XStack>
+
+          <XStack gap="$3" items="center" justify="space-between">
+            <Text color="$color10" flex={1} fontSize={14} fontWeight="700">
+              {t('tabScreens.wallet.transfer.destinationLabel')}
+            </Text>
+            <Text
+              fontSize={14}
+              fontWeight="700"
+              style={{ flexShrink: 1, textAlign: 'right' }}
+            >
+              {payoutDestination}
+            </Text>
+          </XStack>
+
+          <XStack gap="$3" items="center" justify="space-between">
+            <Text color="$color10" flex={1} fontSize={14} fontWeight="700">
+              {t('tabScreens.wallet.transfer.expectedArrivalLabel')}
+            </Text>
+            <Text fontSize={14} fontWeight="700" style={{ textAlign: 'right' }}>
+              {expectedArrivalValue}
+            </Text>
+          </XStack>
+        </YStack>
+      </SurfaceCard>
+
+      <PrimaryButton
+        disabled={!canSubmitTransfer}
+        isPending={isPending}
+        onPress={onSubmit}
+        pendingLabel={t('tabScreens.wallet.transfer.pendingActionLabel')}
+        testID="wallet-transfer-submit-button"
+      >
+        {transferActionLabel}
+      </PrimaryButton>
+    </>
+  )
+}
+
 function WalletTransferScreenContent({
+  fallbackAccountHolderName,
+  minimumTransferCents,
   payoutAccount,
   walletBalanceCents,
 }: {
+  fallbackAccountHolderName?: string
+  minimumTransferCents: number
   payoutAccount: {
     accountHolderName?: string
     ibanMasked: string
@@ -99,63 +249,57 @@ function WalletTransferScreenContent({
   const router = useRouter()
   const { showError, showSuccess } = useActionToast()
   const { i18n, t } = useTranslation()
+  const { fontScale } = useWindowDimensions()
   const requestTransferMutation = useRequestWalletTransferMutation()
   const availableBalanceAmount = formatWalletAmount(
     walletBalanceCents,
     i18n.language,
   )
+  const minimumTransferAmount = formatWalletAmount(
+    minimumTransferCents,
+    i18n.language,
+  )
   const transferValidationCopy = {
     amountFieldHelper: t('tabScreens.wallet.transfer.amountFieldHelper', {
+      minimumAmount: minimumTransferAmount,
       amount: availableBalanceAmount,
     }),
     exceedsBalanceError: t('tabScreens.wallet.transfer.exceedsBalanceError', {
       amount: availableBalanceAmount,
     }),
+    minimumAmountError: t('tabScreens.wallet.transfer.minimumAmountError', {
+      amount: minimumTransferAmount,
+    }),
     zeroAmountError: t('tabScreens.wallet.transfer.zeroAmountError'),
   }
-  const { control, handleSubmit, reset, setValue, watch } =
+  const { control, handleSubmit, reset, setValue } =
     useForm<WalletTransferFormValues>({
       defaultValues: getWalletTransferFormDefaultValues(),
       mode: 'onChange',
       reValidateMode: 'onChange',
       resolver: createZodResolver(
-        getWalletTransferFormSchema(walletBalanceCents, transferValidationCopy),
+        getWalletTransferFormSchema(
+          minimumTransferCents,
+          walletBalanceCents,
+          transferValidationCopy,
+        ),
       ),
     })
-  const transferAmount = watch('amount')
   const hasPayoutAccount = Boolean(payoutAccount)
-  const transferAmountError = getWalletTransferAmountError(
-    transferAmount,
-    walletBalanceCents,
-    transferValidationCopy,
-  )
-  const isTransferAmountValid =
-    transferAmount.length > 0 &&
-    !transferAmountError &&
-    !requestTransferMutation.isPending
-  const transferAmountCents = parseTransferAmountCents(transferAmount)
-  const selectedTransferAmount =
-    transferAmount.length > 0 &&
-    !transferAmountError &&
-    transferAmountCents !== null
-      ? formatWalletAmount(transferAmountCents, i18n.language)
-      : t('tabScreens.wallet.transfer.amountPendingValue')
+  const payoutAccountHolderName =
+    payoutAccount?.accountHolderName ?? fallbackAccountHolderName
   const payoutDestination = payoutAccount
-    ? formatWalletPaymentAccount(payoutAccount)
+    ? payoutAccount.ibanMasked
     : t('tabScreens.wallet.transfer.destinationMissingValue')
+  const payoutDestinationStatusDescription = hasPayoutAccount
+    ? t('tabScreens.wallet.transfer.destinationReadyHelper')
+    : t('tabScreens.wallet.transfer.destinationMissingDescription')
+  const payoutDestinationActionDescription = hasPayoutAccount
+    ? null
+    : t('tabScreens.wallet.transfer.destinationMissingHelper')
   const expectedArrivalValue = hasPayoutAccount
     ? t('tabScreens.wallet.transfer.estimatedArrivalValue')
     : t('tabScreens.wallet.transfer.destinationSetupRequiredValue')
-  const transferSummaryDestinationHelper = hasPayoutAccount
-    ? t('tabScreens.wallet.transfer.destinationReviewHelper')
-    : t('tabScreens.wallet.transfer.destinationMissingHelper')
-  const canSubmitTransfer =
-    hasPayoutAccount && isTransferAmountValid && transferAmountCents !== null
-  const transferActionLabel = canSubmitTransfer
-    ? t('tabScreens.wallet.transfer.confirmActionAmountLabel', {
-        amount: selectedTransferAmount,
-      })
-    : t('tabScreens.wallet.transfer.confirmActionLabel')
   const supportStateCopy = !hasPayoutAccount
     ? {
         actionLabel: t('tabScreens.wallet.transfer.addDestinationActionLabel'),
@@ -205,7 +349,7 @@ function WalletTransferScreenContent({
 
   return (
     <YStack gap="$4">
-      <SurfaceCard gap="$4.5" p="$5" tone="accent">
+      <SurfaceCard gap="$4" p="$4.5" tone="accent">
         <YStack gap="$1.5">
           <Text
             color="$color10"
@@ -215,207 +359,225 @@ function WalletTransferScreenContent({
           >
             {t('tabScreens.wallet.transfer.balanceTitle')}
           </Text>
-          <Text fontSize={24} fontWeight="800">
+          <Text fontSize={24} fontWeight="900">
             {t('tabScreens.wallet.transfer.description')}
           </Text>
-          <Text color="$color11" fontSize={15} lineHeight={22}>
+          <Text color="$color11" fontSize={14} lineHeight={20}>
             {t('tabScreens.wallet.transfer.balanceCaption')}
           </Text>
         </YStack>
 
-        <YStack
-          bg="$background"
-          borderColor="$borderColor"
-          borderWidth={1}
-          gap="$3"
-          p="$4"
-          rounded="$7"
-        >
-          <YStack gap="$1.5">
-            <Text color="$color10" fontSize={13} fontWeight="800">
-              {t('tabScreens.wallet.transfer.destinationCardEyebrow')}
-            </Text>
-            <Text fontSize={20} fontWeight="800">
-              {t(
-                hasPayoutAccount
-                  ? 'tabScreens.wallet.transfer.destinationReadyTitle'
-                  : 'tabScreens.wallet.transfer.destinationMissingTitle',
-              )}
-            </Text>
-            <Text color="$color11" fontSize={14} lineHeight={21}>
-              {t(
-                hasPayoutAccount
-                  ? 'tabScreens.wallet.transfer.destinationReadyDescription'
-                  : 'tabScreens.wallet.transfer.destinationMissingDescription',
-              )}
-            </Text>
-          </YStack>
-
-          <YStack gap="$1">
-            <Text color="$color10" fontSize={13} fontWeight="800">
-              {t('tabScreens.wallet.transfer.destinationLabel')}
-            </Text>
-            <Text fontSize={16} fontWeight="800">
-              {payoutDestination}
-            </Text>
-            <Text color="$color11" fontSize={14} lineHeight={21}>
-              {t(
-                hasPayoutAccount
-                  ? 'tabScreens.wallet.transfer.destinationReadyHelper'
-                  : 'tabScreens.wallet.transfer.destinationMissingHelper',
-              )}
-            </Text>
-          </YStack>
-
-          <PrimaryButton
-            emphasis="outline"
-            fullWidth={false}
-            onPress={handleManagePayoutAccount}
-            tone="neutral"
-          >
-            {t(
-              hasPayoutAccount
-                ? 'tabScreens.wallet.transfer.reviewDestinationActionLabel'
-                : 'tabScreens.wallet.transfer.addDestinationActionLabel',
-            )}
-          </PrimaryButton>
-        </YStack>
-
-        <SurfaceSeparator />
-
-        <YStack gap="$4">
+        <YStack gap="$3.5">
           <Controller
             control={control}
             name="amount"
-            render={({ field }) => (
-              <YStack gap="$2.5" items="center">
+            render={({ field }) => {
+              const transferAmountError = getWalletTransferAmountError(
+                field.value,
+                minimumTransferCents,
+                walletBalanceCents,
+                transferValidationCopy,
+              )
+              const helperText =
+                transferAmountError ?? transferValidationCopy.amountFieldHelper
+              const helperTextId = 'wallet-transfer-amount-helper'
+              const isLargeText = fontScale > 1.15
+
+              return (
+                <YStack
+                  bg="$background"
+                  borderColor={transferAmountError ? '$color8' : '$borderColor'}
+                  borderWidth={1}
+                  gap="$2.5"
+                  p="$4"
+                  rounded="$7"
+                >
+                  <YStack gap="$1.5">
+                    <Text
+                      color="$color10"
+                      fontSize={13}
+                      fontWeight="800"
+                      textTransform="uppercase"
+                    >
+                      {t('tabScreens.wallet.transfer.amountFieldLabel')}
+                    </Text>
+                    <XStack
+                      gap="$3"
+                      items="center"
+                      style={{ minWidth: 0 }}
+                      width="100%"
+                    >
+                      <Text
+                        color="$color10"
+                        fontSize={isLargeText ? 28 : 34}
+                        fontWeight="800"
+                      >
+                        €
+                      </Text>
+                      <Input
+                        aria-describedby={helperTextId}
+                        accessibilityHint={helperText}
+                        accessibilityLabel={t(
+                          'tabScreens.wallet.transfer.amountFieldLabel',
+                        )}
+                        color="$color"
+                        flex={1}
+                        fontSize={isLargeText ? 44 : 52}
+                        fontWeight="900"
+                        height={isLargeText ? 84 : 72}
+                        keyboardType="decimal-pad"
+                        onBlur={field.onBlur}
+                        onChangeText={(value) => {
+                          if (requestTransferMutation.isError) {
+                            requestTransferMutation.reset()
+                          }
+
+                          field.onChange(normalizeTransferAmountInput(value))
+                        }}
+                        placeholder="0,00"
+                        placeholderTextColor="$color10"
+                        style={[
+                          {
+                            fontVariant: 'tabular-nums',
+                            paddingBottom: 0,
+                            paddingTop: 0,
+                          },
+                          Platform.OS === 'android'
+                            ? { paddingVertical: 0 }
+                            : null,
+                        ]}
+                        testID="wallet-transfer-amount-input"
+                        textAlignVertical={
+                          Platform.OS === 'android' ? 'center' : undefined
+                        }
+                        unstyled
+                        value={field.value}
+                      />
+                    </XStack>
+                  </YStack>
+
+                  <XStack items="center" justify="space-between" gap="$3">
+                    <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
+                      <Text color="$color10" fontSize={13} fontWeight="800">
+                        {t(
+                          'tabScreens.wallet.overview.balanceCard.availableBalanceLabel',
+                        )}
+                      </Text>
+                      <Text fontSize={22} fontWeight="900">
+                        {availableBalanceAmount}
+                      </Text>
+                    </YStack>
+
+                    <PrimaryButton
+                      emphasis="outline"
+                      fullWidth={false}
+                      onPress={() => {
+                        if (requestTransferMutation.isError) {
+                          requestTransferMutation.reset()
+                        }
+
+                        setValue(
+                          'amount',
+                          formatTransferAmountInput(walletBalanceCents),
+                          {
+                            shouldDirty: true,
+                            shouldTouch: true,
+                            shouldValidate: true,
+                          },
+                        )
+                      }}
+                      tone="neutral"
+                    >
+                      {t('tabScreens.wallet.transfer.fullBalanceActionLabel')}
+                    </PrimaryButton>
+                  </XStack>
+
+                  <ToneScope tone={transferAmountError ? 'error' : 'neutral'}>
+                    <Text
+                      accessibilityLiveRegion="polite"
+                      color={transferAmountError ? '$color' : '$color11'}
+                      fontSize={14}
+                      lineHeight={20}
+                      nativeID={helperTextId}
+                    >
+                      {helperText}
+                    </Text>
+                  </ToneScope>
+                </YStack>
+              )
+            }}
+          />
+
+          <YStack
+            bg="$color1"
+            borderColor="$borderColor"
+            borderWidth={1}
+            gap="$2.5"
+            p="$3.5"
+            rounded="$7"
+          >
+            <YStack gap="$0.5">
+              <Text color="$color10" fontSize={13} fontWeight="800">
+                {t('tabScreens.wallet.transfer.destinationCardEyebrow')}
+              </Text>
+              {payoutAccountHolderName ? (
+                <YStack gap="$0.5">
+                  <Text color="$color10" fontSize={12} fontWeight="700">
+                    {t('tabScreens.wallet.transfer.accountHolderLabel')}
+                  </Text>
+                  <Text fontSize={15} fontWeight="800">
+                    {payoutAccountHolderName}
+                  </Text>
+                </YStack>
+              ) : null}
+              <YStack gap="$0.5">
+                <Text color="$color10" fontSize={12} fontWeight="700">
+                  {t('tabScreens.wallet.transfer.destinationLabel')}
+                </Text>
+                <Text fontSize={15} fontWeight="800">
+                  {payoutDestination}
+                </Text>
+              </YStack>
+              <Text color="$color11" fontSize={14} lineHeight={21}>
+                {payoutDestinationStatusDescription}
+              </Text>
+              {payoutDestinationActionDescription ? (
                 <Text
                   color="$color10"
                   fontSize={13}
-                  fontWeight="800"
-                  textTransform="uppercase"
+                  fontWeight="700"
+                  lineHeight={18}
                 >
-                  {t('tabScreens.wallet.transfer.amountFieldLabel')}
+                  {payoutDestinationActionDescription}
                 </Text>
-
-                <XStack
-                  gap="$2.5"
-                  items="center"
-                  justify="center"
-                  style={{ maxWidth: 280 }}
-                  width="100%"
-                >
-                  <Input
-                    accessibilityLabel={t(
-                      'tabScreens.wallet.transfer.amountFieldLabel',
-                    )}
-                    color="$color"
-                    flex={1}
-                    fontSize={52}
-                    fontWeight="900"
-                    height={72}
-                    keyboardType="decimal-pad"
-                    onBlur={field.onBlur}
-                    onChangeText={(value) => {
-                      if (requestTransferMutation.isError) {
-                        requestTransferMutation.reset()
-                      }
-
-                      field.onChange(normalizeTransferAmountInput(value))
-                    }}
-                    placeholder="0,00"
-                    placeholderTextColor="$color10"
-                    style={[
-                      {
-                        fontVariant: 'tabular-nums',
-                        paddingBottom: 0,
-                        paddingTop: 0,
-                        textAlign: 'center',
-                      },
-                      Platform.OS === 'android' ? { paddingVertical: 0 } : null,
-                    ]}
-                    testID="wallet-transfer-amount-input"
-                    textAlignVertical={
-                      Platform.OS === 'android' ? 'center' : undefined
-                    }
-                    unstyled
-                    value={field.value}
-                  />
-                  <Text color="$color10" fontSize={34} fontWeight="800">
-                    €
-                  </Text>
-                </XStack>
-
-                <ToneScope tone={transferAmountError ? 'error' : 'neutral'}>
-                  <Text
-                    color={transferAmountError ? '$color' : '$color11'}
-                    fontSize={14}
-                    style={{ textAlign: 'center' }}
-                  >
-                    {transferAmountError ??
-                      transferValidationCopy.amountFieldHelper}
-                  </Text>
-                </ToneScope>
-              </YStack>
-            )}
-          />
-
-          <XStack items="center" justify="space-between" gap="$3">
-            <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
-              <Text color="$color10" fontSize={13} fontWeight="800">
-                {t(
-                  'tabScreens.wallet.overview.balanceCard.availableBalanceLabel',
-                )}
-              </Text>
-              <Text fontSize={24} fontWeight="900">
-                {availableBalanceAmount}
-              </Text>
+              ) : null}
             </YStack>
 
             <PrimaryButton
               emphasis="outline"
               fullWidth={false}
-              onPress={() => {
-                if (requestTransferMutation.isError) {
-                  requestTransferMutation.reset()
-                }
-
-                setValue(
-                  'amount',
-                  formatTransferAmountInput(walletBalanceCents),
-                  {
-                    shouldDirty: true,
-                    shouldTouch: true,
-                    shouldValidate: true,
-                  },
-                )
-              }}
+              onPress={handleManagePayoutAccount}
               tone="neutral"
             >
-              {t('tabScreens.wallet.transfer.fullBalanceActionLabel')}
+              {t(
+                hasPayoutAccount
+                  ? 'tabScreens.wallet.transfer.reviewDestinationActionLabel'
+                  : 'tabScreens.wallet.transfer.addDestinationActionLabel',
+              )}
             </PrimaryButton>
-          </XStack>
+          </YStack>
         </YStack>
       </SurfaceCard>
 
-      <WalletReceiptCard
-        items={[
-          {
-            label: t('tabScreens.wallet.transfer.amountSummaryLabel'),
-            value: selectedTransferAmount,
-          },
-          {
-            label: t('tabScreens.wallet.transfer.destinationLabel'),
-            value: payoutDestination,
-            helper: transferSummaryDestinationHelper,
-          },
-          {
-            label: t('tabScreens.wallet.transfer.expectedArrivalLabel'),
-            value: expectedArrivalValue,
-          },
-        ]}
-        testID="wallet-transfer-review-card"
-        title={t('tabScreens.wallet.transfer.reviewTitle')}
+      <WalletTransferSummarySection
+        control={control}
+        expectedArrivalValue={expectedArrivalValue}
+        fallbackAccountHolderName={fallbackAccountHolderName}
+        hasPayoutAccount={hasPayoutAccount}
+        isPending={requestTransferMutation.isPending}
+        onSubmit={submitTransfer}
+        payoutAccount={payoutAccount}
+        t={t}
       />
 
       {supportStateCopy ? (
@@ -430,6 +592,11 @@ function WalletTransferScreenContent({
             <Text fontSize={18} fontWeight="800">
               {supportStateCopy.description}
             </Text>
+            {!hasPayoutAccount ? (
+              <Text color="$color11" fontSize={14} lineHeight={20}>
+                {t('tabScreens.wallet.transfer.destinationMissingReturnHelper')}
+              </Text>
+            ) : null}
           </YStack>
 
           <PrimaryButton
@@ -442,15 +609,6 @@ function WalletTransferScreenContent({
           </PrimaryButton>
         </SurfaceCard>
       ) : null}
-
-      <PrimaryButton
-        disabled={!canSubmitTransfer}
-        isPending={requestTransferMutation.isPending}
-        onPress={submitTransfer}
-        testID="wallet-transfer-submit-button"
-      >
-        {transferActionLabel}
-      </PrimaryButton>
     </YStack>
   )
 }
@@ -495,6 +653,10 @@ export default function WalletTransferScreen() {
         <WalletTransferScreenSkeleton />
       ) : (
         <WalletTransferScreenContent
+          fallbackAccountHolderName={profile.personal.name ?? undefined}
+          minimumTransferCents={
+            walletOverviewState.transferEligibility.minimumTransfer.amountMinor
+          }
           payoutAccount={profile.payoutAccount}
           walletBalanceCents={walletOverviewState.balance.amountMinor}
         />

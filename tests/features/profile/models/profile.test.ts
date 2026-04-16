@@ -24,6 +24,7 @@ import {
   getDefaultDevicePrivacySettings,
   getProfileSetupSeedState,
   getProfileSetupSnapshotFromProfile,
+  payoutAccountSchema,
   payoutAccountInputSchema,
   serializeProfilePatchRequest,
   profilePatchRequestSchema,
@@ -157,6 +158,8 @@ describe('profile models and forms', () => {
     )
     expect(summarySections.hero.headlineValue).toContain('1,50')
     expect(summarySections.hero.supportingText).toContain('2023')
+    expect(summarySections.totals.title).toBe('Totais')
+    expect(summarySections.totals.stats).toHaveLength(3)
     expect(heroStats).toHaveLength(3)
     expect(formatProfileMemberSince('pt', profile.memberSince)).toContain(
       '2023',
@@ -219,6 +222,109 @@ describe('profile models and forms', () => {
     )
     expect(snapshot.preferences.pushNotificationsEnabled).toBe(false)
     expect(snapshot.alertsEnabled).toBe(false)
+  })
+
+  it('builds payment readiness copy when payout details are missing or unnamed', () => {
+    const reviewReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: true,
+        pinEnabled: true,
+        pushNotificationsEnabled: true,
+      },
+      profile: {
+        ...profile,
+        payoutAccount: null,
+      },
+    })
+
+    const unnamedReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: true,
+        pinEnabled: true,
+        pushNotificationsEnabled: true,
+      },
+      profile: {
+        ...profile,
+        payoutAccount: {
+          ibanMasked: 'PT50************90123',
+          rail: 'sepa',
+        },
+        personal: {
+          ...profile.personal,
+          name: null,
+        },
+      },
+    })
+
+    expect(
+      reviewReadiness.items.find((item) => item.id === 'payments')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.paymentsReviewValue'))
+    expect(
+      unnamedReadiness.items.find((item) => item.id === 'payments')?.value,
+    ).toBe('PT50************90123 associado')
+  })
+
+  it('builds readiness copy for combined, email-only, push-only, and review-only security states', () => {
+    const allEnabledReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: true,
+        pinEnabled: true,
+        pushNotificationsEnabled: false,
+      },
+      profile: {
+        ...profile,
+        preferences: {
+          alertsEmail: 'joao.ferreira@volta.pt',
+          alertsEnabled: true,
+        },
+      },
+    })
+
+    const pushOnlyReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: true,
+      },
+      profile: {
+        ...profile,
+        preferences: {
+          alertsEmail: 'joao.ferreira@volta.pt',
+          alertsEnabled: false,
+        },
+      },
+    })
+
+    const reviewOnlyReadiness = getProfileHubReadiness(t, {
+      deviceSettings: {
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      },
+      profile: {
+        ...profile,
+        preferences: {
+          alertsEmail: 'joao.ferreira@volta.pt',
+          alertsEnabled: false,
+        },
+      },
+    })
+
+    expect(
+      allEnabledReadiness.items.find((item) => item.id === 'security')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.securityAllValue'))
+    expect(
+      allEnabledReadiness.items.find((item) => item.id === 'alerts')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.alertsEmailValue'))
+    expect(
+      pushOnlyReadiness.items.find((item) => item.id === 'alerts')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.alertsPushValue'))
+    expect(
+      reviewOnlyReadiness.items.find((item) => item.id === 'security')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.securityReviewValue'))
+    expect(
+      reviewOnlyReadiness.items.find((item) => item.id === 'alerts')?.value,
+    ).toBe(t('tabScreens.profile.hub.readiness.alertsReviewValue'))
   })
 
   it('builds defaults and normalizes personal, payments, privacy, app settings, and setup payloads', () => {
@@ -446,6 +552,27 @@ describe('profile models and forms', () => {
         rail: 'sepa',
       },
     })
+    expect(
+      payoutAccountSchema.parse({
+        accountHolderName: '   ',
+        ibanMasked: 'PT50************90123',
+        rail: 'spin',
+      }),
+    ).toEqual({
+      ibanMasked: 'PT50************90123',
+      rail: 'sepa',
+    })
+    expect(
+      serializeProfilePatchRequest({
+        preferences: {
+          alertsEnabled: false,
+        },
+      }),
+    ).toEqual({
+      preferences: {
+        alertsEnabled: false,
+      },
+    })
     expect(profilePatchRequestSchema.safeParse({}).success).toBe(false)
   })
 
@@ -580,6 +707,45 @@ describe('profile models and forms', () => {
       personal: {
         email: 'jwt-email@volta.pt',
         name: '',
+        nif: '123456789',
+        phoneNumber: '+351911223344',
+      },
+      preferences: {
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      },
+      alertsEnabled: true,
+    })
+  })
+
+  it('falls back from blank identity names and default device settings in setup snapshots', () => {
+    const blankIdentitySeededProfile = getProfileSetupSeedState({
+      identity: {
+        email: 'jwt-email@volta.pt',
+        name: '   ',
+      },
+      profile: profileResponseSchema.parse({
+        ...profile,
+        personal: {
+          ...profile.personal,
+          name: 'Profile Name',
+        },
+        payoutAccount: null,
+      }),
+    }).profile
+
+    expect(blankIdentitySeededProfile.personal.name).toBe('Profile Name')
+    expect(
+      getProfileSetupSnapshotFromProfile(blankIdentitySeededProfile),
+    ).toEqual({
+      payments: {
+        accountHolderName: 'Profile Name',
+        iban: '',
+      },
+      personal: {
+        email: 'jwt-email@volta.pt',
+        name: 'Profile Name',
         nif: '123456789',
         phoneNumber: '+351911223344',
       },

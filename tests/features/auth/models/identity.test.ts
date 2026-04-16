@@ -53,4 +53,17 @@ describe('auth identity models', () => {
       }),
     ).toBeNull()
   })
+
+  it('returns null for malformed or schema-invalid jwt payloads', () => {
+    expect(
+      getAuthSessionIdentity({
+        accessToken: createJwt({
+          email: 123,
+          sub: 456,
+        }),
+        expiresAt: null,
+        idToken: 'header.!.signature',
+      }),
+    ).toBeNull()
+  })
 })

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import AppLogo from '@/assets/images/logo.svg'
 import { Button, Text, XStack, YStack, useTheme, useThemeName } from 'tamagui'
 import { useOfflineStatus } from '@/hooks/useOfflineStatus'
-import { brandBlack } from '@/themes'
 import { getPlatformShadowProps } from './platformShadows'
 import { ToneScope } from './tone'
 
@@ -134,11 +133,12 @@ export function TopBar(props: TopBarProps) {
   const { t } = useTranslation()
   const theme = useTheme()
   const themeName = useThemeName()
-  const { width } = useWindowDimensions()
+  const { fontScale, width } = useWindowDimensions()
   const isOffline = useOfflineStatus()
-  const isCompactWidth = width < 360
+  const prefersExpandedTextLayout = fontScale > 1.15
+  const isCompactWidth = width < 360 || prefersExpandedTextLayout
   const isDarkTheme = themeName.startsWith('dark')
-  const homeLogoColor = isDarkTheme ? theme.accent10.val : brandBlack
+  const homeLogoColor = isDarkTheme ? theme.accent10.val : theme.color12.val
   const offlineLabel = t('topBar.offline')
 
   if (props.variant === 'home') {
@@ -154,21 +154,32 @@ export function TopBar(props: TopBarProps) {
 
           <YStack flex={1} gap="$1" style={{ minWidth: 0 }}>
             {props.eyebrow ? (
-              <Text color="$color10" fontSize={14} fontWeight="600">
+              <Text
+                color="$color10"
+                fontSize={13}
+                fontWeight="700"
+                letterSpacing={0.2}
+              >
                 {props.eyebrow}
               </Text>
             ) : null}
             <Text
-              ellipsizeMode="tail"
+              accessibilityRole="header"
               fontSize={isCompactWidth ? 24 : 28}
               fontWeight="900"
-              numberOfLines={1}
+              lineHeight={isCompactWidth ? 30 : 34}
+              numberOfLines={2}
               style={{ flexShrink: 1 }}
             >
               {props.title}
             </Text>
             {props.subtitle ? (
-              <Text color="$color11" fontSize={14} style={{ flexShrink: 1 }}>
+              <Text
+                color="$color11"
+                fontSize={15}
+                lineHeight={21}
+                style={{ flexShrink: 1 }}
+              >
                 {props.subtitle}
               </Text>
             ) : null}
@@ -195,13 +206,21 @@ export function TopBar(props: TopBarProps) {
 
       <YStack flex={1} items="center" gap="$1" style={{ minWidth: 0 }}>
         {props.eyebrow ? (
-          <Text color="$color10" fontSize={13} fontWeight="700">
+          <Text
+            color="$color10"
+            fontSize={12}
+            fontWeight="700"
+            letterSpacing={0.2}
+          >
             {props.eyebrow}
           </Text>
         ) : null}
         <Text
+          accessibilityRole="header"
           fontSize={isCompactWidth ? 22 : 24}
           fontWeight="800"
+          lineHeight={isCompactWidth ? 28 : 30}
+          numberOfLines={prefersExpandedTextLayout ? 2 : undefined}
           style={{ flexShrink: 1, textAlign: 'center' }}
         >
           {props.title}
@@ -209,7 +228,8 @@ export function TopBar(props: TopBarProps) {
         {props.subtitle ? (
           <Text
             color="$color11"
-            fontSize={14}
+            fontSize={15}
+            lineHeight={21}
             style={{ flexShrink: 1, textAlign: 'center' }}
           >
             {props.subtitle}
