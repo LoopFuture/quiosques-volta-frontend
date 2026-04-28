@@ -1,0 +1,4 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/flow_barcode_modal.yaml

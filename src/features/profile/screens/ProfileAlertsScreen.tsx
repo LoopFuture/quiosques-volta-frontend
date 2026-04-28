@@ -254,6 +254,7 @@ function ProfileAlertsForm({
                   permissionStatus={permissionStatus}
                   registrationErrorCode={registrationErrorCode}
                   testID="profile-alerts-push-notifications-card"
+                  toggleTestID="profile-alerts-push-notifications-toggle"
                   onCheckedChange={(checked) => {
                     field.onChange(checked)
                     void handlePushNotificationsToggleChange(checked)
@@ -286,6 +287,7 @@ function ProfileAlertsForm({
                   onCheckedChange={(checked) => {
                     handleEmailAlertsToggleChange(checked, field.value)
                   }}
+                  testID="profile-alerts-email-alerts-toggle"
                 />
               )}
             />

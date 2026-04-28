@@ -95,6 +95,7 @@ function ProfilePaymentsForm({
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
                 required
+                testID="profile-payments-account-holder-name-input"
                 value={field.value}
               />
             )}
@@ -122,6 +123,7 @@ function ProfilePaymentsForm({
                 onChangeText={field.onChange}
                 required
                 spellCheck={false}
+                testID="profile-payments-iban-input"
                 value={field.value}
               />
             )}

@@ -582,6 +582,7 @@ export function ProfileSetupScreen() {
                         onBlur={field.onBlur}
                         onChangeText={field.onChange}
                         required
+                        testID="profile-setup-name-input"
                         value={field.value}
                       />
                     )}
@@ -604,6 +605,7 @@ export function ProfileSetupScreen() {
                         onBlur={field.onBlur}
                         onChangeText={field.onChange}
                         required
+                        testID="profile-setup-phone-number-input"
                         value={field.value}
                       />
                     )}
@@ -632,6 +634,7 @@ export function ProfileSetupScreen() {
                         onBlur={field.onBlur}
                         onChangeText={field.onChange}
                         required
+                        testID="profile-setup-nif-input"
                         value={field.value}
                       />
                     )}
@@ -690,6 +693,7 @@ export function ProfileSetupScreen() {
                         onBlur={field.onBlur}
                         onChangeText={field.onChange}
                         required
+                        testID="profile-setup-account-holder-name-input"
                         value={field.value}
                       />
                     )}
@@ -713,6 +717,7 @@ export function ProfileSetupScreen() {
                         onChangeText={field.onChange}
                         required
                         spellCheck={false}
+                        testID="profile-setup-iban-input"
                         value={field.value}
                       />
                     )}

@@ -16,6 +16,7 @@ export type TransactionListItemProps = {
   icon?: ReactNode
   onPress?: () => void
   subtitle?: string
+  testID?: string
   title: string
 }
 
@@ -30,6 +31,7 @@ export function TransactionListItem({
   icon,
   onPress,
   subtitle,
+  testID,
   title,
 }: TransactionListItemProps) {
   const { fontScale, width } = useWindowDimensions()
@@ -185,6 +187,7 @@ export function TransactionListItem({
         p="$3.5"
         pressStyle={onPress ? { opacity: 0.92, scale: 0.99 } : undefined}
         rounded={24}
+        testID={testID}
       >
         {content}
       </YStack>
@@ -199,6 +202,7 @@ export function TransactionListItem({
       onPress={onPress}
       p="$3.5"
       pressStyle={onPress ? { opacity: 0.92, scale: 0.99 } : undefined}
+      testID={testID}
     >
       {content}
     </SurfaceCard>

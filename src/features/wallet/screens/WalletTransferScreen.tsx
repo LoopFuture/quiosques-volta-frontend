@@ -486,6 +486,7 @@ function WalletTransferScreenContent({
                           },
                         )
                       }}
+                      testID="wallet-transfer-full-balance-button"
                       tone="neutral"
                     >
                       {t('tabScreens.wallet.transfer.fullBalanceActionLabel')}
@@ -557,6 +558,7 @@ function WalletTransferScreenContent({
               emphasis="outline"
               fullWidth={false}
               onPress={handleManagePayoutAccount}
+              testID="wallet-transfer-manage-destination-button"
               tone="neutral"
             >
               {t(
@@ -603,6 +605,7 @@ function WalletTransferScreenContent({
             emphasis="outline"
             fullWidth={false}
             onPress={handleManagePayoutAccount}
+            testID="wallet-transfer-support-action-button"
             tone="error"
           >
             {supportStateCopy.actionLabel}

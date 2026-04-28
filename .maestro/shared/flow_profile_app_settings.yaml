@@ -1,0 +1,37 @@
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_profile.yaml
+
+- tapOn:
+    id: profile-menu-appSettings
+
+- extendedWaitUntil:
+    visible:
+      id: profile-app-settings-screen
+    timeout: 30000
+
+- tapOn:
+    id: segmented-tab-dark
+- assertVisible:
+    id: segmented-tab-active-dark
+- tapOn:
+    id: segmented-tab-en
+- assertVisible:
+    id: segmented-tab-active-en
+
+- back
+- extendedWaitUntil:
+    visible:
+      id: profile-screen
+    timeout: 30000
+- tapOn:
+    id: profile-menu-appSettings
+- extendedWaitUntil:
+    visible:
+      id: profile-app-settings-screen
+    timeout: 30000
+- assertVisible:
+    id: segmented-tab-active-dark
+- assertVisible:
+    id: segmented-tab-active-en

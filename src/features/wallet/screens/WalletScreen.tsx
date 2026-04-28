@@ -72,7 +72,10 @@ function WalletBalanceHero({
         </Text>
       </YStack>
 
-      <PrimaryButton onPress={onTransferPress}>
+      <PrimaryButton
+        onPress={onTransferPress}
+        testID="wallet-overview-transfer-button"
+      >
         {t('tabScreens.wallet.overview.balanceCard.actionLabel')}
       </PrimaryButton>
     </SurfaceCard>
@@ -87,7 +90,7 @@ function WalletOverviewSummary({
   title: string
 }) {
   return (
-    <SurfaceCard gap="$3.5" p="$4.5">
+    <SurfaceCard gap="$3.5" p="$4.5" testID="wallet-overview-empty-state">
       <YStack gap="$1.5">
         <Text fontSize={20} fontWeight="800">
           {title}
@@ -202,6 +205,7 @@ export default function WalletScreen() {
                   fullWidth={false}
                   tone="neutral"
                   onPress={() => router.push(walletRoutes.movements)}
+                  testID="wallet-overview-movements-button"
                 >
                   {t('tabScreens.wallet.overview.latestMovements.actionLabel')}
                 </PrimaryButton>
@@ -211,39 +215,42 @@ export default function WalletScreen() {
           >
             {walletOverviewState.recentTransactions.length > 0 ? (
               <YStack gap={10}>
-                {walletOverviewState.recentTransactions.map((movement) => (
-                  <TransactionListItem
-                    key={movement.id}
-                    accessibilityHint={getWalletMovementAccessibilityHint(t)}
-                    accessibilityLabel={getWalletMovementAccessibilityLabel(
-                      t,
-                      i18n.language,
-                      movement,
-                    )}
-                    amount={formatWalletAmount(
-                      movement.amount.amountMinor,
-                      i18n.language,
-                    )}
-                    amountTone={getWalletTransactionAmountTone(movement)}
-                    badgeLabel={
-                      movement.status === 'pending' ||
-                      movement.status === 'processing'
-                        ? getWalletMovementBadgeLabel(t, movement)
-                        : undefined
-                    }
-                    badgeTone={getWalletTransactionBadgeTone(movement)}
-                    framed={false}
-                    icon={<WalletMovementIcon type={movement.type} />}
-                    onPress={() =>
-                      router.push(walletRoutes.movementDetail(movement.id))
-                    }
-                    subtitle={getWalletMovementSubtitle(
-                      i18n.language,
-                      movement,
-                    )}
-                    title={getWalletMovementTitle(t, movement)}
-                  />
-                ))}
+                {walletOverviewState.recentTransactions.map(
+                  (movement, index) => (
+                    <TransactionListItem
+                      key={movement.id}
+                      accessibilityHint={getWalletMovementAccessibilityHint(t)}
+                      accessibilityLabel={getWalletMovementAccessibilityLabel(
+                        t,
+                        i18n.language,
+                        movement,
+                      )}
+                      amount={formatWalletAmount(
+                        movement.amount.amountMinor,
+                        i18n.language,
+                      )}
+                      amountTone={getWalletTransactionAmountTone(movement)}
+                      badgeLabel={
+                        movement.status === 'pending' ||
+                        movement.status === 'processing'
+                          ? getWalletMovementBadgeLabel(t, movement)
+                          : undefined
+                      }
+                      badgeTone={getWalletTransactionBadgeTone(movement)}
+                      framed={false}
+                      icon={<WalletMovementIcon type={movement.type} />}
+                      onPress={() =>
+                        router.push(walletRoutes.movementDetail(movement.id))
+                      }
+                      subtitle={getWalletMovementSubtitle(
+                        i18n.language,
+                        movement,
+                      )}
+                      testID={`wallet-overview-movement-item-${index}`}
+                      title={getWalletMovementTitle(t, movement)}
+                    />
+                  ),
+                )}
               </YStack>
             ) : (
               <WalletOverviewSummary

@@ -1,0 +1,5 @@
+- runFlow:
+    when:
+      visible:
+        id: onboarding-screen
+    file: ../shared/onboarding_skip_steps.yaml

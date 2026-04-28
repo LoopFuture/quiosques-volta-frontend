@@ -1,0 +1,6 @@
+- tapOn:
+    id: tab-wallet
+- extendedWaitUntil:
+    visible:
+      id: wallet-screen
+    timeout: 30000

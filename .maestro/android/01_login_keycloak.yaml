@@ -1,0 +1,14 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/launch_clear_state.yaml
+- runFlow:
+    file: ../shared/keycloak_login_steps.yaml
+
+# This flow assumes the test user has already completed profile setup.
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 90000
+- assertVisible:
+    id: home-dashboard-screen

@@ -49,3 +49,7 @@ node_modules
 .expo
 ios
 android
+!.maestro/ios/
+!.maestro/ios/**/*.yaml
+!.maestro/android/
+!.maestro/android/**/*.yaml

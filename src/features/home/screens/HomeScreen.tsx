@@ -291,6 +291,7 @@ export default function HomeScreen() {
         <>
           <BalanceCard
             actionLabel={t('tabScreens.home.balanceCard.actionLabel')}
+            actionTestID="home-balance-transfer-button"
             amount={formatWalletAmount(
               homeScreenState.walletBalance.amountMinor,
               i18n.language,
@@ -308,6 +309,7 @@ export default function HomeScreen() {
                 fullWidth={false}
                 tone="neutral"
                 onPress={() => router.push(profileRoutes.summary)}
+                testID="home-overview-account-button"
               >
                 {t('tabScreens.home.overview.accountActionLabel')}
               </PrimaryButton>
@@ -344,7 +346,7 @@ export default function HomeScreen() {
           >
             {recentActivityItems && recentActivityItems.length > 0 ? (
               <YStack gap={10}>
-                {recentActivityItems.map((movement) => (
+                {recentActivityItems.map((movement, index) => (
                   <TransactionListItem
                     key={movement.id}
                     accessibilityHint={t(
@@ -366,6 +368,7 @@ export default function HomeScreen() {
                       router.push(walletRoutes.movementDetail(movement.id))
                     }
                     subtitle={movement.subtitle}
+                    testID={`home-recent-activity-item-${index}`}
                     title={movement.title}
                   />
                 ))}

@@ -293,6 +293,7 @@ export default function WalletMovementsScreen() {
                       i18n.language,
                       movement,
                     )}
+                    testID={`wallet-movements-item-${index}`}
                     title={getWalletMovementTitle(t, movement)}
                   />
                 </YStack>

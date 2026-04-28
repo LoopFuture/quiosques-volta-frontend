@@ -1,0 +1,81 @@
+# Profile setup is gated by backend onboarding status.
+# This flow assumes the authenticated user is required to complete setup.
+
+- extendedWaitUntil:
+    visible:
+      id: profile-setup-screen
+    timeout: 90000
+- assertVisible:
+    id: profile-setup-step-personal
+
+# Personal
+- tapOn:
+    id: profile-setup-name-input
+- inputText: 'Maestro Test'
+- hideKeyboard:
+    optional: true
+- tapOn:
+    id: profile-setup-phone-number-input
+- inputText: '912345678'
+- hideKeyboard:
+    optional: true
+- tapOn:
+    id: profile-setup-nif-input
+- inputText: '123456789'
+- hideKeyboard:
+    optional: true
+- tapOn:
+    id: profile-setup-next-button
+
+# Payments
+- extendedWaitUntil:
+    visible:
+      id: profile-setup-step-payments
+    timeout: 30000
+- tapOn:
+    id: profile-setup-account-holder-name-input
+- inputText: 'Maestro Test'
+- hideKeyboard:
+    optional: true
+- tapOn:
+    id: profile-setup-iban-input
+- inputText: 'PT50000201231234567890154'
+- hideKeyboard:
+    optional: true
+- tapOn:
+    id: profile-setup-next-button
+
+# Notifications (don’t trigger system permission prompts in CI; keep toggles off)
+- extendedWaitUntil:
+    visible:
+      id: profile-setup-step-notifications
+    timeout: 30000
+- tapOn:
+    id: profile-setup-next-button
+
+# Security: enable PIN so we can later test unlock flow.
+- extendedWaitUntil:
+    visible:
+      id: profile-setup-step-security
+    timeout: 30000
+- tapOn:
+    id: profile-setup-pin-set-button
+- tapOn:
+    id: profile-setup-pin-pin-input
+- inputText: '1234'
+- hideKeyboard:
+    optional: true
+- tapOn:
+    id: profile-setup-pin-confirm-pin-input
+- inputText: '1234'
+- hideKeyboard:
+    optional: true
+- tapOn:
+    id: profile-setup-pin-save-button
+- tapOn:
+    id: profile-setup-finish-button
+
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 90000

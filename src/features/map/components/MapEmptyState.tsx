@@ -101,7 +101,7 @@ export function MapEmptyState({
           </YStack>
         </XStack>
 
-        <PrimaryButton onPress={onActionPress}>
+        <PrimaryButton onPress={onActionPress} testID="map-open-barcode-button">
           {fallbackActionLabel}
         </PrimaryButton>
       </SurfaceCard>

@@ -1,0 +1,40 @@
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_home.yaml
+- assertVisible:
+    id: home-dashboard-screen
+- tapOn:
+    id: home-overview-account-button
+- extendedWaitUntil:
+    visible:
+      id: profile-summary-screen
+    timeout: 30000
+- back
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 30000
+- assertVisible:
+    id: home-recent-activity-item-0
+- tapOn:
+    id: home-recent-activity-item-0
+- extendedWaitUntil:
+    visible:
+      id: wallet-movement-detail-screen
+    timeout: 30000
+- assertVisible:
+    id: wallet-movement-detail-receipt-card
+- back
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 30000
+- tapOn:
+    id: home-balance-transfer-button
+- extendedWaitUntil:
+    visible:
+      id: wallet-transfer-screen
+    timeout: 30000
+- assertVisible:
+    id: wallet-transfer-review-card

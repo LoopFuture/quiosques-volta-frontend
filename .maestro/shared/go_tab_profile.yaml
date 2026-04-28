@@ -1,0 +1,6 @@
+- tapOn:
+    id: tab-profile
+- extendedWaitUntil:
+    visible:
+      id: profile-screen
+    timeout: 30000

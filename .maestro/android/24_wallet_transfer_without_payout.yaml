@@ -1,0 +1,7 @@
+appId: com.voltafrontend.app
+env:
+  KEYCLOAK_TEST_USERNAME: ${KEYCLOAK_TEST_NO_PAYOUT_USERNAME}
+  KEYCLOAK_TEST_PASSWORD: ${KEYCLOAK_TEST_NO_PAYOUT_PASSWORD}
+---
+- runFlow:
+    file: ../shared/flow_wallet_transfer_without_payout.yaml

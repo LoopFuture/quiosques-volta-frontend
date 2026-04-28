@@ -1,0 +1,29 @@
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_wallet.yaml
+
+- tapOn:
+    id: wallet-overview-movements-button
+
+- extendedWaitUntil:
+    visible:
+      id: wallet-movements-screen
+    timeout: 30000
+- assertVisible:
+    id: wallet-movements-list
+
+# Tap the first visible movement, if any.
+- extendedWaitUntil:
+    visible:
+      id: wallet-movements-item-0
+    timeout: 20000
+- tapOn:
+    id: wallet-movements-item-0
+
+- extendedWaitUntil:
+    visible:
+      id: wallet-movement-detail-screen
+    timeout: 30000
+- assertVisible:
+    id: wallet-movement-detail-receipt-card

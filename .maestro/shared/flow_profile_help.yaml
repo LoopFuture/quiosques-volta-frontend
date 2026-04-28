@@ -1,0 +1,19 @@
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_profile.yaml
+
+- tapOn:
+    id: profile-menu-help
+
+- extendedWaitUntil:
+    visible:
+      id: onboarding-screen
+    timeout: 30000
+- assertVisible:
+    id: onboarding-list
+- back
+- extendedWaitUntil:
+    visible:
+      id: profile-screen
+    timeout: 30000

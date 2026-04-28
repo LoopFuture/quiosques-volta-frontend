@@ -48,6 +48,7 @@ function ActiveToastCard({ currentToast }: { currentToast: ActiveToast }) {
         py="$3.5"
         rounded={28}
         style={{ alignSelf: 'stretch', minWidth: '100%', width: '100%' }}
+        testID={`app-toast-${variant}`}
         viewportName={currentToast.viewportName}
         {...shadowProps}
       >
@@ -89,6 +90,7 @@ function ActiveToastCard({ currentToast }: { currentToast: ActiveToast }) {
               fontWeight="800"
               lineHeight={20}
               style={{ textAlign: 'left' }}
+              testID="app-toast-title"
             >
               {currentToast.title}
             </Toast.Title>
@@ -98,6 +100,7 @@ function ActiveToastCard({ currentToast }: { currentToast: ActiveToast }) {
                 fontSize={14}
                 lineHeight={20}
                 style={{ textAlign: 'left' }}
+                testID="app-toast-description"
               >
                 {currentToast.message}
               </Toast.Description>

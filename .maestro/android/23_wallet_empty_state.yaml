@@ -1,0 +1,7 @@
+appId: com.voltafrontend.app
+env:
+  KEYCLOAK_TEST_USERNAME: ${KEYCLOAK_TEST_EMPTY_WALLET_USERNAME}
+  KEYCLOAK_TEST_PASSWORD: ${KEYCLOAK_TEST_EMPTY_WALLET_PASSWORD}
+---
+- runFlow:
+    file: ../shared/flow_wallet_empty_state.yaml

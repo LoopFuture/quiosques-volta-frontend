@@ -76,6 +76,7 @@ function ProfilePersonalForm({ personal }: { personal: ProfilePersonal }) {
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
                 required
+                testID="profile-personal-name-input"
                 value={field.value}
               />
             )}
@@ -98,6 +99,7 @@ function ProfilePersonalForm({ personal }: { personal: ProfilePersonal }) {
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
                 required
+                testID="profile-personal-email-input"
                 value={field.value}
               />
             )}
@@ -118,6 +120,7 @@ function ProfilePersonalForm({ personal }: { personal: ProfilePersonal }) {
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
                 required
+                testID="profile-personal-phone-number-input"
                 value={field.value}
               />
             )}
@@ -138,6 +141,7 @@ function ProfilePersonalForm({ personal }: { personal: ProfilePersonal }) {
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
                 required
+                testID="profile-personal-nif-input"
                 value={field.value}
               />
             )}

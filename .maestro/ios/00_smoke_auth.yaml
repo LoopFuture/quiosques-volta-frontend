@@ -1,0 +1,10 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/launch_clear_state.yaml
+- assertVisible:
+    id: auth-screen
+- assertVisible:
+    id: auth-login-button
+- assertVisible:
+    id: auth-register-button

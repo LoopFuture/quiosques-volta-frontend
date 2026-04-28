@@ -13,12 +13,14 @@ export function SettingsToggleRow({
   helperText,
   label,
   onCheckedChange,
+  testID,
 }: {
   checked: boolean
   disabled?: boolean
   helperText: string
   label: string
   onCheckedChange: (value: boolean) => void
+  testID?: string
 }) {
   const { fontScale, width } = useWindowDimensions()
   const isCompactLayout = width < 360 || fontScale > 1.15
@@ -45,6 +47,7 @@ export function SettingsToggleRow({
           checked={checked}
           disabled={disabled}
           onCheckedChange={onCheckedChange}
+          testID={testID}
         />
       </XStack>
     </XStack>
