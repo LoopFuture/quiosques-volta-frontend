@@ -1,3 +1,5 @@
+appId: com.voltafrontend.app
+---
 # Expects env vars:
 # - KEYCLOAK_TEST_USERNAME
 # - KEYCLOAK_TEST_PASSWORD

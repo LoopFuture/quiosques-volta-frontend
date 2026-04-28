@@ -1,3 +1,5 @@
+appId: com.voltafrontend.app
+---
 - runFlow:
     when:
       visible:

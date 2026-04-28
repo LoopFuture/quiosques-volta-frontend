@@ -25,7 +25,8 @@
     "test:ci": "jest --coverage --runInBand --watch=false",
     "typecheck": "tsc --noEmit",
     "upload:sourcemaps": "node ./scripts/upload-sentry-sourcemaps.mjs",
-    "validate": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:ci",
+    "validate": "pnpm format:check && pnpm lint && pnpm typecheck",
+    "validate:ci": "pnpm validate && pnpm test:ci",
     "validate:full": "pnpm validate && pnpm build",
     "prepare": "husky"
   },

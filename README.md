@@ -28,31 +28,32 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 
 ## Commands
 
-| Command                    | What it does                                                                           | When to use it                                                             |
-| -------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `pnpm install`             | Installs dependencies and enables Husky hooks via `prepare`.                           | First clone, dependency updates, clean install.                            |
-| `pnpm start`               | Starts the Expo dev server and clears the cache.                                       | General local development.                                                 |
-| `pnpm ios`                 | Starts Expo and opens the iOS target.                                                  | iOS simulator/device development.                                          |
-| `pnpm android`             | Starts Expo and opens the Android target.                                              | Android emulator/device development.                                       |
-| `pnpm build`               | Runs both mobile export builds through the Tamagui compiler wrapper.                   | Production bundle verification for both platforms.                         |
-| `pnpm build:local`         | Runs the local EAS iOS simulator and Android APK builds back to back.                  | Verifying both local native build profiles.                                |
-| `pnpm build:local:ios`     | Runs a local EAS iOS simulator build and writes the archive to `dist/ios/builds`.      | Checking the local iOS simulator build output.                             |
-| `pnpm build:local:android` | Runs a local EAS Android development APK build and writes it to `dist/android/builds`. | Checking the local Android APK build output.                               |
-| `pnpm build:ios`           | Runs `tamagui build --target native` and exports an iOS bundle to `dist/ios`.          | Production iOS bundle check.                                               |
-| `pnpm build:android`       | Runs `tamagui build --target native` and exports an Android bundle to `dist/android`.  | Production Android bundle check.                                           |
-| `pnpm lint`                | Runs ESLint across the repo.                                                           | Repo-wide lint validation before PRs or CI fixes.                          |
-| `pnpm lint:file -- <path>` | Runs ESLint against a single file or file set.                                         | Fast validation while iterating on a small change.                         |
-| `pnpm lint:fix`            | Runs ESLint with autofixes.                                                            | Cleaning up lint issues locally.                                           |
-| `pnpm format`              | Formats the repo with Prettier.                                                        | Bulk formatting before review.                                             |
-| `pnpm format:check`        | Verifies Prettier formatting without changing files.                                   | CI and manual repo-wide format checks.                                     |
-| `pnpm typecheck`           | Runs `tsc --noEmit`.                                                                   | Catching TypeScript regressions.                                           |
-| `pnpm test`                | Runs the Jest suite once.                                                              | General test runs.                                                         |
-| `pnpm test:file -- <path>` | Runs Jest in CI mode for a single file or pattern.                                     | Targeted test runs for the file you changed.                               |
-| `pnpm test:coverage`       | Runs the Jest suite with coverage collection and threshold enforcement.                | Coverage checks and regression prevention.                                 |
-| `pnpm test:watch`          | Runs Jest in watch mode.                                                               | Active test-driven work.                                                   |
-| `pnpm test:ci`             | Runs Jest in non-watch CI mode with coverage thresholds enforced.                      | CI, Husky pre-push, repeatable local validation.                           |
-| `pnpm validate`            | Runs `format:check`, `lint`, `typecheck`, and `test:ci` in sequence.                   | Canonical local validation before pushing, including coverage enforcement. |
-| `pnpm validate:full`       | Runs `validate` and then `build`.                                                      | Changes that may affect bundling or runtime setup.                         |
+| Command                    | What it does                                                                           | When to use it                                      |
+| -------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `pnpm install`             | Installs dependencies and enables Husky hooks via `prepare`.                           | First clone, dependency updates, clean install.     |
+| `pnpm start`               | Starts the Expo dev server and clears the cache.                                       | General local development.                          |
+| `pnpm ios`                 | Starts Expo and opens the iOS target.                                                  | iOS simulator/device development.                   |
+| `pnpm android`             | Starts Expo and opens the Android target.                                              | Android emulator/device development.                |
+| `pnpm build`               | Runs both mobile export builds through the Tamagui compiler wrapper.                   | Production bundle verification for both platforms.  |
+| `pnpm build:local`         | Runs the local EAS iOS simulator and Android APK builds back to back.                  | Verifying both local native build profiles.         |
+| `pnpm build:local:ios`     | Runs a local EAS iOS simulator build and writes the archive to `dist/ios/builds`.      | Checking the local iOS simulator build output.      |
+| `pnpm build:local:android` | Runs a local EAS Android development APK build and writes it to `dist/android/builds`. | Checking the local Android APK build output.        |
+| `pnpm build:ios`           | Runs `tamagui build --target native` and exports an iOS bundle to `dist/ios`.          | Production iOS bundle check.                        |
+| `pnpm build:android`       | Runs `tamagui build --target native` and exports an Android bundle to `dist/android`.  | Production Android bundle check.                    |
+| `pnpm lint`                | Runs ESLint across the repo.                                                           | Repo-wide lint validation before PRs or CI fixes.   |
+| `pnpm lint:file -- <path>` | Runs ESLint against a single file or file set.                                         | Fast validation while iterating on a small change.  |
+| `pnpm lint:fix`            | Runs ESLint with autofixes.                                                            | Cleaning up lint issues locally.                    |
+| `pnpm format`              | Formats the repo with Prettier.                                                        | Bulk formatting before review.                      |
+| `pnpm format:check`        | Verifies Prettier formatting without changing files.                                   | CI and manual repo-wide format checks.              |
+| `pnpm typecheck`           | Runs `tsc --noEmit`.                                                                   | Catching TypeScript regressions.                    |
+| `pnpm test`                | Runs the Jest suite once.                                                              | General test runs.                                  |
+| `pnpm test:file -- <path>` | Runs Jest in CI mode for a single file or pattern.                                     | Targeted test runs for the file you changed.        |
+| `pnpm test:coverage`       | Runs the Jest suite with coverage collection and threshold enforcement.                | Coverage checks and regression prevention.          |
+| `pnpm test:watch`          | Runs Jest in watch mode.                                                               | Active test-driven work.                            |
+| `pnpm test:ci`             | Runs Jest in non-watch CI mode with coverage thresholds enforced.                      | CI-only coverage validation.                        |
+| `pnpm validate`            | Runs `format:check`, `lint`, and `typecheck` in sequence.                              | Canonical local validation and the pre-commit gate. |
+| `pnpm validate:ci`         | Runs `validate` and then `test:ci`.                                                    | CI validation with coverage enforcement.            |
+| `pnpm validate:full`       | Runs `validate` and then `build`.                                                      | Changes that may affect bundling or runtime setup.  |
 
 ## Runtime Config
 
@@ -102,7 +103,7 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - The repo now includes EAS workflow files under `.eas/workflows`.
 - You can run them manually today with `pnpm exec eas workflow:run .eas/workflows/<file>.yml`.
 - After the repo moves to GitHub, the trigger blocks in those files will start handling automatic push and pull request events.
-- `.eas/workflows/validate.yml` mirrors CI-style repo validation for `dev`, `staging`, and `main`.
+- `.eas/workflows/validate.yml` mirrors CI-style repo validation plus coverage enforcement for `dev`, `staging`, and `main`.
 - `.eas/workflows/deliver-preview.yml` targets `staging` and the `preview` EAS channel.
 - `.eas/workflows/release-production.yml` is manual-only and targets the `production` EAS channel plus `submit.production`.
 
@@ -218,9 +219,9 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 - `AGENTS.md` defines the repo contract for autonomous coding agents.
 - `.impeccable.md` is the source of truth for repo-specific UI, UX, and visual design context.
 - `pnpm install` enables Husky hooks automatically.
-- Pre-commit formats staged files and runs cached ESLint only on staged JS/TS files.
-- Pre-push runs `pnpm validate`.
-- CI should run `pnpm validate` and `pnpm build`. It does not run EAS commands.
+- Pre-commit runs `pnpm validate`.
+- There is no pre-push hook.
+- CI should run `pnpm validate:ci` and `pnpm build`. It does not run EAS commands.
 - EAS Workflows are committed for manual use now and for GitHub-triggered automation later.
 
 ## Recommended Validation Flow

@@ -1,3 +1,5 @@
+appId: com.voltafrontend.app
+---
 - assertVisible:
     id: onboarding-screen
 - tapOn:

@@ -1,3 +1,5 @@
+appId: com.voltafrontend.app
+---
 - runFlow:
     file: ../shared/ensure_ready_user.yaml
 - runFlow:

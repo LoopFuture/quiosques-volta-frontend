@@ -1,3 +1,5 @@
+appId: com.voltafrontend.app
+---
 - tapOn:
     id: tab-map
 - extendedWaitUntil:

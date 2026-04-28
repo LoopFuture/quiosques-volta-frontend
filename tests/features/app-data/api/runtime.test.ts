@@ -46,6 +46,34 @@ describe('app api runtime config', () => {
     })
   })
 
+  it('returns the cached config on repeated reads', () => {
+    __setExpoConfig(
+      createMockExpoConfig({
+        api: {
+          baseUrl: 'https://api.example.com',
+        },
+      }),
+    )
+
+    expect(getApiRuntimeConfig()).toEqual({
+      baseUrl: 'https://api.example.com',
+      resolvedBaseUrl: 'https://api.example.com',
+    })
+
+    __setExpoConfig(
+      createMockExpoConfig({
+        api: {
+          baseUrl: 'https://api.changed.example.com',
+        },
+      }),
+    )
+
+    expect(getApiRuntimeConfig()).toEqual({
+      baseUrl: 'https://api.example.com',
+      resolvedBaseUrl: 'https://api.example.com',
+    })
+  })
+
   it('throws when the configured backend url is blank or malformed', () => {
     __setExpoConfig(
       createMockExpoConfig({

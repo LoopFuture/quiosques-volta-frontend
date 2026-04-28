@@ -1,3 +1,5 @@
+appId: com.voltafrontend.app
+---
 # Profile setup is gated by backend onboarding status.
 # This flow assumes the authenticated user is required to complete setup.
 
