@@ -1,0 +1,26 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_profile.yaml
+
+- tapOn:
+    id: profile-menu-payments
+
+- extendedWaitUntil:
+    visible:
+      id: profile-payments-screen
+    timeout: 30000
+- assertVisible:
+    id: profile-payments-account-holder-name-input
+- assertVisible:
+    id: profile-payments-iban-input
+- assertVisible:
+    id: profile-payments-save-button
+- tapOn:
+    id: profile-payments-save-button
+- extendedWaitUntil:
+    visible:
+      id: app-toast-success
+    timeout: 30000

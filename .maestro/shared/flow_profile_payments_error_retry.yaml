@@ -1,0 +1,17 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+
+- openLink: 'voltafrontend:///profile/payments?__e2eQueryState=error'
+
+- extendedWaitUntil:
+    visible:
+      id: profile-payments-screen-error-state
+    timeout: 30000
+- tapOn:
+    id: profile-payments-screen-error-state-retry-button
+- extendedWaitUntil:
+    visible:
+      id: profile-payments-screen
+    timeout: 30000

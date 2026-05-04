@@ -1,0 +1,32 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_profile.yaml
+
+- tapOn:
+    id: profile-menu-privacy
+
+- extendedWaitUntil:
+    visible:
+      id: profile-privacy-screen
+    timeout: 30000
+- tapOn:
+    id: profile-privacy-pin-set-button
+    optional: true
+- tapOn:
+    id: profile-privacy-pin-change-button
+    optional: true
+- assertVisible:
+    id: profile-privacy-pin-pin-input
+- assertVisible:
+    id: profile-privacy-pin-confirm-pin-input
+- assertVisible:
+    id: profile-privacy-pin-save-button
+- assertVisible:
+    id: profile-privacy-pin-cancel-button
+- tapOn:
+    id: profile-privacy-pin-cancel-button
+- assertNotVisible:
+    id: profile-privacy-pin-pin-input

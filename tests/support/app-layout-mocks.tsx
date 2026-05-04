@@ -126,11 +126,14 @@ export const { __mockUseFonts: mockUseFonts } = jest.requireMock('expo-font')
 export const {
   __mockHideAsync: mockHideAsync,
   __mockRouterNavigate: mockRouterNavigate,
+  __mockRouterReplace: mockRouterReplace,
   __mockStack: mockStack,
   __mockStackProtected: mockStackProtected,
   __mockStackScreen: mockStackScreen,
   __mockTabs: mockTabs,
   __mockTabsScreen: mockTabsScreen,
+  __mockUseGlobalSearchParams: mockUseGlobalSearchParams,
+  __mockUsePathname: mockUsePathname,
 } = jest.requireMock('expo-router')
 export const { useAuthSession: mockUseAuthSession } = jest.requireMock(
   '@/features/auth/hooks/useAuthSession',
@@ -160,6 +163,8 @@ export function createAuthSessionMock(overrides: Record<string, unknown> = {}) {
 export function resetAppLayoutMocks() {
   jest.clearAllMocks()
   mockUseFonts.mockReturnValue([true, null])
+  mockUseGlobalSearchParams.mockReturnValue({})
+  mockUsePathname.mockReturnValue('/')
   mockUseAuthSession.mockReturnValue(createAuthSessionMock())
   mockUseProfileQuery.mockReturnValue({
     data: undefined,

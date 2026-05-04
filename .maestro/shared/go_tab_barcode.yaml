@@ -1,0 +1,8 @@
+appId: com.voltafrontend.app
+---
+- tapOn:
+    id: tab-barcode
+- extendedWaitUntil:
+    visible:
+      id: barcode-screen
+    timeout: 30000

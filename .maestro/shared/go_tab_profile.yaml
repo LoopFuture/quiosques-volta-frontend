@@ -1,0 +1,8 @@
+appId: com.voltafrontend.app
+---
+- tapOn:
+    id: tab-profile
+- extendedWaitUntil:
+    visible:
+      id: profile-screen
+    timeout: 30000

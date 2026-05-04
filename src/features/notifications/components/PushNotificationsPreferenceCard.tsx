@@ -29,6 +29,7 @@ type PushNotificationsPreferenceCardProps = {
   permissionStatus: 'denied' | 'granted' | 'undetermined'
   registrationErrorCode: PushNotificationsRegistrationErrorCode | null
   testID?: string
+  toggleTestID?: string
   tone?: Tone
 }
 
@@ -129,6 +130,7 @@ export function PushNotificationsPreferenceCard({
   permissionStatus,
   registrationErrorCode,
   testID,
+  toggleTestID,
   tone = 'accent',
 }: PushNotificationsPreferenceCardProps) {
   const { fontScale, width } = useWindowDimensions()
@@ -171,6 +173,7 @@ export function PushNotificationsPreferenceCard({
               checked={effectiveChecked}
               disabled={isToggleDisabled}
               onCheckedChange={onCheckedChange}
+              testID={toggleTestID}
             />
           </XStack>
         </YStack>
@@ -190,6 +193,7 @@ export function PushNotificationsPreferenceCard({
             checked={effectiveChecked}
             disabled={isToggleDisabled}
             onCheckedChange={onCheckedChange}
+            testID={toggleTestID}
           />
         </XStack>
       )}

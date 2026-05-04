@@ -18,6 +18,7 @@ import {
   SurfaceSeparator,
   TransactionListItem,
 } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { getAppToastDuration } from '@/features/app-shell/toast'
 import { TabTopBar } from '@/features/app-shell/navigation/tab-header'
 import { profileRoutes } from '@/features/profile/routes'
@@ -194,6 +195,7 @@ function HomeRecentActivityEmptyState({
 
 export default function HomeScreen() {
   const backPressTimestampRef = useRef(0)
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const pathname = usePathname()
   const router = useRouter()
   const toast = useToastController()
@@ -217,8 +219,12 @@ export default function HomeScreen() {
       title: getWalletMovementTitle(t, movement),
     }),
   )
-
   const handleRefresh = () => {
+    if (isForcedQueryError) {
+      clearForcedQueryError()
+      return
+    }
+
     void refetch()
   }
 
@@ -278,7 +284,7 @@ export default function HomeScreen() {
       scrollable
       testID="home-dashboard-screen"
     >
-      {isError && !homeScreenState ? (
+      {isForcedQueryError || (isError && !homeScreenState) ? (
         <QueryErrorState
           description={t('tabScreens.home.errors.description')}
           onRetry={handleRefresh}
@@ -291,6 +297,7 @@ export default function HomeScreen() {
         <>
           <BalanceCard
             actionLabel={t('tabScreens.home.balanceCard.actionLabel')}
+            actionTestID="home-balance-transfer-button"
             amount={formatWalletAmount(
               homeScreenState.walletBalance.amountMinor,
               i18n.language,
@@ -308,6 +315,7 @@ export default function HomeScreen() {
                 fullWidth={false}
                 tone="neutral"
                 onPress={() => router.push(profileRoutes.summary)}
+                testID="home-overview-account-button"
               >
                 {t('tabScreens.home.overview.accountActionLabel')}
               </PrimaryButton>
@@ -344,7 +352,7 @@ export default function HomeScreen() {
           >
             {recentActivityItems && recentActivityItems.length > 0 ? (
               <YStack gap={10}>
-                {recentActivityItems.map((movement) => (
+                {recentActivityItems.map((movement, index) => (
                   <TransactionListItem
                     key={movement.id}
                     accessibilityHint={t(
@@ -366,6 +374,7 @@ export default function HomeScreen() {
                       router.push(walletRoutes.movementDetail(movement.id))
                     }
                     subtitle={movement.subtitle}
+                    testID={`home-recent-activity-item-${index}`}
                     title={movement.title}
                   />
                 ))}

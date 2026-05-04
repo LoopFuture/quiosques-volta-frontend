@@ -6,9 +6,15 @@ export type ToggleSwitchProps = Omit<GetProps<typeof Switch>, 'children'>
 export const ToggleSwitch = forwardRef<
   ElementRef<typeof Switch>,
   ToggleSwitchProps
->(function ToggleSwitch({ disabled = false, size = '$3.5', ...rest }, ref) {
+>(function ToggleSwitch(
+  { checked = false, disabled = false, size = '$3.5', testID, ...rest },
+  ref,
+) {
   const themeName = useThemeName()
   const isDarkTheme = themeName.startsWith('dark')
+  const stateTestID = testID
+    ? `${testID}-${checked ? 'checked' : 'unchecked'}`
+    : undefined
   const inactiveTrackColor = disabled
     ? isDarkTheme
       ? '$color4'
@@ -53,6 +59,7 @@ export const ToggleSwitch = forwardRef<
       bg={inactiveTrackColor}
       borderColor={inactiveTrackBorderColor}
       borderWidth={1.5}
+      checked={checked}
       disabled={disabled}
       focusStyle={{
         borderColor: '$accent9',
@@ -68,9 +75,10 @@ export const ToggleSwitch = forwardRef<
             }
       }
       size={size}
+      testID={testID}
       {...rest}
     >
-      <Switch.Thumb bg={thumbColor} size="$3" />
+      <Switch.Thumb bg={thumbColor} size="$3" testID={stateTestID} />
     </Switch>
   )
 })

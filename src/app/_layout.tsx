@@ -17,6 +17,8 @@ import {
   recordDiagnosticEvent,
   registerNavigationContainer,
 } from '@/features/app-data/monitoring'
+import { useE2EForcedRootState } from '@/features/app-data/e2e/hooks'
+import { E2E_ROOT_STATE_PROFILE_BOOTSTRAP_ERROR } from '@/features/app-data/e2e/search-params'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { PushNotificationsObserver } from '@/features/notifications/components/PushNotificationsObserver'
 import { useProfileQuery } from '@/features/profile/hooks'
@@ -76,6 +78,9 @@ const Providers = ({ children }: { children: ReactNode }) => {
 }
 function RootLayoutNav() {
   const { canAccessProtectedApp, status } = useAuthSession()
+  const { clearForcedRootState, isForcedRootState } = useE2EForcedRootState(
+    E2E_ROOT_STATE_PROFILE_BOOTSTRAP_ERROR,
+  )
   const {
     data: profile,
     isError: isProfileBootstrapError,
@@ -86,11 +91,15 @@ function RootLayoutNav() {
   })
   const navigationContainerRef = useNavigationContainerRef()
   const themeName = useThemeName()
+  const isForcedProfileBootstrapError =
+    canAccessProtectedApp && isForcedRootState
   const isProfileBootstrapReady =
     !canAccessProtectedApp || (!isProfileBootstrapPending && Boolean(profile))
   const isNavigationReady =
     status !== 'hydrating' &&
-    (isProfileBootstrapReady || isProfileBootstrapError)
+    (isProfileBootstrapReady ||
+      isProfileBootstrapError ||
+      isForcedProfileBootstrapError)
 
   useEffect(() => {
     registerNavigationContainer(navigationContainerRef)
@@ -106,7 +115,7 @@ function RootLayoutNav() {
     return null
   }
 
-  if (isProfileBootstrapError) {
+  if (isForcedProfileBootstrapError || isProfileBootstrapError) {
     return (
       <>
         <StatusBar style={themeName.startsWith('dark') ? 'light' : 'dark'} />
@@ -116,6 +125,11 @@ function RootLayoutNav() {
         >
           <QueryErrorState
             onRetry={() => {
+              if (isForcedProfileBootstrapError) {
+                clearForcedRootState()
+                return
+              }
+
               void refetchProfileBootstrap()
             }}
             testID="profile-bootstrap-error-state"

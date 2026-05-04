@@ -1,0 +1,30 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_profile.yaml
+
+- tapOn:
+    id: profile-menu-personal
+
+- extendedWaitUntil:
+    visible:
+      id: profile-personal-screen
+    timeout: 30000
+- assertVisible:
+    id: profile-personal-name-input
+- assertVisible:
+    id: profile-personal-email-input
+- assertVisible:
+    id: profile-personal-phone-number-input
+- assertVisible:
+    id: profile-personal-nif-input
+- assertVisible:
+    id: profile-personal-save-button
+- tapOn:
+    id: profile-personal-save-button
+- extendedWaitUntil:
+    visible:
+      id: app-toast-success
+    timeout: 30000

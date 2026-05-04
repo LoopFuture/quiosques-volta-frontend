@@ -11,6 +11,7 @@ import {
   SkeletonBlock,
   SurfaceCard,
 } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { useActionToast } from '@/features/app-shell/hooks/useActionToast'
 import { ProfileDetailScreenFrame } from '../components/ProfileDetailScreenFrame'
 import { SettingsSectionHeader } from '../components/ProfilePreferenceControls'
@@ -76,6 +77,7 @@ function ProfilePersonalForm({ personal }: { personal: ProfilePersonal }) {
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
                 required
+                testID="profile-personal-name-input"
                 value={field.value}
               />
             )}
@@ -98,6 +100,7 @@ function ProfilePersonalForm({ personal }: { personal: ProfilePersonal }) {
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
                 required
+                testID="profile-personal-email-input"
                 value={field.value}
               />
             )}
@@ -118,6 +121,7 @@ function ProfilePersonalForm({ personal }: { personal: ProfilePersonal }) {
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
                 required
+                testID="profile-personal-phone-number-input"
                 value={field.value}
               />
             )}
@@ -138,6 +142,7 @@ function ProfilePersonalForm({ personal }: { personal: ProfilePersonal }) {
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
                 required
+                testID="profile-personal-nif-input"
                 value={field.value}
               />
             )}
@@ -179,6 +184,7 @@ function ProfilePersonalForm({ personal }: { personal: ProfilePersonal }) {
 }
 
 export function ProfilePersonalScreen() {
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const { t } = useTranslation()
   const { data: profile, isError, isPending, refetch } = useProfileQuery()
 
@@ -188,9 +194,14 @@ export function ProfilePersonalScreen() {
       testID="profile-personal-screen"
       title={t('tabScreens.profile.personal.title')}
     >
-      {isError && !profile ? (
+      {isForcedQueryError || (isError && !profile) ? (
         <QueryErrorState
           onRetry={() => {
+            if (isForcedQueryError) {
+              clearForcedQueryError()
+              return
+            }
+
             void refetch()
           }}
           testID="profile-personal-screen-error-state"

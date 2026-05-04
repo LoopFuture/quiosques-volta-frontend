@@ -1,0 +1,17 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+
+- openLink: 'voltafrontend:///wallet/movements?__e2eQueryState=error'
+
+- extendedWaitUntil:
+    visible:
+      id: wallet-movements-screen-error-state
+    timeout: 30000
+- tapOn:
+    id: wallet-movements-screen-error-state-retry-button
+- extendedWaitUntil:
+    visible:
+      id: wallet-movements-screen
+    timeout: 30000

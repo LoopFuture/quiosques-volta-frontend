@@ -1,0 +1,26 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_wallet.yaml
+
+- tapOn:
+    id: wallet-overview-transfer-button
+
+- extendedWaitUntil:
+    visible:
+      id: wallet-transfer-screen
+    timeout: 30000
+- tapOn:
+    id: wallet-transfer-full-balance-button
+- extendedWaitUntil:
+    visible:
+      id: wallet-transfer-support-state
+    timeout: 30000
+- tapOn:
+    id: wallet-transfer-support-action-button
+- extendedWaitUntil:
+    visible:
+      id: profile-payments-screen
+    timeout: 30000

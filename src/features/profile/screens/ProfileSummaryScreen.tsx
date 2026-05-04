@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { YStack } from 'tamagui'
 import { QueryErrorState, SkeletonBlock, SurfaceCard } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { ProfileHeroCard } from '../components/ProfileHeroCard'
 import { ProfileDetailScreenFrame } from '../components/ProfileDetailScreenFrame'
 import { ProfileSummaryTotalsCard } from '../components/ProfileSummaryTotalsCard'
@@ -47,6 +48,7 @@ function ProfileSummarySkeleton() {
 }
 
 export default function ProfileSummaryScreen() {
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const { i18n, t } = useTranslation()
   const {
     data: profile,
@@ -65,6 +67,11 @@ export default function ProfileSummaryScreen() {
     : undefined
 
   const handleRefresh = () => {
+    if (isForcedQueryError) {
+      clearForcedQueryError()
+      return
+    }
+
     void refetch()
   }
 
@@ -76,7 +83,7 @@ export default function ProfileSummaryScreen() {
       testID="profile-summary-screen"
       title={t('tabScreens.profile.summary.title')}
     >
-      {isError && !profile ? (
+      {isForcedQueryError || (isError && !profile) ? (
         <QueryErrorState
           onRetry={handleRefresh}
           testID="profile-summary-screen-error-state"

@@ -7,6 +7,7 @@ import { SurfaceCard } from './SurfaceCard'
 
 export type BalanceCardProps = {
   actionLabel?: string
+  actionTestID?: string
   amount: string
   caption?: string
   eyebrow?: string
@@ -18,6 +19,7 @@ export type BalanceCardProps = {
 
 export function BalanceCard({
   actionLabel,
+  actionTestID,
   amount,
   caption,
   eyebrow,
@@ -77,7 +79,9 @@ export function BalanceCard({
       </YStack>
 
       {actionLabel ? (
-        <PrimaryButton onPress={onActionPress}>{actionLabel}</PrimaryButton>
+        <PrimaryButton onPress={onActionPress} testID={actionTestID}>
+          {actionLabel}
+        </PrimaryButton>
       ) : null}
     </SurfaceCard>
   )

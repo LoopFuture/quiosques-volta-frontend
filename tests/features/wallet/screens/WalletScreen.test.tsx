@@ -18,7 +18,12 @@ jest.mock('@/features/wallet/hooks', () => ({
   useWalletOverviewQuery: jest.fn(),
 }))
 
-const { __mockRouterPush: mockRouterPush } = jest.requireMock('expo-router')
+const {
+  __mockRouterPush: mockRouterPush,
+  __mockRouterReplace: mockRouterReplace,
+  __mockUseLocalSearchParams: mockUseLocalSearchParams,
+  __mockUsePathname: mockUsePathname,
+} = jest.requireMock('expo-router')
 const { useWalletOverviewQuery: mockUseWalletOverviewQuery } = jest.requireMock(
   '@/features/wallet/hooks',
 )
@@ -111,6 +116,8 @@ describe('WalletScreen', () => {
     jest.clearAllMocks()
     setLocaleOverrideForTests('pt-PT')
     syncLocale('system')
+    mockUseLocalSearchParams.mockReturnValue({})
+    mockUsePathname.mockReturnValue('/wallet')
     mockUseWalletOverviewQuery.mockReturnValue({
       data: undefined,
       isError: false,
@@ -149,6 +156,55 @@ describe('WalletScreen', () => {
     fireEvent.press(screen.getByText(i18n.t('routes.queryError.retryLabel')))
 
     expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders the forced e2e error state and clears it on retry', () => {
+    const { __setExpoConfig } = jest.requireMock('expo-constants') as {
+      __setExpoConfig: jest.Mock
+    }
+
+    __setExpoConfig({
+      extra: {
+        api: {
+          baseUrl: 'https://volta.be.dev.theloop.tech',
+        },
+        e2e: {
+          enabled: true,
+        },
+        eas: {
+          projectId: '768d0ed6-c7e3-4b88-9ef2-8a4d1ba22381',
+        },
+        keycloak: {
+          clientId: 'volta-mobile',
+          issuerUrl: 'https://keycloak.example.com/realms/volta',
+          scopes: ['openid', 'profile', 'email'],
+        },
+        sentry: {},
+        webApp: {
+          baseUrl: 'https://volta.example.com',
+        },
+      },
+    })
+    mockUseLocalSearchParams.mockReturnValue({
+      __e2eQueryState: 'error',
+    })
+    mockUseWalletOverviewQuery.mockReturnValue({
+      data: walletOverviewState,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<WalletScreen />)
+
+    expect(screen.getByTestId('wallet-screen-error-state')).toBeTruthy()
+
+    fireEvent.press(
+      screen.getByTestId('wallet-screen-error-state-retry-button'),
+    )
+
+    expect(mockRouterReplace).toHaveBeenCalledWith('/wallet')
   })
 
   it('renders the overview and routes transfer, history, and movement detail actions', () => {

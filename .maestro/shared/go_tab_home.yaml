@@ -1,0 +1,8 @@
+appId: com.voltafrontend.app
+---
+- tapOn:
+    id: tab-index
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 30000

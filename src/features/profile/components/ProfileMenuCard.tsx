@@ -12,6 +12,7 @@ export type ProfileMenuRow = {
   icon: ReactNode
   onPress: () => void
   summary: ReactNode
+  testID?: string
   title: string
 }
 
@@ -71,6 +72,7 @@ export function ProfileMenuCard({ rows }: ProfileMenuCardProps) {
                 pressStyle={{ opacity: 0.9 }}
                 px="$4"
                 py="$3.5"
+                testID={row.testID}
               >
                 <XStack
                   bg="$accent3"

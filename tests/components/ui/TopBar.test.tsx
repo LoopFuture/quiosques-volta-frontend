@@ -4,14 +4,27 @@ import { TopBar } from '@/components/ui/TopBar'
 import { mockWindowDimensions } from '@tests/support/react-native'
 import { renderWithProvider, renderWithTheme } from '@tests/support/test-utils'
 
+jest.mock('expo-router', () => {
+  const { createExpoRouterMock } = jest.requireActual(
+    '@tests/support/expo-router-mock',
+  )
+
+  return createExpoRouterMock()
+})
+
 jest.mock('expo-network', () => ({
   __resetExpoNetworkMock: jest.fn(),
   addNetworkStateListener: jest.fn(() => ({ remove: jest.fn() })),
   getNetworkStateAsync: jest.fn(),
 }))
 
+const { __mockUseGlobalSearchParams: mockUseGlobalSearchParams } =
+  jest.requireMock('expo-router')
 const { getNetworkStateAsync } = jest.requireMock('expo-network') as {
   getNetworkStateAsync: jest.Mock
+}
+const { __setExpoConfig } = jest.requireMock('expo-constants') as {
+  __setExpoConfig: jest.Mock
 }
 
 describe('TopBar', () => {
@@ -20,6 +33,7 @@ describe('TopBar', () => {
       isConnected: true,
       isInternetReachable: true,
     })
+    mockUseGlobalSearchParams.mockReturnValue({})
   })
 
   it('renders the home variant and triggers actions', () => {
@@ -186,6 +200,38 @@ describe('TopBar', () => {
     const view = renderWithProvider(<TopBar variant="home" title="Volta" />)
 
     expect(await view.findByTestId('top-bar-offline-indicator')).toBeTruthy()
+  })
+
+  it('renders the offline indicator from the e2e route override', () => {
+    __setExpoConfig({
+      extra: {
+        api: {
+          baseUrl: 'https://volta.be.dev.theloop.tech',
+        },
+        e2e: {
+          enabled: true,
+        },
+        eas: {
+          projectId: '768d0ed6-c7e3-4b88-9ef2-8a4d1ba22381',
+        },
+        keycloak: {
+          clientId: 'volta-mobile',
+          issuerUrl: 'https://keycloak.example.com/realms/volta',
+          scopes: ['openid', 'profile', 'email'],
+        },
+        sentry: {},
+        webApp: {
+          baseUrl: 'https://volta.example.com',
+        },
+      },
+    })
+    mockUseGlobalSearchParams.mockReturnValue({
+      __e2eOffline: '1',
+    })
+
+    const view = renderWithProvider(<TopBar variant="title" title="Perfil" />)
+
+    expect(view.getByTestId('top-bar-offline-indicator')).toBeTruthy()
   })
 
   it('keeps the compact title layout usable without actions', () => {

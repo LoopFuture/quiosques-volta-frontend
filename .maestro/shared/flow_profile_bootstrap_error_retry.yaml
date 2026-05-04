@@ -1,0 +1,17 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+
+- openLink: 'voltafrontend:///profile?__e2eRootState=profile-bootstrap-error'
+
+- extendedWaitUntil:
+    visible:
+      id: profile-bootstrap-error-state
+    timeout: 30000
+- tapOn:
+    id: profile-bootstrap-error-state
+- extendedWaitUntil:
+    visible:
+      id: profile-screen
+    timeout: 30000

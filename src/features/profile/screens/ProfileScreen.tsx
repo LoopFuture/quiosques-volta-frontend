@@ -21,6 +21,7 @@ import {
   SkeletonBlock,
   SurfaceCard,
 } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { useBiometricHardwareAvailability } from '@/features/auth/biometrics'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { authRoutes } from '@/features/auth/routes'
@@ -78,6 +79,7 @@ function ProfileScreenSkeleton() {
 
 export default function ProfileScreen() {
   const router = useRouter()
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const { t } = useTranslation()
   const { signOut } = useAuthSession()
   const hasBiometricHardware = useBiometricHardwareAvailability()
@@ -106,6 +108,11 @@ export default function ProfileScreen() {
   } as const
 
   const handleRefresh = () => {
+    if (isForcedQueryError) {
+      clearForcedQueryError()
+      return
+    }
+
     void refetch()
   }
 
@@ -179,7 +186,7 @@ export default function ProfileScreen() {
       scrollable
       testID="profile-screen"
     >
-      {isError && !profile ? (
+      {isForcedQueryError || (isError && !profile) ? (
         <QueryErrorState
           description={t('tabScreens.profile.errors.description')}
           onRetry={handleRefresh}
@@ -221,6 +228,7 @@ export default function ProfileScreen() {
                     icon: hubIcons[section.id],
                     onPress: () => router.push(hubRoutes[section.id]),
                     summary,
+                    testID: `profile-menu-${section.id}`,
                     title: section.title,
                   }
                 })}
@@ -247,6 +255,7 @@ export default function ProfileScreen() {
                     icon: hubIcons[section.id],
                     onPress: () => router.push(hubRoutes[section.id]),
                     summary,
+                    testID: `profile-menu-${section.id}`,
                     title: section.title,
                   }
                 })}
@@ -270,6 +279,7 @@ export default function ProfileScreen() {
                   onPress: () => router.push(profileRoutes.help),
                   summary: t('tabScreens.profile.hub.rows.onboardingTitle'),
                   helper: undefined,
+                  testID: 'profile-menu-help',
                   title: t('tabScreens.profile.hub.helpRowLabel'),
                 },
                 {
@@ -282,6 +292,7 @@ export default function ProfileScreen() {
                   onPress: handleOpenHelpCenter,
                   summary: t('tabScreens.profile.hub.rows.helpCenterSummary'),
                   helper: undefined,
+                  testID: 'profile-menu-help-center',
                   title: t('tabScreens.profile.hub.rows.helpCenterLabel'),
                 },
                 {
@@ -296,6 +307,7 @@ export default function ProfileScreen() {
                     'tabScreens.profile.hub.rows.privacyPolicySummary',
                   ),
                   helper: undefined,
+                  testID: 'profile-menu-privacy-policy',
                   title: t('tabScreens.profile.hub.rows.privacyPolicyLabel'),
                 },
                 {
@@ -308,6 +320,7 @@ export default function ProfileScreen() {
                   onPress: handleOpenTermsAndConditions,
                   summary: t('tabScreens.profile.hub.rows.termsSummary'),
                   helper: undefined,
+                  testID: 'profile-menu-terms',
                   title: t('tabScreens.profile.hub.rows.termsLabel'),
                 },
               ]}

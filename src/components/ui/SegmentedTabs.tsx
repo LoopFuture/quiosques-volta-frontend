@@ -59,6 +59,7 @@ export function SegmentedTabs<TValue extends string>({
               flexGrow: shouldScroll ? 0 : 1,
               flexShrink: 0,
             }}
+            testID={`segmented-tab-${option.value}`}
             unstyled
             value={option.value}
           >
@@ -69,6 +70,9 @@ export function SegmentedTabs<TValue extends string>({
               lineHeight={18}
               numberOfLines={2}
               style={{ textAlign: 'center' }}
+              testID={
+                active ? `segmented-tab-active-${option.value}` : undefined
+              }
             >
               {option.label}
             </Text>

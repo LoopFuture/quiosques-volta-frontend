@@ -1,0 +1,55 @@
+appId: com.voltafrontend.app
+---
+# Expects env vars:
+# - KEYCLOAK_TEST_USERNAME
+# - KEYCLOAK_TEST_PASSWORD
+#
+# This flow is intentionally defensive because Keycloak themes differ.
+# If your Keycloak login page uses different labels/ids, adjust selectors here.
+
+- assertVisible:
+    id: auth-screen
+- tapOn:
+    id: auth-login-button
+
+# Wait for the browser-based login UI to become interactive.
+- extendedWaitUntil:
+    visible:
+      text: 'Username'
+    timeout: 30000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'Password'
+    timeout: 30000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'Log in'
+    timeout: 30000
+    optional: true
+
+# Username
+- tapOn:
+    text: 'Username'
+    optional: true
+- tapOn:
+    text: 'Username or email'
+    optional: true
+- inputText: ${KEYCLOAK_TEST_USERNAME}
+
+# Password
+- tapOn:
+    text: 'Password'
+    optional: true
+- inputText: ${KEYCLOAK_TEST_PASSWORD}
+- hideKeyboard:
+    optional: true
+
+# Submit
+- tapOn:
+    text: 'Log in'
+    optional: true
+- tapOn:
+    text: 'Sign in'
+    optional: true

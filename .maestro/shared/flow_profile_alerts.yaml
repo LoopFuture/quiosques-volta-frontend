@@ -1,0 +1,32 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_profile.yaml
+
+- tapOn:
+    id: profile-menu-alerts
+
+- extendedWaitUntil:
+    visible:
+      id: profile-alerts-screen
+    timeout: 30000
+- assertVisible:
+    id: profile-alerts-push-notifications-card
+- assertVisible:
+    id: profile-alerts-push-notifications-toggle
+- assertVisible:
+    id: profile-alerts-email-alerts-toggle
+- tapOn:
+    id: profile-alerts-email-alerts-toggle
+- extendedWaitUntil:
+    visible:
+      id: app-toast-success
+    timeout: 30000
+- tapOn:
+    id: profile-alerts-email-alerts-toggle
+- extendedWaitUntil:
+    visible:
+      id: app-toast-success
+    timeout: 30000

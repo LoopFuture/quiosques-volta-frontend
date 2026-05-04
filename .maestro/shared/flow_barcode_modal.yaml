@@ -1,0 +1,37 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_barcode.yaml
+
+- extendedWaitUntil:
+    visible:
+      id: barcode-qr-trigger
+    timeout: 60000
+    optional: true
+
+- tapOn:
+    id: barcode-qr-trigger
+    optional: true
+- tapOn:
+    id: barcode-inline-qr-button
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: barcode-qr-modal
+    timeout: 30000
+- assertVisible:
+    id: barcode-inline-countdown
+- assertVisible:
+    id: barcode-modal-countdown
+- assertVisible:
+    id: barcode-modal-status-label
+
+- tapOn:
+    id: barcode-qr-close
+- extendedWaitUntil:
+    notVisible:
+      id: barcode-qr-modal
+    timeout: 30000

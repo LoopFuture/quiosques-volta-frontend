@@ -1,0 +1,13 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+
+- openLink: 'voltafrontend:///?__e2eOffline=1'
+
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 30000
+- assertVisible:
+    id: top-bar-offline-indicator

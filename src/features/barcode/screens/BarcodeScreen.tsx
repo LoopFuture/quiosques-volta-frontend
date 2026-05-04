@@ -27,6 +27,7 @@ import {
   SurfaceCard,
   ToneScope,
 } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { TabTopBar } from '@/features/app-shell/navigation/tab-header'
 import { BarcodeQrCode } from '../components/BarcodeQrCode'
 import { PersonalBarcodeCard } from '../components/PersonalBarcodeCard'
@@ -273,6 +274,7 @@ const BarcodeModalActiveQr = memo(function BarcodeModalActiveQr({
 export default function BarcodeScreen() {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false)
   const expiredPayloadRefetchKeyRef = useRef<string | null>(null)
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const { height, width } = useWindowDimensions()
@@ -439,10 +441,15 @@ export default function BarcodeScreen() {
         scrollable
         testID="barcode-screen"
       >
-        {isError && !barcodeScreenState ? (
+        {isForcedQueryError || (isError && !barcodeScreenState) ? (
           <QueryErrorState
             description={t('tabScreens.barcode.errors.description')}
             onRetry={() => {
+              if (isForcedQueryError) {
+                clearForcedQueryError()
+                return
+              }
+
               void refetch()
             }}
             testID="barcode-screen-error-state"

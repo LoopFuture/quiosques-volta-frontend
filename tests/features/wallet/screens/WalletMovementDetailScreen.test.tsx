@@ -45,6 +45,49 @@ describe('WalletMovementDetailScreen', () => {
     expect(mockRouterReplace).toHaveBeenCalledWith(walletRoutes.movements)
   })
 
+  it('renders the forced e2e not-found state and routes back to history', () => {
+    const { __setExpoConfig } = jest.requireMock('expo-constants') as {
+      __setExpoConfig: jest.Mock
+    }
+
+    __setExpoConfig({
+      extra: {
+        api: {
+          baseUrl: 'https://volta.be.dev.theloop.tech',
+        },
+        e2e: {
+          enabled: true,
+        },
+        eas: {
+          projectId: '768d0ed6-c7e3-4b88-9ef2-8a4d1ba22381',
+        },
+        keycloak: {
+          clientId: 'volta-mobile',
+          issuerUrl: 'https://keycloak.example.com/realms/volta',
+          scopes: ['openid', 'profile', 'email'],
+        },
+        sentry: {},
+        webApp: {
+          baseUrl: 'https://volta.example.com',
+        },
+      },
+    })
+    mockUseLocalSearchParams.mockReturnValue({
+      __e2eMovementState: 'not-found',
+      movementId: 'maestro-missing',
+    })
+
+    renderWithProvider(<WalletMovementDetailScreen />)
+
+    expect(screen.getByTestId('wallet-movement-not-found-screen')).toBeTruthy()
+
+    fireEvent.press(
+      screen.getByTestId('wallet-movement-not-found-history-button'),
+    )
+
+    expect(mockRouterReplace).toHaveBeenCalledWith(walletRoutes.movements)
+  })
+
   it('renders the movement detail skeleton while the query is pending', () => {
     mockUseWalletMovementDetailQuery.mockReturnValue({
       data: undefined,

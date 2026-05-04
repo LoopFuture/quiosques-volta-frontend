@@ -8,12 +8,21 @@ import {
 } from '@tests/support/profile-editor-screen-mocks'
 import { fireEvent, screen, waitFor } from '@testing-library/react-native'
 import { ProfilePersonalScreen } from '@/features/profile/screens/ProfilePersonalScreen'
+import { profileRoutes } from '@/features/profile/routes'
 import { i18n } from '@/i18n'
 import { renderWithProvider } from '@tests/support/test-utils'
+
+const {
+  __mockRouterReplace: mockRouterReplace,
+  __mockUseLocalSearchParams: mockUseLocalSearchParams,
+  __mockUsePathname: mockUsePathname,
+} = jest.requireMock('expo-router')
 
 describe('ProfilePersonalScreen', () => {
   beforeEach(() => {
     resetProfileEditorScreenMocks()
+    mockUseLocalSearchParams.mockReturnValue({})
+    mockUsePathname.mockReturnValue(profileRoutes.personal)
   })
 
   afterAll(() => {
@@ -32,6 +41,50 @@ describe('ProfilePersonalScreen', () => {
     renderWithProvider(<ProfilePersonalScreen />)
 
     expect(screen.getByTestId('profile-personal-screen-skeleton')).toBeTruthy()
+  })
+
+  it('renders the forced e2e error state and clears it on retry', () => {
+    const { __setExpoConfig } = jest.requireMock('expo-constants') as {
+      __setExpoConfig: jest.Mock
+    }
+
+    __setExpoConfig({
+      extra: {
+        api: {
+          baseUrl: 'https://volta.be.dev.theloop.tech',
+        },
+        e2e: {
+          enabled: true,
+        },
+        eas: {
+          projectId: '768d0ed6-c7e3-4b88-9ef2-8a4d1ba22381',
+        },
+        keycloak: {
+          clientId: 'volta-mobile',
+          issuerUrl: 'https://keycloak.example.com/realms/volta',
+          scopes: ['openid', 'profile', 'email'],
+        },
+        sentry: {},
+        webApp: {
+          baseUrl: 'https://volta.example.com',
+        },
+      },
+    })
+    mockUseLocalSearchParams.mockReturnValue({
+      __e2eQueryState: 'error',
+    })
+
+    renderWithProvider(<ProfilePersonalScreen />)
+
+    expect(
+      screen.getByTestId('profile-personal-screen-error-state'),
+    ).toBeTruthy()
+
+    fireEvent.press(
+      screen.getByTestId('profile-personal-screen-error-state-retry-button'),
+    )
+
+    expect(mockRouterReplace).toHaveBeenCalledWith(profileRoutes.personal)
   })
 
   it('submits updated personal details and shows the success toast', async () => {

@@ -1,0 +1,17 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+
+- openLink: 'voltafrontend:///wallet/maestro-missing?__e2eMovementState=not-found'
+
+- extendedWaitUntil:
+    visible:
+      id: wallet-movement-not-found-screen
+    timeout: 30000
+- tapOn:
+    id: wallet-movement-not-found-history-button
+- extendedWaitUntil:
+    visible:
+      id: wallet-movements-screen
+    timeout: 30000

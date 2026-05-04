@@ -1,0 +1,25 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/launch_clear_state.yaml
+
+- runFlow:
+    file: ../shared/keycloak_login_steps.yaml
+
+# After the redirect back to the app, the user may land on setup or directly on tabs.
+- extendedWaitUntil:
+    visible:
+      id: profile-setup-screen
+    timeout: 90000
+    optional: true
+
+- runFlow:
+    when:
+      visible:
+        id: profile-setup-screen
+    file: ../shared/profile_setup_happy_path.yaml
+
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 90000

@@ -1,0 +1,10 @@
+appId: com.voltafrontend.app
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../shared/if_onboarding_skip.yaml
+- extendedWaitUntil:
+    timeout: 30000
+    visible:
+      id: auth-screen

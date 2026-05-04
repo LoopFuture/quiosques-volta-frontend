@@ -12,10 +12,17 @@ jest.mock('expo-router', () => {
 })
 
 const { __mockRouterPush: mockRouterPush } = jest.requireMock('expo-router')
+const {
+  __mockRouterReplace: mockRouterReplace,
+  __mockUseLocalSearchParams: mockUseLocalSearchParams,
+  __mockUsePathname: mockUsePathname,
+} = jest.requireMock('expo-router')
 
 describe('map screen', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseLocalSearchParams.mockReturnValue({})
+    mockUsePathname.mockReturnValue('/map')
   })
 
   it('renders the coming soon message and routes the code action to barcode', async () => {
@@ -40,5 +47,45 @@ describe('map screen', () => {
     fireEvent.press(screen.getByRole('button', { name: 'Mostrar código' }))
 
     expect(mockRouterPush).toHaveBeenCalledWith(barcodeRoutes.index)
+  })
+
+  it('renders the forced e2e error state and clears it on retry', () => {
+    const { __setExpoConfig } = jest.requireMock('expo-constants') as {
+      __setExpoConfig: jest.Mock
+    }
+
+    __setExpoConfig({
+      extra: {
+        api: {
+          baseUrl: 'https://volta.be.dev.theloop.tech',
+        },
+        e2e: {
+          enabled: true,
+        },
+        eas: {
+          projectId: '768d0ed6-c7e3-4b88-9ef2-8a4d1ba22381',
+        },
+        keycloak: {
+          clientId: 'volta-mobile',
+          issuerUrl: 'https://keycloak.example.com/realms/volta',
+          scopes: ['openid', 'profile', 'email'],
+        },
+        sentry: {},
+        webApp: {
+          baseUrl: 'https://volta.example.com',
+        },
+      },
+    })
+    mockUseLocalSearchParams.mockReturnValue({
+      __e2eQueryState: 'error',
+    })
+
+    renderWithProvider(<MapScreen />)
+
+    expect(screen.getByTestId('map-error-state')).toBeTruthy()
+
+    fireEvent.press(screen.getByRole('button', { name: 'Tentar novamente' }))
+
+    expect(mockRouterReplace).toHaveBeenCalledWith('/map')
   })
 })

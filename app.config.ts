@@ -134,6 +134,7 @@ const defaultSentryEnvironment = getDefaultSentryEnvironment()
 const sentryEnvironment =
   getEnvironmentVariable('SENTRY_ENVIRONMENT') ?? defaultSentryEnvironment
 const easProjectId = '768d0ed6-c7e3-4b88-9ef2-8a4d1ba22381'
+const e2eEnabled = getBuildProfile() === 'e2e-test'
 const androidGoogleServicesFile = getFileEnvironmentVariable(
   'ANDROID_GOOGLE_SERVICES_FILE',
 )
@@ -244,6 +245,9 @@ const config: ExpoConfig = {
       baseUrl: getEnvironmentVariable('WEB_APP_BASE_URL', {
         required: true,
       }),
+    },
+    e2e: {
+      enabled: e2eEnabled,
     },
   },
 }

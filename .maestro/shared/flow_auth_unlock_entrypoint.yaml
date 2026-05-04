@@ -1,0 +1,51 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/launch_clear_state.yaml
+- runFlow:
+    file: ../shared/keycloak_login_steps.yaml
+
+- extendedWaitUntil:
+    visible:
+      id: profile-setup-screen
+    timeout: 15000
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: profile-setup-screen
+    file: ../shared/profile_setup_happy_path.yaml
+
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 90000
+
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 60000
+
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: auth-unlock-screen
+    timeout: 60000
+
+- tapOn:
+    id: auth-unlock-close-button
+- extendedWaitUntil:
+    visible:
+      id: auth-screen
+    timeout: 30000
+- assertVisible:
+    id: auth-open-unlock-button
+- tapOn:
+    id: auth-open-unlock-button
+- extendedWaitUntil:
+    visible:
+      id: auth-unlock-screen
+    timeout: 30000

@@ -8,13 +8,22 @@ import {
 } from '@tests/support/profile-editor-screen-mocks'
 import { fireEvent, screen, waitFor } from '@testing-library/react-native'
 import { ProfilePaymentsScreen } from '@/features/profile/screens/ProfilePaymentsScreen'
+import { profileRoutes } from '@/features/profile/routes'
 import { i18n } from '@/i18n'
 import { mockWindowDimensions } from '@tests/support/react-native'
 import { renderWithProvider } from '@tests/support/test-utils'
 
+const {
+  __mockRouterReplace: mockRouterReplace,
+  __mockUseLocalSearchParams: mockUseLocalSearchParams,
+  __mockUsePathname: mockUsePathname,
+} = jest.requireMock('expo-router')
+
 describe('ProfilePaymentsScreen', () => {
   beforeEach(() => {
     resetProfileEditorScreenMocks()
+    mockUseLocalSearchParams.mockReturnValue({})
+    mockUsePathname.mockReturnValue(profileRoutes.payments)
   })
 
   afterAll(() => {
@@ -51,6 +60,50 @@ describe('ProfilePaymentsScreen', () => {
     fireEvent.press(screen.getByText(i18n.t('routes.queryError.retryLabel')))
 
     expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders the forced e2e error state and clears it on retry', () => {
+    const { __setExpoConfig } = jest.requireMock('expo-constants') as {
+      __setExpoConfig: jest.Mock
+    }
+
+    __setExpoConfig({
+      extra: {
+        api: {
+          baseUrl: 'https://volta.be.dev.theloop.tech',
+        },
+        e2e: {
+          enabled: true,
+        },
+        eas: {
+          projectId: '768d0ed6-c7e3-4b88-9ef2-8a4d1ba22381',
+        },
+        keycloak: {
+          clientId: 'volta-mobile',
+          issuerUrl: 'https://keycloak.example.com/realms/volta',
+          scopes: ['openid', 'profile', 'email'],
+        },
+        sentry: {},
+        webApp: {
+          baseUrl: 'https://volta.example.com',
+        },
+      },
+    })
+    mockUseLocalSearchParams.mockReturnValue({
+      __e2eQueryState: 'error',
+    })
+
+    renderWithProvider(<ProfilePaymentsScreen />)
+
+    expect(
+      screen.getByTestId('profile-payments-screen-error-state'),
+    ).toBeTruthy()
+
+    fireEvent.press(
+      screen.getByTestId('profile-payments-screen-error-state-retry-button'),
+    )
+
+    expect(mockRouterReplace).toHaveBeenCalledWith(profileRoutes.payments)
   })
 
   it('submits updated payment details and shows the success toast', async () => {

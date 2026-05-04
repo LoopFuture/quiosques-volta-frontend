@@ -1,0 +1,23 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_wallet.yaml
+
+- assertVisible:
+    id: wallet-overview-empty-state
+- assertNotVisible:
+    id: wallet-overview-movements-button
+
+- tapOn:
+    id: wallet-overview-transfer-button
+
+- extendedWaitUntil:
+    visible:
+      id: wallet-transfer-screen
+    timeout: 30000
+- assertVisible:
+    id: wallet-transfer-review-card
+- assertVisible:
+    id: wallet-transfer-submit-button

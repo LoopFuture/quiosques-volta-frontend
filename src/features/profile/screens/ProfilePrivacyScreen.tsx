@@ -188,6 +188,7 @@ function ProfilePrivacyForm() {
                   onCheckedChange={(checked) => {
                     void handleBiometricsToggleChange(checked, field.onChange)
                   }}
+                  testID="profile-privacy-biometric-toggle"
                 />
               )}
             />

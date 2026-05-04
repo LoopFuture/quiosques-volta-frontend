@@ -1,0 +1,17 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+- runFlow:
+    file: ../shared/go_tab_map.yaml
+
+- assertVisible:
+    id: map-empty-state
+
+- tapOn:
+    id: map-open-barcode-button
+
+- extendedWaitUntil:
+    visible:
+      id: barcode-screen
+    timeout: 30000

@@ -1,0 +1,8 @@
+appId: com.voltafrontend.app
+---
+- tapOn:
+    id: tab-map
+- extendedWaitUntil:
+    visible:
+      id: map-screen
+    timeout: 30000
