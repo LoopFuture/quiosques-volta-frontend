@@ -210,13 +210,11 @@ export default function OnboardingScreen({
   const flatListRef = useRef<FlatList<OnboardingSlide>>(null)
   const scrollX = useRef(new Animated.Value(0)).current
   const [activeIndex, setActiveIndex] = useState(0)
-  const { fontScale, height, width } = useWindowDimensions()
+  const { width } = useWindowDimensions()
   const pageWidth = Math.max(width, 1)
   const isCompactWidth = width < 360
   const isLastSlide = activeIndex === slides.length - 1
   const isReviewMode = variant === 'review'
-  const prefersExpandedTextLayout = fontScale > 1.15
-  const shouldUseScrollableLayout = prefersExpandedTextLayout || height < 760
   const footerHelper = isLastSlide
     ? isReviewMode
       ? t('onboarding.actions.closeHelper')
@@ -302,14 +300,13 @@ export default function OnboardingScreen({
         ) : undefined
       }
       contentProps={{
-        flex: shouldUseScrollableLayout ? undefined : 1,
         gap: '$3',
         px: '$0',
-        pb: shouldUseScrollableLayout ? '$4' : '$0',
+        pb: '$4',
         pt: '$3',
       }}
-      footer={shouldUseScrollableLayout ? undefined : footerContent}
-      scrollable={shouldUseScrollableLayout}
+      footer={footerContent}
+      scrollable
       testID="onboarding-screen"
     >
       <YStack gap="$4" px="$4">
@@ -359,18 +356,11 @@ export default function OnboardingScreen({
         </YStack>
       </YStack>
 
-      <YStack
-        flex={shouldUseScrollableLayout ? undefined : 1}
-        style={shouldUseScrollableLayout ? undefined : { minHeight: 380 }}
-      >
+      <YStack>
         <Animated.FlatList
           ref={flatListRef}
           bounces={false}
-          contentContainerStyle={
-            shouldUseScrollableLayout
-              ? { flexGrow: 1 }
-              : { flexGrow: 1, height: '100%' }
-          }
+          contentContainerStyle={{ flexGrow: 1 }}
           data={slides}
           getItemLayout={(_, index) => ({
             index,
@@ -385,6 +375,7 @@ export default function OnboardingScreen({
             [{ nativeEvent: { contentOffset: { x: scrollX } } }],
             { useNativeDriver: true },
           )}
+          decelerationRate="fast"
           pagingEnabled
           renderItem={({ index, item }) => (
             <OnboardingSlideCard
@@ -392,17 +383,15 @@ export default function OnboardingScreen({
               isCompactWidth={isCompactWidth}
               scrollX={scrollX}
               slide={item}
-              stretchToFill={!shouldUseScrollableLayout}
+              stretchToFill={false}
               width={pageWidth}
             />
           )}
           scrollEventThrottle={16}
           showsHorizontalScrollIndicator={false}
-          style={shouldUseScrollableLayout ? undefined : { flex: 1 }}
           testID="onboarding-list"
         />
       </YStack>
-      {shouldUseScrollableLayout ? footerContent : null}
     </ScreenContainer>
   )
 }

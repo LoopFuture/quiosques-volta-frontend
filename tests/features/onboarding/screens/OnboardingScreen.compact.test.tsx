@@ -6,7 +6,7 @@ import { renderWithProvider } from '@tests/support/test-utils'
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
   __esModule: true,
   default: jest.fn(() => ({
-    fontScale: 1.5,
+    fontScale: 1,
     height: 640,
     scale: 2,
     width: 320,
@@ -14,7 +14,7 @@ jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
 }))
 
 describe('onboarding screen compact layout', () => {
-  it('renders the compact footer actions in a scrollable layout under high font scale', () => {
+  it('renders the compact footer actions in a scrollable layout', () => {
     const view = renderWithProvider(<OnboardingScreen onComplete={jest.fn()} />)
 
     expect(view.getByTestId('onboarding-screen-scroll-view')).toBeTruthy()

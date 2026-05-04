@@ -1,6 +1,6 @@
 import { Platform } from 'react-native'
 
-type ShadowRole = 'surface' | 'button' | 'iconButton' | 'fab'
+type ShadowRole = 'surface' | 'card' | 'button' | 'iconButton' | 'fab'
 
 type ShadowProps = {
   elevation?: number
@@ -23,6 +23,12 @@ const iosShadowPresets: Record<
       shadowOffset: { width: 0, height: 12 },
       shadowOpacity: 0.14,
       shadowRadius: 28,
+    },
+    card: {
+      shadowColor: '$accent8',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.1,
+      shadowRadius: 18,
     },
     button: {
       shadowColor: '$accent8',
@@ -49,6 +55,12 @@ const iosShadowPresets: Record<
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.18,
       shadowRadius: 20,
+    },
+    card: {
+      shadowColor: '$accent8',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.14,
+      shadowRadius: 16,
     },
     button: {
       shadowColor: '$accent8',
@@ -77,12 +89,14 @@ const androidShadowPresets: Record<
 > = {
   light: {
     surface: { elevation: 2 },
+    card: { elevation: 1 },
     button: { elevation: 2 },
     iconButton: { elevation: 1 },
     fab: { elevation: 5 },
   },
   dark: {
     surface: { elevation: 1 },
+    card: { elevation: 1 },
     button: { elevation: 1 },
     iconButton: { elevation: 1 },
     fab: { elevation: 4 },
