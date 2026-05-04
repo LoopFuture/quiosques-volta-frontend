@@ -45,6 +45,9 @@ describe('i18n index', () => {
     expect(i18n.t('tabScreens.profile.personal.photoTitle')).toBe(
       'Profile photo',
     )
+    expect(i18n.t('tabScreens.profile.deleteAccount.title')).toBe(
+      'Delete account',
+    )
     expect(getWalletHistoryFilterOptions(t)[0]?.label).toBe('All')
   })
 

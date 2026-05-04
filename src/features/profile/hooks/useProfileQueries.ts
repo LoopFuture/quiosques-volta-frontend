@@ -7,7 +7,7 @@ import {
   invalidateProfileQueries,
   invalidateWalletQueries,
 } from '@/features/app-data/query'
-import { patchProfile, fetchProfileState } from '../api'
+import { deleteProfileAccount, patchProfile, fetchProfileState } from '../api'
 import type { ProfilePatchRequest } from '../models'
 import type { ProfileSetupSnapshot } from '../models/setup'
 
@@ -85,6 +85,17 @@ export function useUpdateProfilePreferencesMutation() {
     onSuccessInvalidate: () => undefined,
     operation: 'update-preferences',
     redactKeys: ['alertsEmail'],
+  })
+}
+
+export function useDeleteProfileAccountMutation() {
+  return useMutation({
+    meta: {
+      feature: 'profile',
+      operation: 'delete-account',
+    },
+    mutationFn: () => deleteProfileAccount(),
+    mutationKey: appMutationKeys.profile.deleteAccount(),
   })
 }
 

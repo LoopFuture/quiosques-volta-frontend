@@ -403,6 +403,8 @@
             "biometricsDisabledHelper": "Biometrics disabled",
             "biometricsEnabledHelper": "Face ID / fingerprint",
             "biometricsTitle": "Biometrics",
+            "deleteAccountLabel": "Delete account",
+            "deleteAccountSummary": "Review what happens before deleting your account.",
             "emailTitle": "Email",
             "helpCenterBrowserHelper": "Quick answers and account support in your browser.",
             "helpCenterLabel": "Help center",
@@ -457,6 +459,18 @@
           },
           "sessionDescription": "Sign out on this phone if you no longer need this account on this device.",
           "sessionLabel": "Session"
+        },
+        "deleteAccount": {
+          "buttonLabel": "Delete account",
+          "confirmationLabel": "I am certain that I want to delete this account.",
+          "description": "This starts your account deletion period and signs you out on this phone.",
+          "donationNotice": "After the 30 days end, any money still left in the account will be donated to charity.",
+          "errorToast": "We couldn't delete your account right now.",
+          "recoveryNotice": "If you want to recover the account, just log in again within those 30 days.",
+          "retentionNotice": "Your account data will be kept for 30 days after deletion so the account can still be recovered during that period.",
+          "title": "Delete account",
+          "transferNotice": "Before deleting the account, transfer all of your credits to your bank account.",
+          "warningLabel": "Before you continue"
         },
         "alerts": {
           "description": "Choose how Volta sends account and payment updates.",

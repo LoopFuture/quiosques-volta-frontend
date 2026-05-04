@@ -1,4 +1,8 @@
-import { fetchProfileState, patchProfile } from '@/features/profile/api'
+import {
+  deleteProfileAccount,
+  fetchProfileState,
+  patchProfile,
+} from '@/features/profile/api'
 
 jest.mock('@/features/app-data/api', () => ({
   request: jest.fn(),
@@ -157,6 +161,21 @@ describe('profile api', () => {
       },
       method: 'PATCH',
       path: '/api/v1/profile',
+    })
+  })
+
+  it('deletes the authenticated account with delete-account metadata', async () => {
+    mockRequest.mockResolvedValue(undefined)
+
+    await expect(deleteProfileAccount()).resolves.toBeUndefined()
+
+    expect(mockRequest).toHaveBeenCalledWith({
+      meta: {
+        feature: 'profile',
+        operation: 'delete-account',
+      },
+      method: 'DELETE',
+      path: '/api/v1/profile/account',
     })
   })
 })

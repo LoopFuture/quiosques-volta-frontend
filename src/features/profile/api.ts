@@ -42,3 +42,14 @@ export async function patchProfile(patch: ProfilePatchRequest) {
     }),
   )
 }
+
+export async function deleteProfileAccount() {
+  await request<void>({
+    meta: {
+      feature: 'profile',
+      operation: 'delete-account',
+    },
+    method: 'DELETE',
+    path: '/api/v1/profile/account',
+  })
+}
