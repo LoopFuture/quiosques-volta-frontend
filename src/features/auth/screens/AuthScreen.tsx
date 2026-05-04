@@ -401,7 +401,7 @@ export default function AuthScreen() {
   const { completeOnboarding, hasCompletedOnboarding } = useOnboardingStatus()
   const { isAuthenticated } = useAuthSession()
 
-  if (hasCompletedOnboarding && !isAuthenticated) {
+  if (!hasCompletedOnboarding && !isAuthenticated) {
     return <OnboardingScreen onComplete={completeOnboarding} />
   }
 
