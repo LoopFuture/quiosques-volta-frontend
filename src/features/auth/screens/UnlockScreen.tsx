@@ -98,6 +98,10 @@ export default function UnlockScreen() {
   const cardPadding = isVeryShortHeight ? '$4' : '$5'
   const titleSize = isVeryShortHeight || isCompactWidth ? 24 : 28
   const cardMaxWidth = Math.min(width - 32, 360)
+  const hasPinBlockingError =
+    unlockError?.kind === 'pin' &&
+    (unlockError.reason === 'not-configured' ||
+      unlockError.reason === 'too-many-attempts')
   const currentErrorMessage = unlockError
     ? unlockError.kind === 'biometric'
       ? getUnlockErrorMessage(unlockError.reason, t)
@@ -128,11 +132,6 @@ export default function UnlockScreen() {
     },
     [t],
   )
-  const hasPinBlockingError =
-    unlockError?.kind === 'pin' &&
-    (unlockError.reason === 'not-configured' ||
-      unlockError.reason === 'too-many-attempts')
-
   useEffect(() => {
     if (!isLockedSession) {
       router.replace(authRoutes.index)
@@ -375,7 +374,11 @@ export default function UnlockScreen() {
             >
               {t('auth.lock.title')}
             </Text>
-            <Text color="$color11" size="$4" style={{ textAlign: 'center' }}>
+            <Text
+              color="$color11"
+              fontSize={16}
+              style={{ textAlign: 'center' }}
+            >
               {t('auth.lock.description')}
             </Text>
           </YStack>
