@@ -3,7 +3,7 @@ import { Animated, Easing, useWindowDimensions } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Delete, Fingerprint, X } from '@tamagui/lucide-icons'
 import { useTranslation } from 'react-i18next'
-import { Button, Paragraph, Text, XStack, YStack } from 'tamagui'
+import { Button, Text, XStack, YStack } from 'tamagui'
 import { PrimaryButton, ScreenContainer, SurfaceCard } from '@/components/ui'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { APP_PIN_LENGTH } from '@/features/auth/pin'
@@ -101,7 +101,9 @@ export default function UnlockScreen() {
   const currentErrorMessage = unlockError
     ? unlockError.kind === 'biometric'
       ? getUnlockErrorMessage(unlockError.reason, t)
-      : getPinUnlockErrorMessage(unlockError.reason, t)
+      : hasPinBlockingError
+        ? getPinUnlockErrorMessage(unlockError.reason, t)
+        : null
     : null
   const getPinDotAccessibilityLabel = useCallback(
     (index: number, filled: boolean, isError: boolean) => {
@@ -373,13 +375,9 @@ export default function UnlockScreen() {
             >
               {t('auth.lock.title')}
             </Text>
-            <Paragraph
-              color="$color11"
-              size="$4"
-              style={{ textAlign: 'center' }}
-            >
+            <Text color="$color11" size="$4" style={{ textAlign: 'center' }}>
               {t('auth.lock.description')}
-            </Paragraph>
+            </Text>
           </YStack>
 
           {currentErrorMessage ? (
@@ -446,14 +444,6 @@ export default function UnlockScreen() {
             gap={keypadGap}
             style={{ alignSelf: 'center', width: '100%' }}
           >
-            <Paragraph
-              color="$color11"
-              size="$3"
-              style={{ textAlign: 'center' }}
-            >
-              {t('auth.lock.pinHelper')}
-            </Paragraph>
-
             {PIN_PAD_ROWS.map((row, rowIndex) => (
               <XStack
                 gap={keypadGap}

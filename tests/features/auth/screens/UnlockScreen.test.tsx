@@ -212,8 +212,8 @@ describe('unlock screen', () => {
     })
   })
 
-  it.each(['invalid-pin', 'too-many-attempts'] as const)(
-    'shows red PIN feedback and recovery copy for %s',
+  it.each(['failed', 'invalid-pin'] as const)(
+    'shows red PIN feedback without the recovery card for %s',
     async (reason) => {
       const unlockWithPin = jest.fn().mockResolvedValue({
         reason,
@@ -250,7 +250,10 @@ describe('unlock screen', () => {
         expect(
           screen.getByTestId('auth-pin-dot-4').props.accessibilityLabel,
         ).toBe('Erro no dígito 4 de 4 do PIN')
-        expect(screen.getByTestId('auth-error-text')).toBeTruthy()
+        expect(screen.queryByTestId('auth-error-text')).toBeNull()
+        expect(
+          screen.queryByTestId('auth-unlock-login-again-button'),
+        ).toBeNull()
       })
     },
   )
