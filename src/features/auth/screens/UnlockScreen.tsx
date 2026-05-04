@@ -5,6 +5,7 @@ import { Delete, Fingerprint, X } from '@tamagui/lucide-icons'
 import { useTranslation } from 'react-i18next'
 import { Button, Text, XStack, YStack } from 'tamagui'
 import { PrimaryButton, ScreenContainer, SurfaceCard } from '@/components/ui'
+import { useBiometricHardwareAvailability } from '@/features/auth/biometrics'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { APP_PIN_LENGTH } from '@/features/auth/pin'
 import { authRoutes } from '@/features/auth/routes'
@@ -71,6 +72,7 @@ export default function UnlockScreen() {
     unlockWithBiometrics,
     unlockWithPin,
   } = useAuthSession()
+  const hasBiometricHardware = useBiometricHardwareAvailability()
   const { fontScale, height, width } = useWindowDimensions()
   const lastAutoPromptedLockRevisionRef = useRef<number | null>(null)
   const pinValueRef = useRef('')
@@ -455,6 +457,10 @@ export default function UnlockScreen() {
               >
                 {row.map((item) => {
                   if (item === 'biometric') {
+                    if (!hasBiometricHardware) {
+                      return null
+                    }
+
                     return (
                       <Button
                         accessibilityLabel={t('auth.biometricLabel')}

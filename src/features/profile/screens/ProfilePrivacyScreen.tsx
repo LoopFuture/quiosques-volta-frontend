@@ -73,6 +73,13 @@ function ProfilePrivacyForm() {
     cancelLabel: t('tabScreens.profile.privacy.pinCancelLabel'),
     changeLabel: t('tabScreens.profile.privacy.pinChangeLabel'),
     confirmPinLabel: t('tabScreens.profile.privacy.pinConfirmLabel'),
+    currentPinInvalidError: t(
+      'tabScreens.profile.privacy.pinCurrentInvalidError',
+    ),
+    currentPinLabel: t('tabScreens.profile.privacy.pinCurrentLabel'),
+    currentPinMismatchError: t(
+      'tabScreens.profile.privacy.pinCurrentMismatchError',
+    ),
     enabledHelper: t('tabScreens.profile.privacy.pinEnabledHelper'),
     invalidPinError: t('tabScreens.profile.privacy.pinInvalidError'),
     label: t('tabScreens.profile.privacy.pinLabel'),

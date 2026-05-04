@@ -10,13 +10,11 @@ import { LockKeyhole } from '@tamagui/lucide-icons'
 import { useTranslation } from 'react-i18next'
 import { Button, Text, XStack, YStack } from 'tamagui'
 import { PrimaryButton, ScreenContainer, SurfaceCard } from '@/components/ui'
-import { useDevicePrivacySettings } from '@/features/app-data/storage/device/privacy'
 import {
   createDiagnosticTimer,
   recordDiagnosticEvent,
 } from '@/features/app-data/monitoring'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
-import { clearStoredAppPin } from '@/features/auth/pin'
 import {
   createKeycloakDiscoveryDocument,
   createKeycloakRedirectUri,
@@ -38,7 +36,6 @@ type AuthIntent = 'login' | 'register' | null
 function AuthPromptScreen() {
   const { t } = useTranslation()
   const { showLogin } = useLocalSearchParams<{ showLogin?: string }>()
-  const { settings, setSettings } = useDevicePrivacySettings()
   const runtimeConfig = getKeycloakRuntimeConfig()
   const discovery = createKeycloakDiscoveryDocument(runtimeConfig.issuerUrl)
   const redirectUri = createKeycloakRedirectUri()
@@ -168,13 +165,6 @@ function AuthPromptScreen() {
 
     try {
       if (isLockedSession) {
-        if (isPinUnlockEnabled) {
-          await clearStoredAppPin()
-          setSettings({
-            ...settings,
-            pinEnabled: false,
-          })
-        }
         await signOut()
       }
 
