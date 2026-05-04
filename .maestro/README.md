@@ -12,6 +12,7 @@ This repo includes Maestro end-to-end tests for both mobile platforms.
 
 - `.eas/workflows/maestro-e2e.yml` is manual-only on purpose.
 - The workflow already builds platform-specific `e2e-test` artifacts and points Maestro at the platform directories above.
+- The checked-in suite covers core user journeys plus route edge cases such as unknown deep links, root profile-bootstrap failure recovery, route-level not-found states, and deterministic offline/error/retry states across protected routes.
 
 ## Running in EAS
 
@@ -39,6 +40,20 @@ Typical local flow:
   - iOS: `maestro test .maestro/ios`
   - Android: `maestro test .maestro/android`
 
+## E2E route overrides
+
+The `e2e-test` build profile enables a small set of route query overrides used only by Maestro. They are intentionally narrow and should not be used outside E2E coverage.
+
+- `__e2eRootState=profile-bootstrap-error`
+  - Forces the protected app shell into the profile bootstrap error state until retry clears the override.
+- `__e2eOffline=1`
+  - Forces the route header to show the offline indicator.
+- `__e2eQueryState=error`
+  - Forces supported routes to render their query error state until retry clears the override.
+  - Supported routes in this suite: `/`, `/barcode`, `/map`, `/wallet`, `/wallet/movements`, `/wallet/transfer`, `/profile`, `/profile/summary`, `/profile/personal`, `/profile/payments`, `/profile/alerts`, and `/wallet/[movementId]`.
+- `__e2eMovementState=not-found`
+  - Forces the wallet movement detail route to render its not-found state.
+
 ## Required environment & test data
 
 ### Keycloak automation
@@ -58,12 +73,12 @@ It expects these environment variables at runtime:
 
 If your Keycloak login theme uses different labels/ids than the defaults in that file, update selectors in `keycloak_login_steps.yaml` (this is the only place we rely on browser-page selectors).
 
-### Two test users (recommended)
+### Test users (recommended)
 
 Some flows depend on server-side profile onboarding state.
 
 - **Ready user** (profile setup already completed)
-  - Used by: login smoke + tab flows (`01_login_keycloak.yaml`, `10_*` through `22_*`, `30_unlock_entrypoint.yaml`, `31_unlock_pin_failure.yaml`)
+  - Used by: login smoke + tab flows (`01_login_keycloak.yaml`, `10_*` through `28_*`, `30_unlock_entrypoint.yaml`, `31_unlock_pin_failure.yaml`, `32_*` through `42_*`)
 - **Setup-required user** (backend returns `onboarding.status != 'completed'`)
   - Used by: `02_profile_setup.yaml` and the PIN unlock flow (`20_unlock_pin.yaml`)
   - This flow enables a PIN of **`1234`** as part of the setup wizard.

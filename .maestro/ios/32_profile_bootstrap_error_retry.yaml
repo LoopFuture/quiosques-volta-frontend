@@ -1,0 +1,4 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/flow_profile_bootstrap_error_retry.yaml

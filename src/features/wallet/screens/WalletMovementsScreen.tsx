@@ -14,6 +14,7 @@ import {
   SurfaceCard,
   TransactionListItem,
 } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { StackTopBar } from '@/features/app-shell/navigation/tab-header'
 import { WalletMovementIcon } from '../components/WalletMovementIcon'
 import { useWalletHistoryQuery } from '../hooks'
@@ -89,6 +90,7 @@ function WalletMovementsSkeleton() {
 
 export default function WalletMovementsScreen() {
   const router = useRouter()
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const { i18n, t } = useTranslation()
   const theme = useTheme()
   const movementListRef = useRef<FlashListRef<WalletTransaction>>(null)
@@ -133,6 +135,11 @@ export default function WalletMovementsScreen() {
   }
 
   const handleRefresh = async () => {
+    if (isForcedQueryError) {
+      clearForcedQueryError()
+      return
+    }
+
     setIsRefreshing(true)
 
     try {
@@ -171,10 +178,10 @@ export default function WalletMovementsScreen() {
           onValueChange={handleHistoryFilterChange}
         />
 
-        {isError && !walletHistoryState ? (
+        {isForcedQueryError || (isError && !walletHistoryState) ? (
           <QueryErrorState
             onRetry={() => {
-              void refetch()
+              void handleRefresh()
             }}
             testID="wallet-movements-screen-error-state"
           />

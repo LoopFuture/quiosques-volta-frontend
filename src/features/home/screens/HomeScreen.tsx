@@ -18,6 +18,7 @@ import {
   SurfaceSeparator,
   TransactionListItem,
 } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { getAppToastDuration } from '@/features/app-shell/toast'
 import { TabTopBar } from '@/features/app-shell/navigation/tab-header'
 import { profileRoutes } from '@/features/profile/routes'
@@ -194,6 +195,7 @@ function HomeRecentActivityEmptyState({
 
 export default function HomeScreen() {
   const backPressTimestampRef = useRef(0)
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const pathname = usePathname()
   const router = useRouter()
   const toast = useToastController()
@@ -217,8 +219,12 @@ export default function HomeScreen() {
       title: getWalletMovementTitle(t, movement),
     }),
   )
-
   const handleRefresh = () => {
+    if (isForcedQueryError) {
+      clearForcedQueryError()
+      return
+    }
+
     void refetch()
   }
 
@@ -278,7 +284,7 @@ export default function HomeScreen() {
       scrollable
       testID="home-dashboard-screen"
     >
-      {isError && !homeScreenState ? (
+      {isForcedQueryError || (isError && !homeScreenState) ? (
         <QueryErrorState
           description={t('tabScreens.home.errors.description')}
           onRetry={handleRefresh}

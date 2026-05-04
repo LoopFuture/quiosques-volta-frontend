@@ -22,6 +22,7 @@ export const {
   __mockRouterPush: mockRouterPush,
   __mockRouterReplace: mockRouterReplace,
   __mockUseLocalSearchParams: mockUseLocalSearchParams,
+  __mockUsePathname: mockUsePathname,
 } = jest.requireMock('expo-router')
 export const {
   useWalletHistoryQuery: mockUseWalletHistoryQuery,
@@ -127,6 +128,7 @@ export function resetWalletDetailScreenMocks() {
   mockUseLocalSearchParams.mockReturnValue({
     movementId: 'movement-transfer-1',
   })
+  mockUsePathname.mockReturnValue('/wallet/movement-transfer-1')
   mockUseWalletMovementDetailQuery.mockReturnValue({
     data: transferMovement,
     isError: false,

@@ -1,0 +1,17 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+
+- openLink: 'voltafrontend:///maestro/unknown-route'
+
+- extendedWaitUntil:
+    visible:
+      id: not-found-screen
+    timeout: 30000
+- tapOn:
+    id: not-found-home-button
+- extendedWaitUntil:
+    visible:
+      id: home-dashboard-screen
+    timeout: 30000

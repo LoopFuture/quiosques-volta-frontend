@@ -21,6 +21,7 @@ import {
   SkeletonBlock,
   SurfaceCard,
 } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { useBiometricHardwareAvailability } from '@/features/auth/biometrics'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { authRoutes } from '@/features/auth/routes'
@@ -78,6 +79,7 @@ function ProfileScreenSkeleton() {
 
 export default function ProfileScreen() {
   const router = useRouter()
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const { t } = useTranslation()
   const { signOut } = useAuthSession()
   const hasBiometricHardware = useBiometricHardwareAvailability()
@@ -106,6 +108,11 @@ export default function ProfileScreen() {
   } as const
 
   const handleRefresh = () => {
+    if (isForcedQueryError) {
+      clearForcedQueryError()
+      return
+    }
+
     void refetch()
   }
 
@@ -179,7 +186,7 @@ export default function ProfileScreen() {
       scrollable
       testID="profile-screen"
     >
-      {isError && !profile ? (
+      {isForcedQueryError || (isError && !profile) ? (
         <QueryErrorState
           description={t('tabScreens.profile.errors.description')}
           onRetry={handleRefresh}

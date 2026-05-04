@@ -36,11 +36,18 @@ jest.mock('@/features/home/hooks', () => ({
   useHomeScreenQuery: jest.fn(),
 }))
 
-const { __mockRouterPush: mockRouterPush, __mockUsePathname: mockUsePathname } =
-  jest.requireMock('expo-router')
+const {
+  __mockRouterPush: mockRouterPush,
+  __mockRouterReplace: mockRouterReplace,
+  __mockUseLocalSearchParams: mockUseLocalSearchParams,
+  __mockUsePathname: mockUsePathname,
+} = jest.requireMock('expo-router')
 const { useHomeScreenQuery: mockUseHomeScreenQuery } = jest.requireMock(
   '@/features/home/hooks',
 )
+const { __setExpoConfig } = jest.requireMock('expo-constants') as {
+  __setExpoConfig: jest.Mock
+}
 
 const homeScreenState = homeResponseSchema.parse({
   greeting: {
@@ -114,6 +121,7 @@ describe('HomeScreen', () => {
     syncLocale('system')
     restorePlatformOS()
     mockUsePathname.mockReturnValue('/')
+    mockUseLocalSearchParams.mockReturnValue({})
     mockUseHomeScreenQuery.mockReturnValue({
       data: undefined,
       isError: false,
@@ -160,6 +168,51 @@ describe('HomeScreen', () => {
     fireEvent.press(screen.getByText(i18n.t('routes.queryError.retryLabel')))
 
     expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders the forced e2e error state and clears the route override on retry', () => {
+    __setExpoConfig({
+      extra: {
+        api: {
+          baseUrl: 'https://volta.be.dev.theloop.tech',
+        },
+        e2e: {
+          enabled: true,
+        },
+        eas: {
+          projectId: '768d0ed6-c7e3-4b88-9ef2-8a4d1ba22381',
+        },
+        keycloak: {
+          clientId: 'volta-mobile',
+          issuerUrl: 'https://keycloak.example.com/realms/volta',
+          scopes: ['openid', 'profile', 'email'],
+        },
+        sentry: {},
+        webApp: {
+          baseUrl: 'https://volta.example.com',
+        },
+      },
+    })
+    mockUseLocalSearchParams.mockReturnValue({
+      __e2eQueryState: 'error',
+    })
+    mockUseHomeScreenQuery.mockReturnValue({
+      data: homeScreenState,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<HomeScreen />)
+
+    expect(screen.getByTestId('home-dashboard-screen-error-state')).toBeTruthy()
+
+    fireEvent.press(
+      screen.getByTestId('home-dashboard-screen-error-state-retry-button'),
+    )
+
+    expect(mockRouterReplace).toHaveBeenCalledWith('/')
   })
 
   it('renders the dashboard and routes the primary actions', () => {

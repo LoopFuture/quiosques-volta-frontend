@@ -47,6 +47,7 @@ export function QueryErrorState({
           fullWidth={false}
           tone="error"
           onPress={onRetry}
+          testID={testID ? `${testID}-retry-button` : undefined}
         >
           {retryLabel ?? t('routes.queryError.retryLabel')}
         </PrimaryButton>

@@ -32,7 +32,10 @@ export default function NotFoundScreen() {
           </YStack>
 
           <YStack gap="$3" style={{ maxWidth: 440 }}>
-            <PrimaryButton onPress={() => router.replace(homeRoutes.index)}>
+            <PrimaryButton
+              onPress={() => router.replace(homeRoutes.index)}
+              testID="not-found-home-button"
+            >
               {t('routes.notFound.ctaLabel')}
             </PrimaryButton>
 
@@ -40,6 +43,7 @@ export default function NotFoundScreen() {
               <PrimaryButton
                 emphasis="outline"
                 onPress={() => router.back()}
+                testID="not-found-back-button"
                 tone="neutral"
               >
                 {t('routes.notFound.backLabel')}

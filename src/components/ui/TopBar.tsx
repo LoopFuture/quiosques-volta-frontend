@@ -1,8 +1,14 @@
 import type { ReactNode } from 'react'
 import { useWindowDimensions } from 'react-native'
+import { useGlobalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import AppLogo from '@/assets/images/logo.svg'
 import { Button, Text, XStack, YStack, useTheme, useThemeName } from 'tamagui'
+import {
+  E2E_ROUTE_OFFLINE_PARAM,
+  hasTruthySearchFlag,
+} from '@/features/app-data/e2e/search-params'
+import { getE2ERuntimeConfig } from '@/features/app-data/e2e/runtime'
 import { useOfflineStatus } from '@/hooks/useOfflineStatus'
 import { getPlatformShadowProps } from './platformShadows'
 import { ToneScope } from './tone'
@@ -131,10 +137,16 @@ function HeaderActionButton({
 
 export function TopBar(props: TopBarProps) {
   const { t } = useTranslation()
+  const globalSearchParams = useGlobalSearchParams<{
+    __e2eOffline?: string | string[]
+  }>()
   const theme = useTheme()
   const themeName = useThemeName()
   const { fontScale, width } = useWindowDimensions()
-  const isOffline = useOfflineStatus()
+  const isOffline =
+    useOfflineStatus() ||
+    (getE2ERuntimeConfig().enabled &&
+      hasTruthySearchFlag(globalSearchParams[E2E_ROUTE_OFFLINE_PARAM]))
   const prefersExpandedTextLayout = fontScale > 1.15
   const isCompactWidth = width < 360 || prefersExpandedTextLayout
   const isDarkTheme = themeName.startsWith('dark')

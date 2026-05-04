@@ -18,6 +18,7 @@ import {
   SurfaceCard,
   ToneScope,
 } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { useActionToast } from '@/features/app-shell/hooks/useActionToast'
 import { useProfileQuery } from '@/features/profile/hooks'
 import { profileRoutes } from '@/features/profile/routes'
@@ -618,6 +619,7 @@ function WalletTransferScreenContent({
 
 export default function WalletTransferScreen() {
   const { t } = useTranslation()
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const {
     data: walletOverviewState,
     isError: isWalletError,
@@ -632,6 +634,11 @@ export default function WalletTransferScreen() {
   } = useProfileQuery()
 
   const handleRetry = () => {
+    if (isForcedQueryError) {
+      clearForcedQueryError()
+      return
+    }
+
     void refetchWallet()
     void refetchProfile()
   }
@@ -643,8 +650,9 @@ export default function WalletTransferScreen() {
       testID="wallet-transfer-screen"
       title={t('tabScreens.wallet.transfer.title')}
     >
-      {(isWalletError || isProfileError) &&
-      (!walletOverviewState || !profile) ? (
+      {isForcedQueryError ||
+      ((isWalletError || isProfileError) &&
+        (!walletOverviewState || !profile)) ? (
         <QueryErrorState
           onRetry={handleRetry}
           testID="wallet-transfer-screen-error-state"

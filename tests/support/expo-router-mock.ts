@@ -15,6 +15,7 @@ export function createExpoRouterMock({
 }: ExpoRouterMockOptions = {}) {
   const mockHideAsync = jest.fn()
   const mockLink = jest.fn(({ children }: any) => children)
+  const mockUseGlobalSearchParams = jest.fn(() => ({}))
   const mockUsePathname = jest.fn(() => '/')
   const mockUseLocalSearchParams = jest.fn(() => ({}))
   const mockPreventAutoHideAsync = jest.fn()
@@ -54,8 +55,10 @@ export function createExpoRouterMock({
     __mockStack: Stack,
     __mockStackProtected: mockStackProtected,
     __mockStackScreen: mockStackScreen,
+    __mockUseGlobalSearchParams: mockUseGlobalSearchParams,
     __mockUsePathname: mockUsePathname,
     __mockUseLocalSearchParams: mockUseLocalSearchParams,
+    useGlobalSearchParams: mockUseGlobalSearchParams,
     usePathname: mockUsePathname,
     useLocalSearchParams: mockUseLocalSearchParams,
     useNavigationContainerRef: jest.fn(() => mockNavigationContainerRef),

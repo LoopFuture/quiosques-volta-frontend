@@ -1,0 +1,17 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+
+- openLink: 'voltafrontend:///map?__e2eQueryState=error'
+
+- extendedWaitUntil:
+    visible:
+      id: map-error-state
+    timeout: 30000
+- tapOn:
+    id: map-error-state-retry-button
+- extendedWaitUntil:
+    visible:
+      id: map-empty-state
+    timeout: 30000

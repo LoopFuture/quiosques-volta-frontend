@@ -4,9 +4,12 @@ import {
   mockInitializeMonitoring,
   mockRecordDiagnosticEvent,
   mockRegisterNavigationContainer,
+  mockRouterReplace,
   mockStackProtected,
   mockStackScreen,
   mockUseAuthSession,
+  mockUseGlobalSearchParams,
+  mockUsePathname,
   mockUseProfileQuery,
   resetAppLayoutMocks,
 } from '@tests/support/app-layout-mocks'
@@ -75,6 +78,66 @@ describe('app/_layout', () => {
     fireEvent.press(screen.getByTestId('profile-bootstrap-error-state'))
 
     expect(refetch).toHaveBeenCalled()
+  })
+
+  it('renders the forced e2e profile bootstrap error state and clears it on retry', async () => {
+    mockUsePathname.mockReturnValue('/profile')
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        canAccessProtectedApp: true,
+        status: 'authenticated',
+      }),
+    )
+    mockUseGlobalSearchParams.mockReturnValue({
+      __e2eRootState: 'profile-bootstrap-error',
+    })
+    mockUseProfileQuery.mockReturnValue({
+      data: {
+        onboarding: {
+          status: 'completed',
+        },
+      },
+      isError: false,
+      isPending: false,
+      refetch: jest.fn(),
+    })
+
+    const { __setExpoConfig } = jest.requireMock('expo-constants') as {
+      __setExpoConfig: jest.Mock
+    }
+
+    __setExpoConfig({
+      extra: {
+        api: {
+          baseUrl: 'https://volta.be.dev.theloop.tech',
+        },
+        e2e: {
+          enabled: true,
+        },
+        eas: {
+          projectId: '768d0ed6-c7e3-4b88-9ef2-8a4d1ba22381',
+        },
+        keycloak: {
+          clientId: 'volta-mobile',
+          issuerUrl: 'https://keycloak.example.com/realms/volta',
+          scopes: ['openid', 'profile', 'email'],
+        },
+        sentry: {},
+        webApp: {
+          baseUrl: 'https://volta.example.com',
+        },
+      },
+    })
+
+    render(<RootLayout />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('profile-bootstrap-error-screen')).toBeTruthy()
+    })
+
+    fireEvent.press(screen.getByTestId('profile-bootstrap-error-state'))
+
+    expect(mockRouterReplace).toHaveBeenCalledWith('/profile')
   })
 
   it('enables the protected app stack when profile setup is completed', async () => {

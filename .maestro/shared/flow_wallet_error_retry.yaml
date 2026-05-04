@@ -1,0 +1,17 @@
+appId: com.voltafrontend.app
+---
+- runFlow:
+    file: ../shared/ensure_ready_user.yaml
+
+- openLink: 'voltafrontend:///wallet?__e2eQueryState=error'
+
+- extendedWaitUntil:
+    visible:
+      id: wallet-screen-error-state
+    timeout: 30000
+- tapOn:
+    id: wallet-screen-error-state-retry-button
+- extendedWaitUntil:
+    visible:
+      id: wallet-screen
+    timeout: 30000

@@ -10,6 +10,12 @@ import {
   StatusTimeline,
   SurfaceCard,
 } from '@/components/ui'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
+import {
+  E2E_WALLET_MOVEMENT_STATE_NOT_FOUND,
+  getSearchParamValue,
+} from '@/features/app-data/e2e/search-params'
+import { getE2ERuntimeConfig } from '@/features/app-data/e2e/runtime'
 import { WalletDetailScreenFrame } from '../components/WalletDetailScreenFrame'
 import { WalletMovementSummaryCard } from '../components/WalletMovementSummaryCard'
 import { WalletReceiptCard } from '../components/WalletReceiptCard'
@@ -82,6 +88,7 @@ function WalletMovementNotFoundState({
           fullWidth={false}
           tone="neutral"
           onPress={onHistoryPress}
+          testID="wallet-movement-not-found-history-button"
         >
           {t('tabScreens.wallet.overview.latestMovements.actionLabel')}
         </PrimaryButton>
@@ -92,8 +99,10 @@ function WalletMovementNotFoundState({
 
 export default function WalletMovementDetailScreen() {
   const router = useRouter()
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const { i18n, t } = useTranslation()
-  const { movementId } = useLocalSearchParams<{
+  const { __e2eMovementState, movementId } = useLocalSearchParams<{
+    __e2eMovementState?: string | string[]
     movementId?: string | string[]
   }>()
   const resolvedMovementId = getMovementIdParam(movementId)
@@ -105,8 +114,17 @@ export default function WalletMovementDetailScreen() {
     refetch,
   } = useWalletMovementDetailQuery(resolvedMovementId)
   const movement = walletMovementDetailState?.transaction ?? null
+  const isForcedNotFound =
+    getE2ERuntimeConfig().enabled &&
+    getSearchParamValue(__e2eMovementState) ===
+      E2E_WALLET_MOVEMENT_STATE_NOT_FOUND
 
   const handleRefresh = () => {
+    if (isForcedQueryError) {
+      clearForcedQueryError()
+      return
+    }
+
     void refetch()
   }
 
@@ -114,7 +132,7 @@ export default function WalletMovementDetailScreen() {
     router.replace(walletRoutes.movements)
   }
 
-  if (!resolvedMovementId) {
+  if (isForcedNotFound || !resolvedMovementId) {
     return (
       <WalletDetailScreenFrame
         description=""
@@ -146,7 +164,7 @@ export default function WalletMovementDetailScreen() {
     )
   }
 
-  if (isError && !movement) {
+  if (isForcedQueryError || (isError && !movement)) {
     return (
       <WalletDetailScreenFrame
         description=""

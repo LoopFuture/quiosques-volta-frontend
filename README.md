@@ -153,10 +153,14 @@ Mobile-first Expo app using Expo Router, React Native, and Tamagui. The repo is 
 
 ## End-to-End Testing
 
-- Maestro scaffolding lives under `.maestro/android` and `.maestro/ios`.
-- `.eas/workflows/maestro-e2e.yml` is manual-only until real Maestro flows are added.
-- The workflow already builds platform-specific `e2e-test` artifacts and points Maestro at those directories, so enabling it later should only require adding flow files and adjusting triggers.
-- Start with one smoke test per platform before widening coverage or enabling pull request automation.
+- Maestro flows live under `.maestro/android` and `.maestro/ios`, with shared subflows in `.maestro/shared`.
+- `.eas/workflows/maestro-e2e.yml` is still manual-only on purpose, but it runs a real suite for both platforms against the `e2e-test` build profile.
+- Current Maestro coverage includes auth, onboarding, tab navigation, wallet transfer/history variants, barcode, map-to-barcode, profile sections, unlock flows, root profile-bootstrap failure recovery, and route edge cases such as unknown deep links, route-level not-found states, and deterministic offline/error/retry states across protected routes in `e2e-test` builds.
+- The `e2e-test` build profile also enables narrow route query overrides used only by Maestro to make edge-state coverage deterministic:
+  - `__e2eRootState=profile-bootstrap-error`
+  - `__e2eOffline=1`
+  - `__e2eQueryState=error`
+  - `__e2eMovementState=not-found`
 
 ## Project Layout
 

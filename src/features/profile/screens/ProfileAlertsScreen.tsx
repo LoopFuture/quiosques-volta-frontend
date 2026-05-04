@@ -10,6 +10,7 @@ import {
   SurfaceCard,
 } from '@/components/ui'
 import { createZodResolver } from '@/features/app-data/forms'
+import { useE2EForcedQueryError } from '@/features/app-data/e2e/hooks'
 import { useActionToast } from '@/features/app-shell/hooks/useActionToast'
 import { PushNotificationsPreferenceCard } from '@/features/notifications/components/PushNotificationsPreferenceCard'
 import { usePushNotifications } from '@/features/notifications/hooks'
@@ -299,6 +300,7 @@ function ProfileAlertsForm({
 }
 
 export function ProfileAlertsScreen() {
+  const { clearForcedQueryError, isForcedQueryError } = useE2EForcedQueryError()
   const { t } = useTranslation()
   const { data: profile, isError, isPending, refetch } = useProfileQuery()
 
@@ -308,9 +310,14 @@ export function ProfileAlertsScreen() {
       testID="profile-alerts-screen"
       title={t('tabScreens.profile.alerts.title')}
     >
-      {isError && !profile ? (
+      {isForcedQueryError || (isError && !profile) ? (
         <QueryErrorState
           onRetry={() => {
+            if (isForcedQueryError) {
+              clearForcedQueryError()
+              return
+            }
+
             void refetch()
           }}
           testID="profile-alerts-screen-error-state"

@@ -1,4 +1,5 @@
 import { cleanup } from '@testing-library/react-native'
+import { resetE2ERuntimeConfigForTests } from '@/features/app-data/e2e/runtime'
 import { resetApiRuntimeConfigForTests } from '@/features/app-data/api'
 import { resetMonitoringForTests } from '@/features/app-data/monitoring'
 import { resetKeycloakRuntimeConfigForTests } from '@/features/auth/models/config'
@@ -782,6 +783,7 @@ beforeEach(() => {
   __resetMMKVMock()
   __resetSecureStoreMock()
   resetApiRuntimeConfigForTests()
+  resetE2ERuntimeConfigForTests()
   resetMonitoringForTests()
   resetKeycloakRuntimeConfigForTests()
   resetProfileWebAppRuntimeConfigForTests()
