@@ -35,6 +35,7 @@ import {
   getWalletMovementStateCopy,
   getWalletMovementSubtitle,
   getWalletMovementSummaryItems,
+  getWalletMovementTimeSubtitle,
   getWalletMovementTitle,
   getWalletTransferTimelineItems,
   matchesWalletHistoryFilter,
@@ -256,7 +257,11 @@ describe('wallet models, forms, and presentation', () => {
     expect(getWalletMovementSubtitle('pt', processingTransfer)).toContain(
       'Joao Ferreira · PT50************90123',
     )
+    expect(getWalletMovementTimeSubtitle('pt', processingTransfer)).toContain(
+      'Joao Ferreira · PT50************90123',
+    )
     expect(getWalletMovementSubtitle('pt', creditMovement)).toBeTruthy()
+    expect(getWalletMovementTimeSubtitle('pt', creditMovement)).toBeTruthy()
     expect(getWalletMovementAccessibilityHint(t)).toBe(
       'Abre este movimento para veres os detalhes.',
     )

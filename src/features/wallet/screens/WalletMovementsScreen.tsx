@@ -31,7 +31,7 @@ import {
   getWalletMovementAccessibilityLabel,
   getWalletMovementBadgeLabel,
   getWalletMovementDateHeading,
-  getWalletMovementSubtitle,
+  getWalletMovementTimeSubtitle,
   getWalletMovementTitle,
   matchesWalletHistoryFilter,
 } from '../presentation'
@@ -224,6 +224,7 @@ export default function WalletMovementsScreen() {
                       emphasis="outline"
                       fullWidth={false}
                       onPress={() => handleHistoryFilterChange('all')}
+                      style={{ alignSelf: 'center', maxWidth: '100%' }}
                       tone="neutral"
                     >
                       {t(
@@ -296,7 +297,7 @@ export default function WalletMovementsScreen() {
                     onPress={() =>
                       router.push(walletRoutes.movementDetail(movement.id))
                     }
-                    subtitle={getWalletMovementSubtitle(
+                    subtitle={getWalletMovementTimeSubtitle(
                       i18n.language,
                       movement,
                     )}

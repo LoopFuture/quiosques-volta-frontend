@@ -2,6 +2,7 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react-native'
 import UnlockScreen from '@/features/auth/screens/UnlockScreen'
 import { renderWithProvider } from '@tests/support/test-utils'
 import { authRoutes } from '@/features/auth/routes'
+
 jest.mock('expo-router', () => {
   const { createExpoRouterMock } = jest.requireActual(
     '@tests/support/expo-router-mock',
@@ -14,12 +15,19 @@ jest.mock('@/features/auth/hooks/useAuthSession', () => ({
   useAuthSession: jest.fn(),
 }))
 
+jest.mock('@/features/auth/biometrics', () => ({
+  useBiometricHardwareAvailability: jest.fn(),
+}))
+
 jest.mock('@/features/auth/components/AuthSessionProvider', () => ({
   AuthSessionProvider: ({ children }: any) => children,
 }))
 
 const { __mockRouterReplace: mockRouterReplace } =
   jest.requireMock('expo-router')
+const {
+  useBiometricHardwareAvailability: mockUseBiometricHardwareAvailability,
+} = jest.requireMock('@/features/auth/biometrics')
 const { useAuthSession: mockUseAuthSession } = jest.requireMock(
   '@/features/auth/hooks/useAuthSession',
 )
@@ -49,6 +57,7 @@ function createAuthSessionMock(overrides: Record<string, unknown> = {}) {
 describe('unlock screen', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseBiometricHardwareAvailability.mockReturnValue(true)
     mockUseAuthSession.mockReturnValue(createAuthSessionMock())
   })
 
@@ -212,8 +221,8 @@ describe('unlock screen', () => {
     })
   })
 
-  it.each(['invalid-pin', 'too-many-attempts'] as const)(
-    'shows red PIN feedback and recovery copy for %s',
+  it.each(['failed', 'invalid-pin'] as const)(
+    'shows red PIN feedback without the recovery card for %s',
     async (reason) => {
       const unlockWithPin = jest.fn().mockResolvedValue({
         reason,
@@ -250,7 +259,10 @@ describe('unlock screen', () => {
         expect(
           screen.getByTestId('auth-pin-dot-4').props.accessibilityLabel,
         ).toBe('Erro no dígito 4 de 4 do PIN')
-        expect(screen.getByTestId('auth-error-text')).toBeTruthy()
+        expect(screen.queryByTestId('auth-error-text')).toBeNull()
+        expect(
+          screen.queryByTestId('auth-unlock-login-again-button'),
+        ).toBeNull()
       })
     },
   )
@@ -267,6 +279,21 @@ describe('unlock screen', () => {
     expect(
       screen.getByTestId('auth-pin-delete-button').props.accessibilityLabel,
     ).toBe('Apagar o último dígito do PIN')
+  })
+
+  it('hides the biometric button when the device has no biometric hardware', () => {
+    mockUseBiometricHardwareAvailability.mockReturnValue(false)
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        isBiometricUnlockEnabled: true,
+      }),
+    )
+
+    renderWithProvider(<UnlockScreen />)
+
+    expect(screen.queryByTestId('auth-biometric-button')).toBeNull()
+    expect(screen.getByTestId('auth-pin-key-0')).toBeTruthy()
+    expect(screen.getByTestId('auth-pin-delete-button')).toBeTruthy()
   })
 
   it('clears the PIN failure feedback when the user starts entering a new PIN', async () => {

@@ -403,6 +403,8 @@
             "biometricsDisabledHelper": "Biometria desativada",
             "biometricsEnabledHelper": "Face ID / impressão digital",
             "biometricsTitle": "Biometria",
+            "deleteAccountLabel": "Eliminar conta",
+            "deleteAccountSummary": "Revê o que acontece antes de eliminares a conta.",
             "emailTitle": "E-mail",
             "helpCenterBrowserHelper": "Respostas rápidas e apoio da conta no navegador.",
             "helpCenterLabel": "Centro de ajuda",
@@ -457,6 +459,18 @@
           },
           "sessionDescription": "Termina a sessão neste telemóvel se já não precisares desta conta neste dispositivo.",
           "sessionLabel": "Sessão"
+        },
+        "deleteAccount": {
+          "buttonLabel": "Eliminar conta",
+          "confirmationLabel": "Tenho a certeza de que quero eliminar esta conta.",
+          "description": "Isto inicia o periodo de eliminacao da conta e termina a sessao neste telemovel.",
+          "donationNotice": "Depois de terminarem os 30 dias, qualquer valor que ainda esteja na conta sera doado a uma instituicao de caridade.",
+          "errorToast": "Nao foi possivel eliminar a tua conta agora.",
+          "recoveryNotice": "Se quiseres recuperar a conta, basta voltares a entrar dentro desses 30 dias.",
+          "retentionNotice": "Os dados da tua conta ficam guardados durante 30 dias apos a eliminacao para que a conta ainda possa ser recuperada nesse periodo.",
+          "title": "Eliminar conta",
+          "transferNotice": "Antes de eliminares a conta, transfere todos os teus creditos para a tua conta bancaria.",
+          "warningLabel": "Antes de continuares"
         },
         "alerts": {
           "description": "Escolhe como a Volta envia atualizações sobre a tua conta e pagamentos.",
@@ -538,6 +552,9 @@
           "pinCancelLabel": "Cancelar",
           "pinChangeLabel": "Alterar PIN",
           "pinConfirmLabel": "Confirmar PIN da app",
+          "pinCurrentInvalidError": "Introduz o PIN atual.",
+          "pinCurrentLabel": "PIN da app atual",
+          "pinCurrentMismatchError": "O PIN atual não está correto.",
           "pinEnabledHelper": "Um PIN de 4 dígitos protege o acesso neste dispositivo.",
           "pinHelper": "Define um PIN de 4 dígitos para proteger a app neste telemóvel.",
           "pinInputLabel": "PIN da app com 4 dígitos",
@@ -738,7 +755,7 @@
           "filteredEmptyStateAction": "Ver todos os movimentos",
           "filteredEmptyStateDescription": "Experimenta outro filtro para veres o resto do histórico da carteira.",
           "filteredEmptyStateTitle": "Este filtro não tem movimentos",
-          "title": "Histórico completo"
+          "title": "Histórico"
         },
         "list": {
           "transferCancelledTitle": "Transferência cancelada",
@@ -759,7 +776,7 @@
             "title": "Saldo pronto a transferir"
           },
           "latestMovements": {
-            "actionLabel": "Ver histórico completo",
+            "actionLabel": "Ver histórico",
             "description": "Os teus créditos e transferências mais recentes.",
             "emptyDescription": "Quando receberes novos créditos ou pedires uma transferência, os movimentos vão aparecer aqui.",
             "emptyNoBalanceDescription": "Depois da tua próxima devolução, os créditos e as transferências vão aparecer aqui.",

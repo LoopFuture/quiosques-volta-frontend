@@ -14,6 +14,13 @@ import {
   ONBOARDING_COMPLETED_STORAGE_KEY,
 } from '@/features/app-data/storage/device/onboarding'
 import { authRoutes } from '@/features/auth/routes'
+import {
+  BIOMETRICS_ENABLED_STORAGE_KEY,
+  PIN_ENABLED_STORAGE_KEY,
+  privacyPreferenceStorage,
+  setStoredDevicePrivacySettings,
+} from '@/features/app-data/storage/device/privacy'
+import { saveStoredAppPin } from '@/features/auth/pin'
 import { i18n } from '@/i18n'
 import { createMockExpoConfig } from '@tests/support/expo-config'
 
@@ -39,6 +46,7 @@ jest.mock('@/features/auth/components/AuthSessionProvider', () => ({
 const { __getAuthRequests, __setNextPromptResults, exchangeCodeAsync } =
   jest.requireMock('expo-auth-session')
 const { __setExpoConfig } = jest.requireMock('expo-constants')
+const { __getSecureStoreItem } = jest.requireMock('expo-secure-store')
 const {
   __mockRouterPush: mockRouterPush,
   __mockRouterReplace: mockRouterReplace,
@@ -85,6 +93,7 @@ describe('auth screen', () => {
       }),
     )
     mockUseLocalSearchParams.mockReturnValue({})
+    privacyPreferenceStorage.clearAll()
     languagePreferenceStorage.clearAll()
     themePreferenceStorage.clearAll()
     onboardingPreferenceStorage.set(ONBOARDING_COMPLETED_STORAGE_KEY, 'true')
@@ -442,6 +451,63 @@ describe('auth screen', () => {
         expect.anything(),
       )
     })
+  })
+
+  it('keeps local biometrics and PIN state when re-entering login from a locked session', async () => {
+    await saveStoredAppPin('1234')
+    setStoredDevicePrivacySettings({
+      biometricsEnabled: true,
+      pinEnabled: true,
+      pushNotificationsEnabled: false,
+    })
+    __setNextPromptResults([
+      {
+        authentication: null,
+        error: null,
+        errorCode: null,
+        params: {
+          code: 'relogin-code',
+        },
+        type: 'success',
+        url: 'voltafrontend://auth/callback?code=relogin-code',
+      },
+    ])
+    mockUseLocalSearchParams.mockReturnValue({
+      showLogin: '1',
+    })
+    mockUseAuthSession.mockReturnValue(
+      createAuthSessionMock({
+        isAppLocked: true,
+        isAuthenticated: true,
+        isPinUnlockEnabled: true,
+        session: { accessToken: 'token', expiresAt: null },
+        signOut: mockSignOut.mockResolvedValue(undefined),
+        status: 'authenticated',
+      }),
+    )
+
+    renderWithProvider(<AuthScreen />)
+
+    const reloginRequest = __getAuthRequests()
+      .slice(-3)
+      .find((request: any) => request.config.extraParams.prompt === 'login')
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('auth-login-button'))
+    })
+
+    await waitFor(() => {
+      expect(mockSignOut).toHaveBeenCalledTimes(1)
+      expect(reloginRequest?.promptAsync).toHaveBeenCalledTimes(1)
+    })
+
+    expect(__getSecureStoreItem('auth.pinCredential')).toContain('"version":1')
+    expect(
+      privacyPreferenceStorage.getString(BIOMETRICS_ENABLED_STORAGE_KEY),
+    ).toBe('true')
+    expect(privacyPreferenceStorage.getString(PIN_ENABLED_STORAGE_KEY)).toBe(
+      'true',
+    )
   })
 
   it('does not exchange tokens when the auth prompt is cancelled', async () => {

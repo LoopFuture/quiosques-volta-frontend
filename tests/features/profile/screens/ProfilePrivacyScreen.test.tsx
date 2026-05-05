@@ -137,7 +137,7 @@ describe('ProfilePrivacyScreen', () => {
     })
   })
 
-  it('lets the user set and remove a PIN from privacy settings', async () => {
+  it('requires the current PIN before changing a stored PIN', async () => {
     renderWithProvider(<ProfilePrivacyScreen />)
 
     fireEvent.press(screen.getByTestId('profile-privacy-pin-set-button'))
@@ -174,12 +174,35 @@ describe('ProfilePrivacyScreen', () => {
 
     renderWithProvider(<ProfilePrivacyScreen />)
 
-    fireEvent.press(screen.getByTestId('profile-privacy-pin-remove-button'))
+    fireEvent.press(screen.getByTestId('profile-privacy-pin-change-button'))
+    fireEvent.changeText(
+      screen.getByTestId('profile-privacy-pin-pin-input'),
+      '5678',
+    )
+    fireEvent.changeText(
+      screen.getByTestId('profile-privacy-pin-confirm-pin-input'),
+      '5678',
+    )
+    fireEvent.press(screen.getByTestId('profile-privacy-pin-save-button'))
 
     await waitFor(() => {
-      expect(mockSetSettings).toHaveBeenCalledWith({
+      expect(
+        screen.getByText(
+          i18n.t('tabScreens.profile.privacy.pinCurrentInvalidError'),
+        ),
+      ).toBeTruthy()
+    })
+
+    fireEvent.changeText(
+      screen.getByTestId('profile-privacy-pin-current-pin-input'),
+      '1234',
+    )
+    fireEvent.press(screen.getByTestId('profile-privacy-pin-save-button'))
+
+    await waitFor(() => {
+      expect(mockSetSettings).toHaveBeenLastCalledWith({
         biometricsEnabled: false,
-        pinEnabled: false,
+        pinEnabled: true,
         pushNotificationsEnabled: false,
       })
     })

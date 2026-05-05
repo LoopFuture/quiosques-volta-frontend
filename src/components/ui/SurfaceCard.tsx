@@ -46,7 +46,7 @@ export function SurfaceCard({
   const borderColor =
     customBorderColor ??
     (tone === 'neutral' ? neutralBorderColor : '$borderColor')
-  const shadowProps = getPlatformShadowProps('surface', isDarkTheme)
+  const shadowProps = getPlatformShadowProps('card', isDarkTheme)
 
   const content = (
     <YStack

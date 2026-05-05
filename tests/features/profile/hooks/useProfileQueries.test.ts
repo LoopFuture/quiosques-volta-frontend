@@ -9,6 +9,7 @@ import {
 import { profileResponseSchema } from '@/features/profile/models'
 import {
   useCompleteProfileSetupMutation,
+  useDeleteProfileAccountMutation,
   useProfileQuery,
   useUpdateProfilePaymentsMutation,
   useUpdateProfilePersonalMutation,
@@ -22,6 +23,7 @@ jest.mock('@tanstack/react-query', () => ({
 }))
 
 jest.mock('@/features/profile/api', () => ({
+  deleteProfileAccount: jest.fn(),
   fetchProfileState: jest.fn(),
   patchProfile: jest.fn(),
 }))
@@ -44,6 +46,7 @@ const {
   useQueryClient: mockUseQueryClient,
 } = jest.requireMock('@tanstack/react-query')
 const {
+  deleteProfileAccount: mockDeleteProfileAccount,
   fetchProfileState: mockFetchProfileState,
   patchProfile: mockPatchProfile,
 } = jest.requireMock('@/features/profile/api')
@@ -204,6 +207,22 @@ describe('profile hooks', () => {
     expect(invalidateHomeQueries).not.toHaveBeenCalled()
     expect(invalidateWalletQueries).not.toHaveBeenCalled()
     expect(invalidateBarcodeQueries).not.toHaveBeenCalled()
+  })
+
+  it('wires the delete-account mutation with the expected key and metadata', async () => {
+    useDeleteProfileAccountMutation()
+    const [options] = mockUseMutation.mock.calls[0]
+
+    expect(options.mutationKey).toEqual(appMutationKeys.profile.deleteAccount())
+    expect(options.meta).toEqual({
+      feature: 'profile',
+      operation: 'delete-account',
+    })
+
+    await options.mutationFn()
+
+    expect(mockDeleteProfileAccount).toHaveBeenCalledTimes(1)
+    expect(queryClient.setQueryData).not.toHaveBeenCalled()
   })
 
   it('serializes setup completion and invalidates dependent queries', async () => {

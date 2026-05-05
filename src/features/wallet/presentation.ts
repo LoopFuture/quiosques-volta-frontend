@@ -9,6 +9,7 @@ import {
   formatWalletDateTime,
   formatWalletLongDate,
   formatWalletPaymentAccount,
+  formatWalletTime,
   getWalletTransferTimelineSteps,
   isTransferTransaction,
   type ActivityPreview,
@@ -109,6 +110,20 @@ export function getWalletMovementSubtitle(
   }
 
   return formatWalletDateTime(movement.occurredAt, locale)
+}
+
+export function getWalletMovementTimeSubtitle(
+  locale: string,
+  movement: ActivityPreview | WalletTransaction,
+) {
+  if (
+    'transferDetails' in movement &&
+    movement.transferDetails?.payoutAccount
+  ) {
+    return `${formatWalletPaymentAccount(movement.transferDetails.payoutAccount)} · ${formatWalletTime(movement.occurredAt, locale)}`
+  }
+
+  return formatWalletTime(movement.occurredAt, locale)
 }
 
 export function getWalletMovementAccessibilityHint(t: TFunction) {

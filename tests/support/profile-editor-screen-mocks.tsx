@@ -7,6 +7,8 @@ export const mockSetLanguageMode = jest.fn()
 export const mockSetThemeMode = jest.fn()
 export const mockSetSettings = jest.fn()
 export const mockRequestPushPermissionAndToken = jest.fn()
+export const mockDeleteProfileAccountMutate = jest.fn()
+export const mockSignOut = jest.fn()
 
 jest.mock('expo-router', () => {
   const { createExpoRouterMock } = jest.requireActual(
@@ -28,11 +30,16 @@ jest.mock('@/hooks/useAppPreferences', () => ({
 }))
 
 jest.mock('@/features/profile/hooks', () => ({
+  useDeleteProfileAccountMutation: jest.fn(),
   useDevicePrivacySettings: jest.fn(),
   useProfileQuery: jest.fn(),
   useUpdateProfilePaymentsMutation: jest.fn(),
   useUpdateProfilePersonalMutation: jest.fn(),
   useUpdateProfilePreferencesMutation: jest.fn(),
+}))
+
+jest.mock('@/features/auth/hooks/useAuthSession', () => ({
+  useAuthSession: jest.fn(),
 }))
 
 jest.mock('@/features/auth/biometrics', () => ({
@@ -59,12 +66,16 @@ export const { useAppPreferences: mockUseAppPreferences } = jest.requireMock(
   '@/hooks/useAppPreferences',
 )
 export const {
+  useDeleteProfileAccountMutation: mockUseDeleteProfileAccountMutation,
   useDevicePrivacySettings: mockUseDevicePrivacySettings,
   useProfileQuery: mockUseProfileQuery,
   useUpdateProfilePaymentsMutation: mockUseUpdateProfilePaymentsMutation,
   useUpdateProfilePersonalMutation: mockUseUpdateProfilePersonalMutation,
   useUpdateProfilePreferencesMutation: mockUseUpdateProfilePreferencesMutation,
 } = jest.requireMock('@/features/profile/hooks')
+export const { useAuthSession: mockUseAuthSession } = jest.requireMock(
+  '@/features/auth/hooks/useAuthSession',
+)
 export const {
   authenticateWithAvailableBiometrics: mockAuthenticateWithAvailableBiometrics,
   useBiometricHardwareAvailability: mockUseBiometricHardwareAvailability,
@@ -137,6 +148,10 @@ export function resetProfileEditorScreenMocks() {
     isPending: false,
     mutate: jest.fn(),
   })
+  mockUseDeleteProfileAccountMutation.mockReturnValue({
+    isPending: false,
+    mutate: mockDeleteProfileAccountMutate,
+  })
   mockUseDevicePrivacySettings.mockReturnValue({
     settings: {
       biometricsEnabled: false,
@@ -157,6 +172,9 @@ export function resetProfileEditorScreenMocks() {
     permissionStatus: 'granted',
     registrationErrorCode: null,
     requestPushPermissionAndToken: mockRequestPushPermissionAndToken,
+  })
+  mockUseAuthSession.mockReturnValue({
+    signOut: mockSignOut.mockResolvedValue(undefined),
   })
 }
 

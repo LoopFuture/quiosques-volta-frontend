@@ -29,6 +29,12 @@ jest.mock('@/features/auth/biometrics', () => ({
   useBiometricHardwareAvailability: jest.fn(),
 }))
 
+jest.mock('@/features/auth/pin', () => ({
+  clearStoredAppPin: jest.fn(),
+  hasStoredAppPin: jest.fn(),
+  saveStoredAppPin: jest.fn(),
+}))
+
 jest.mock('@/features/auth/hooks/useAuthSession', () => ({
   useAuthSession: jest.fn(),
 }))
@@ -49,6 +55,9 @@ const {
   authenticateWithAvailableBiometrics: mockAuthenticateWithAvailableBiometrics,
   useBiometricHardwareAvailability: mockUseBiometricHardwareAvailability,
 } = jest.requireMock('@/features/auth/biometrics')
+const { hasStoredAppPin: mockHasStoredAppPin } = jest.requireMock(
+  '@/features/auth/pin',
+)
 const { useAuthSession: mockUseAuthSession } = jest.requireMock(
   '@/features/auth/hooks/useAuthSession',
 )
@@ -114,6 +123,7 @@ describe('ProfileSetupScreen', () => {
     mockAuthenticateWithAvailableBiometrics.mockResolvedValue({
       success: true,
     })
+    mockHasStoredAppPin.mockResolvedValue(false)
     mockUsePushNotifications.mockReturnValue({
       canAskAgain: true,
       expoPushToken: 'ExponentPushToken[mock-token]',
@@ -590,6 +600,7 @@ describe('ProfileSetupScreen', () => {
   })
 
   it('lets the user remove an existing PIN during setup', async () => {
+    mockHasStoredAppPin.mockResolvedValue(true)
     mockUseDevicePrivacySettings.mockReturnValue({
       settings: {
         biometricsEnabled: false,
@@ -615,6 +626,32 @@ describe('ProfileSetupScreen', () => {
         i18n.t('tabScreens.profile.privacy.pinLabel'),
         i18n.t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
       )
+    })
+  })
+
+  it('shows an existing stored PIN as configured even when the privacy flag is stale', async () => {
+    mockHasStoredAppPin.mockResolvedValue(true)
+    mockUseDevicePrivacySettings.mockReturnValue({
+      settings: {
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      },
+      setSettings,
+    })
+
+    renderWithProvider(<ProfileSetupScreen />)
+
+    await advanceToSecurityStep()
+
+    await waitFor(() => {
+      expect(screen.getByTestId('profile-setup-pin-change-button')).toBeTruthy()
+      expect(screen.getByTestId('profile-setup-pin-remove-button')).toBeTruthy()
+      expect(setSettings).toHaveBeenCalledWith({
+        biometricsEnabled: false,
+        pinEnabled: true,
+        pushNotificationsEnabled: false,
+      })
     })
   })
 
@@ -699,6 +736,51 @@ describe('ProfileSetupScreen', () => {
         i18n.t('tabScreens.profile.privacy.biometricLabel'),
         i18n.t('tabScreens.profile.privacy.savedOnThisDeviceToast'),
       )
+    })
+  })
+
+  it('clears a stale biometric setup before submitting when the device has no biometric hardware', async () => {
+    mockUseBiometricHardwareAvailability.mockReturnValue(false)
+    mockUseDevicePrivacySettings.mockReturnValue({
+      settings: {
+        biometricsEnabled: true,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      },
+      setSettings,
+    })
+
+    renderWithProvider(<ProfileSetupScreen />)
+
+    await advanceToSecurityStep()
+    fireEvent.press(screen.getByTestId('profile-setup-finish-button'))
+
+    await waitFor(() => {
+      expect(setSettings).toHaveBeenCalledWith({
+        biometricsEnabled: false,
+        pinEnabled: false,
+        pushNotificationsEnabled: false,
+      })
+      expect(mutateAsync).toHaveBeenCalledWith({
+        snapshot: {
+          payments: {
+            accountHolderName: 'Joao Ferreira',
+            iban: 'PT50000201231234567890154',
+          },
+          personal: {
+            email: 'joao@volta.pt',
+            name: 'Joao Ferreira',
+            nif: '123456789',
+            phoneNumber: '+351912345678',
+          },
+          preferences: {
+            biometricsEnabled: false,
+            pinEnabled: false,
+            pushNotificationsEnabled: false,
+          },
+          alertsEnabled: true,
+        },
+      })
     })
   })
 

@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react'
 import { useWindowDimensions } from 'react-native'
 import { Text, XStack, YStack } from 'tamagui'
 import { FormField, PrimaryButton, SurfaceCard } from '@/components/ui'
-import { APP_PIN_LENGTH } from '@/features/auth/pin'
+import { APP_PIN_LENGTH, verifyStoredAppPin } from '@/features/auth/pin'
 
 type PinPreferenceCardCopy = {
   cancelLabel: string
   changeLabel: string
   confirmPinLabel: string
+  currentPinInvalidError: string
+  currentPinLabel: string
+  currentPinMismatchError: string
   enabledHelper: string
   invalidPinError: string
   label: string
@@ -39,6 +42,11 @@ export function PinPreferenceCard({
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [pin, setPin] = useState('')
+  const [currentPin, setCurrentPin] = useState('')
+  const currentPinInvalidText =
+    errorText === copy.currentPinInvalidError ? errorText : undefined
+  const currentPinMismatchText =
+    errorText === copy.currentPinMismatchError ? errorText : undefined
   const pinErrorText =
     errorText === copy.invalidPinError ? errorText : undefined
   const confirmPinErrorText =
@@ -47,6 +55,7 @@ export function PinPreferenceCard({
   useEffect(() => {
     if (!enabled) {
       setIsEditing(false)
+      setCurrentPin('')
       setPin('')
       setConfirmPin('')
       setErrorText(null)
@@ -54,6 +63,7 @@ export function PinPreferenceCard({
   }, [enabled])
 
   function resetEditor() {
+    setCurrentPin('')
     setConfirmPin('')
     setErrorText(null)
     setIsEditing(false)
@@ -61,6 +71,18 @@ export function PinPreferenceCard({
   }
 
   async function handleSave() {
+    if (enabled) {
+      if (!/^\d{4}$/.test(currentPin)) {
+        setErrorText(copy.currentPinInvalidError)
+        return
+      }
+
+      if (!(await verifyStoredAppPin(currentPin))) {
+        setErrorText(copy.currentPinMismatchError)
+        return
+      }
+    }
+
     if (!/^\d{4}$/.test(pin)) {
       setErrorText(copy.invalidPinError)
       return
@@ -103,6 +125,28 @@ export function PinPreferenceCard({
 
         {isEditing ? (
           <YStack gap="$3">
+            {enabled ? (
+              <FormField
+                errorText={currentPinInvalidText ?? currentPinMismatchText}
+                keyboardType="number-pad"
+                label={copy.currentPinLabel}
+                maxLength={APP_PIN_LENGTH}
+                onChangeText={(value) => {
+                  setCurrentPin(
+                    value.replace(/\D/g, '').slice(0, APP_PIN_LENGTH),
+                  )
+                  if (errorText) {
+                    setErrorText(null)
+                  }
+                }}
+                secureTextEntry
+                testID={
+                  testIDPrefix ? `${testIDPrefix}-current-pin-input` : undefined
+                }
+                textContentType="oneTimeCode"
+                value={currentPin}
+              />
+            ) : null}
             <FormField
               errorText={pinErrorText}
               keyboardType="number-pad"

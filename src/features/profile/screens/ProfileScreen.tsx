@@ -10,6 +10,7 @@ import {
   LockKeyhole,
   Palette,
   Shield,
+  Trash2,
   User,
 } from '@tamagui/lucide-icons'
 import { useTranslation } from 'react-i18next'
@@ -118,7 +119,7 @@ export default function ProfileScreen() {
 
   const hubSections = profile
     ? getProfileHubSections(t, {
-        biometricsSupported: hasBiometricHardware !== false,
+        biometricsSupported: hasBiometricHardware === true,
         deviceSettings: settings,
         languageMode,
         profile,
@@ -322,6 +323,26 @@ export default function ProfileScreen() {
                   helper: undefined,
                   testID: 'profile-menu-terms',
                   title: t('tabScreens.profile.hub.rows.termsLabel'),
+                },
+              ]}
+            />
+          </YStack>
+
+          <YStack gap="$2">
+            <Text color="$color10" fontSize={12} fontWeight="800">
+              {t('tabScreens.profile.deleteAccount.title')}
+            </Text>
+            <ProfileMenuCard
+              rows={[
+                {
+                  icon: <Trash2 color="$accent11" size={18} />,
+                  onPress: () => router.push(profileRoutes.deleteAccount),
+                  summary: t(
+                    'tabScreens.profile.hub.rows.deleteAccountSummary',
+                  ),
+                  helper: undefined,
+                  testID: 'profile-menu-delete-account',
+                  title: t('tabScreens.profile.hub.rows.deleteAccountLabel'),
                 },
               ]}
             />

@@ -1,9 +1,10 @@
 import { useId } from 'react'
-import { Label, Text, XStack, YStack } from 'tamagui'
+import { Checkbox, Label, Text, XStack, YStack, type GetProps } from 'tamagui'
 import { CheckboxControl } from './CheckboxControl'
 
 export type CheckboxRowProps = {
   checked: boolean
+  checkboxSize?: GetProps<typeof Checkbox>['size']
   description?: string
   label: string
   onCheckedChange?: (checked: boolean) => void
@@ -11,6 +12,7 @@ export type CheckboxRowProps = {
 
 export function CheckboxRow({
   checked,
+  checkboxSize,
   description,
   label,
   onCheckedChange,
@@ -36,6 +38,7 @@ export function CheckboxRow({
         id={checkboxId}
         onCheckedChange={handleChange}
         mt="$1"
+        size={checkboxSize}
       />
 
       <YStack flex={1} gap="$1">

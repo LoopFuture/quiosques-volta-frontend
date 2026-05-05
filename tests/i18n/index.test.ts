@@ -31,7 +31,7 @@ describe('i18n index', () => {
     expect(i18n.t('tabs.home.label')).toBe('Home')
     expect(i18n.t('tabScreens.barcode.card.title')).toBe('Your Volta code')
     expect(i18n.t('tabScreens.home.overview.title')).toBe('Right now')
-    expect(i18n.t('tabScreens.wallet.movementsPage.title')).toBe('Full history')
+    expect(i18n.t('tabScreens.wallet.movementsPage.title')).toBe('History')
     expect(
       i18n.t('tabScreens.home.balanceCard.badges.returns', {
         count: 1,
@@ -44,6 +44,9 @@ describe('i18n index', () => {
     ).toBe('24 containers')
     expect(i18n.t('tabScreens.profile.personal.photoTitle')).toBe(
       'Profile photo',
+    )
+    expect(i18n.t('tabScreens.profile.deleteAccount.title')).toBe(
+      'Delete account',
     )
     expect(getWalletHistoryFilterOptions(t)[0]?.label).toBe('All')
   })

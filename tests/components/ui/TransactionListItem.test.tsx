@@ -117,13 +117,13 @@ describe('TransactionListItem', () => {
       />,
     )
 
-    expect(view.getByText('Transferência').props.numberOfLines).toBeUndefined()
-    expect(
-      view.getByText('Conta terminada em 4321').props.numberOfLines,
-    ).toBeUndefined()
+    expect(view.getByText('Transferência').props.numberOfLines).toBe(2)
+    expect(view.getByText('Conta terminada em 4321').props.numberOfLines).toBe(
+      2,
+    )
     expect(
       view.getByText('Transferência em processamento').props.numberOfLines,
-    ).toBeUndefined()
+    ).toBe(2)
 
     windowSpy.mockRestore()
   })

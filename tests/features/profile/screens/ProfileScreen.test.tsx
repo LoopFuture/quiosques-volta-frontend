@@ -239,6 +239,7 @@ describe('ProfileScreen', () => {
         ].join('. '),
       ),
     )
+    fireEvent.press(screen.getByTestId('profile-menu-delete-account'))
     fireEvent.press(screen.getByTestId('profile-logout-button'))
 
     expect(mockRouterPush).toHaveBeenNthCalledWith(1, profileRoutes.payments)
@@ -247,6 +248,10 @@ describe('ProfileScreen', () => {
     expect(mockRouterPush).toHaveBeenNthCalledWith(4, profileRoutes.privacy)
     expect(mockRouterPush).toHaveBeenNthCalledWith(5, profileRoutes.appSettings)
     expect(mockRouterPush).toHaveBeenNthCalledWith(6, profileRoutes.help)
+    expect(mockRouterPush).toHaveBeenNthCalledWith(
+      7,
+      profileRoutes.deleteAccount,
+    )
     expect(openBrowserAsync).toHaveBeenNthCalledWith(
       1,
       `https://volta.example.com${PROFILE_LEGAL_LINK_PATHS.helpCenter}`,
@@ -294,5 +299,29 @@ describe('ProfileScreen', () => {
       screen.getAllByText(i18n.t('tabScreens.profile.hub.rows.ibanTitle')),
     ).toHaveLength(1)
     expect(screen.getByText('PT50************4321')).toBeTruthy()
+  })
+
+  it('hides biometric profile hub copy when the device has no biometric hardware', () => {
+    mockUseBiometricHardwareAvailability.mockReturnValue(false)
+    mockUseDevicePrivacySettings.mockReturnValue({
+      settings: {
+        biometricsEnabled: true,
+        pinEnabled: false,
+        pushNotificationsEnabled: true,
+      },
+    })
+    mockUseProfileQuery.mockReturnValue({
+      data: readyProfileStateWithPayoutAccount,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<ProfileScreen />)
+
+    expect(
+      screen.queryByText(i18n.t('tabScreens.profile.hub.rows.biometricsTitle')),
+    ).toBeNull()
   })
 })

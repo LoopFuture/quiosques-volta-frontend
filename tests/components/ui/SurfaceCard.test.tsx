@@ -30,14 +30,14 @@ describe('SurfaceCard', () => {
     expect(view.getByText('Accent card')).toBeTruthy()
   })
 
-  it('uses the stronger light-theme shadow preset', () => {
+  it('uses the lighter light-theme card shadow preset', () => {
     setPlatformOS('ios')
 
-    expect(getPlatformShadowProps('surface', false)).toEqual({
+    expect(getPlatformShadowProps('card', false)).toEqual({
       shadowColor: '$accent8',
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.14,
-      shadowRadius: 28,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.1,
+      shadowRadius: 18,
     })
 
     const view = renderWithTheme(
@@ -53,14 +53,14 @@ describe('SurfaceCard', () => {
     expect(card.props.overflow).toBe('hidden')
   })
 
-  it('uses the stronger dark-theme shadow preset', () => {
+  it('uses the lighter dark-theme card shadow preset', () => {
     setPlatformOS('ios')
 
-    expect(getPlatformShadowProps('surface', true)).toEqual({
+    expect(getPlatformShadowProps('card', true)).toEqual({
       shadowColor: '$accent8',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.18,
-      shadowRadius: 20,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.14,
+      shadowRadius: 16,
     })
 
     const view = renderWithTheme(
@@ -79,8 +79,8 @@ describe('SurfaceCard', () => {
   it('uses Android elevation without iOS shadow props', () => {
     setPlatformOS('android')
 
-    expect(getPlatformShadowProps('surface', false)).toEqual({
-      elevation: 2,
+    expect(getPlatformShadowProps('card', false)).toEqual({
+      elevation: 1,
     })
 
     const view = renderWithTheme(

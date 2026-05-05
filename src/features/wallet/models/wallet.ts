@@ -12,6 +12,7 @@ import {
   formatLongDate,
   formatNumber,
   formatShortDateTime,
+  formatShortTime,
 } from '@/i18n/format'
 
 export const walletTransactionTypeSchema = z.enum([
@@ -192,6 +193,10 @@ export function formatWalletCompactCount(value: number, locale: string) {
 
 export function formatWalletDateTime(value: string, locale: string) {
   return formatShortDateTime(value, locale)
+}
+
+export function formatWalletTime(value: string, locale: string) {
+  return formatShortTime(value, locale)
 }
 
 export function formatWalletLongDate(value: string, locale: string) {

@@ -24,6 +24,7 @@ export const appQueryKeys = {
 export const appMutationKeys = {
   profile: {
     completeSetup: () => ['profile', 'complete-setup'] as const,
+    deleteAccount: () => ['profile', 'delete-account'] as const,
     updatePayments: () => ['profile', 'update-payments'] as const,
     updatePersonal: () => ['profile', 'update-personal'] as const,
     updatePreferences: () => ['profile', 'update-preferences'] as const,

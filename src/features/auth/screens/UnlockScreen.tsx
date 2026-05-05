@@ -3,8 +3,9 @@ import { Animated, Easing, useWindowDimensions } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Delete, Fingerprint, X } from '@tamagui/lucide-icons'
 import { useTranslation } from 'react-i18next'
-import { Button, Paragraph, Text, XStack, YStack } from 'tamagui'
+import { Button, Text, XStack, YStack } from 'tamagui'
 import { PrimaryButton, ScreenContainer, SurfaceCard } from '@/components/ui'
+import { useBiometricHardwareAvailability } from '@/features/auth/biometrics'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { APP_PIN_LENGTH } from '@/features/auth/pin'
 import { authRoutes } from '@/features/auth/routes'
@@ -71,6 +72,7 @@ export default function UnlockScreen() {
     unlockWithBiometrics,
     unlockWithPin,
   } = useAuthSession()
+  const hasBiometricHardware = useBiometricHardwareAvailability()
   const { fontScale, height, width } = useWindowDimensions()
   const lastAutoPromptedLockRevisionRef = useRef<number | null>(null)
   const pinValueRef = useRef('')
@@ -98,10 +100,16 @@ export default function UnlockScreen() {
   const cardPadding = isVeryShortHeight ? '$4' : '$5'
   const titleSize = isVeryShortHeight || isCompactWidth ? 24 : 28
   const cardMaxWidth = Math.min(width - 32, 360)
+  const hasPinBlockingError =
+    unlockError?.kind === 'pin' &&
+    (unlockError.reason === 'not-configured' ||
+      unlockError.reason === 'too-many-attempts')
   const currentErrorMessage = unlockError
     ? unlockError.kind === 'biometric'
       ? getUnlockErrorMessage(unlockError.reason, t)
-      : getPinUnlockErrorMessage(unlockError.reason, t)
+      : hasPinBlockingError
+        ? getPinUnlockErrorMessage(unlockError.reason, t)
+        : null
     : null
   const getPinDotAccessibilityLabel = useCallback(
     (index: number, filled: boolean, isError: boolean) => {
@@ -126,11 +134,6 @@ export default function UnlockScreen() {
     },
     [t],
   )
-  const hasPinBlockingError =
-    unlockError?.kind === 'pin' &&
-    (unlockError.reason === 'not-configured' ||
-      unlockError.reason === 'too-many-attempts')
-
   useEffect(() => {
     if (!isLockedSession) {
       router.replace(authRoutes.index)
@@ -373,13 +376,13 @@ export default function UnlockScreen() {
             >
               {t('auth.lock.title')}
             </Text>
-            <Paragraph
+            <Text
               color="$color11"
-              size="$4"
+              fontSize={16}
               style={{ textAlign: 'center' }}
             >
               {t('auth.lock.description')}
-            </Paragraph>
+            </Text>
           </YStack>
 
           {currentErrorMessage ? (
@@ -446,14 +449,6 @@ export default function UnlockScreen() {
             gap={keypadGap}
             style={{ alignSelf: 'center', width: '100%' }}
           >
-            <Paragraph
-              color="$color11"
-              size="$3"
-              style={{ textAlign: 'center' }}
-            >
-              {t('auth.lock.pinHelper')}
-            </Paragraph>
-
             {PIN_PAD_ROWS.map((row, rowIndex) => (
               <XStack
                 gap={keypadGap}
@@ -462,6 +457,10 @@ export default function UnlockScreen() {
               >
                 {row.map((item) => {
                   if (item === 'biometric') {
+                    if (!hasBiometricHardware) {
+                      return null
+                    }
+
                     return (
                       <Button
                         accessibilityLabel={t('auth.biometricLabel')}

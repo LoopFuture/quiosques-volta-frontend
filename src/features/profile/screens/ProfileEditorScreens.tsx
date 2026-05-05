@@ -1,5 +1,6 @@
 export { ProfileAlertsScreen } from './ProfileAlertsScreen'
 export { ProfileAppSettingsScreen } from './ProfileAppSettingsScreen'
+export { ProfileDeleteAccountScreen } from './ProfileDeleteAccountScreen'
 export { ProfilePaymentsScreen } from './ProfilePaymentsScreen'
 export { ProfilePersonalScreen } from './ProfilePersonalScreen'
 export { ProfilePrivacyScreen } from './ProfilePrivacyScreen'
