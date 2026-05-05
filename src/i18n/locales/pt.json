@@ -755,7 +755,7 @@
           "filteredEmptyStateAction": "Ver todos os movimentos",
           "filteredEmptyStateDescription": "Experimenta outro filtro para veres o resto do histórico da carteira.",
           "filteredEmptyStateTitle": "Este filtro não tem movimentos",
-          "title": "Histórico completo"
+          "title": "Histórico"
         },
         "list": {
           "transferCancelledTitle": "Transferência cancelada",
@@ -776,7 +776,7 @@
             "title": "Saldo pronto a transferir"
           },
           "latestMovements": {
-            "actionLabel": "Ver histórico completo",
+            "actionLabel": "Ver histórico",
             "description": "Os teus créditos e transferências mais recentes.",
             "emptyDescription": "Quando receberes novos créditos ou pedires uma transferência, os movimentos vão aparecer aqui.",
             "emptyNoBalanceDescription": "Depois da tua próxima devolução, os créditos e as transferências vão aparecer aqui.",

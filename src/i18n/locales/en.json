@@ -748,7 +748,7 @@
           "filteredEmptyStateAction": "Show all movements",
           "filteredEmptyStateDescription": "Try another filter to see the rest of your wallet history.",
           "filteredEmptyStateTitle": "No movements match this filter",
-          "title": "Full history"
+          "title": "History"
         },
         "list": {
           "transferCancelledTitle": "Transfer cancelled",
@@ -769,7 +769,7 @@
             "title": "Balance ready to transfer"
           },
           "latestMovements": {
-            "actionLabel": "See full history",
+            "actionLabel": "See history",
             "description": "Your most recent credits and transfers.",
             "emptyDescription": "As soon as you receive new credits or request a transfer, your activity will appear here.",
             "emptyNoBalanceDescription": "After your next return, your credits and transfers will appear here.",
