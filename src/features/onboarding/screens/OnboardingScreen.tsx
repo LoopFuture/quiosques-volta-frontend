@@ -88,11 +88,6 @@ function OnboardingSlideCard({
 }) {
   const Icon = slideIconMap[slide.iconKey] as typeof QrCode
   const inputRange = [(index - 1) * width, index * width, (index + 1) * width]
-  const opacity = scrollX.interpolate({
-    extrapolate: 'clamp',
-    inputRange,
-    outputRange: [0.35, 1, 0.35],
-  })
   const scale = scrollX.interpolate({
     extrapolate: 'clamp',
     inputRange,
@@ -110,7 +105,6 @@ function OnboardingSlideCard({
         style={{
           flex: stretchToFill ? 1 : undefined,
           height: stretchToFill ? '100%' : undefined,
-          opacity,
           transform: [{ scale }],
         }}
       >
@@ -360,7 +354,7 @@ export default function OnboardingScreen({
         <Animated.FlatList
           ref={flatListRef}
           bounces={false}
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
           data={slides}
           getItemLayout={(_, index) => ({
             index,
