@@ -67,3 +67,10 @@ export function formatShortDateTime(value: string, locale: string) {
     month: 'short',
   }).format(getDate(value))
 }
+
+export function formatShortTime(value: string, locale: string) {
+  return new Intl.DateTimeFormat(getSafeLocale(locale), {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(getDate(value))
+}
