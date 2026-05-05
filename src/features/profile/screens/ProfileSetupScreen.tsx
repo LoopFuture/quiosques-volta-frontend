@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useRouter } from 'expo-router'
 import { ArrowLeft } from '@tamagui/lucide-icons'
 import { Linking, useWindowDimensions } from 'react-native'
@@ -21,7 +21,11 @@ import {
   authenticateWithAvailableBiometrics,
   useBiometricHardwareAvailability,
 } from '@/features/auth/biometrics'
-import { clearStoredAppPin, saveStoredAppPin } from '@/features/auth/pin'
+import {
+  clearStoredAppPin,
+  hasStoredAppPin,
+  saveStoredAppPin,
+} from '@/features/auth/pin'
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession'
 import { homeRoutes } from '@/features/home/routes'
 import { PushNotificationsPreferenceCard } from '@/features/notifications/components/PushNotificationsPreferenceCard'
@@ -207,9 +211,15 @@ export function ProfileSetupScreen() {
         }),
       ),
     })
+  const pinEnabled = useWatch({
+    control,
+    name: 'pinEnabled',
+  })
 
   useEffect(() => {
-    reset(getProfileSetupFormDefaultValues(defaultSnapshot))
+    reset(getProfileSetupFormDefaultValues(defaultSnapshot), {
+      keepDirtyValues: true,
+    })
   }, [defaultSnapshot, reset])
 
   useEffect(() => {
@@ -223,6 +233,57 @@ export function ProfileSetupScreen() {
 
     setValue('pushNotificationsEnabled', false)
   }, [getValues, permissionStatus, setValue])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function reconcileSecuritySettings() {
+      const resolvedHasStoredPin = await hasStoredAppPin().catch(() => false)
+
+      if (!isMounted) {
+        return
+      }
+
+      const nextBiometricsEnabled =
+        hasBiometricHardware === null
+          ? settings.biometricsEnabled
+          : settings.biometricsEnabled && hasBiometricHardware
+      const nextPinEnabled = resolvedHasStoredPin
+
+      if (getValues('biometricsEnabled') !== nextBiometricsEnabled) {
+        setValue('biometricsEnabled', nextBiometricsEnabled, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+      }
+
+      if (getValues('pinEnabled') !== nextPinEnabled) {
+        setValue('pinEnabled', nextPinEnabled, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+      }
+
+      if (
+        nextBiometricsEnabled !== settings.biometricsEnabled ||
+        nextPinEnabled !== settings.pinEnabled
+      ) {
+        setSettings({
+          ...settings,
+          biometricsEnabled: nextBiometricsEnabled,
+          pinEnabled: nextPinEnabled,
+        })
+      }
+    }
+
+    void reconcileSecuritySettings()
+
+    return () => {
+      isMounted = false
+    }
+  }, [getValues, hasBiometricHardware, setSettings, setValue, settings])
 
   const pushNotificationsCopy = {
     deniedHelper: t('tabScreens.profile.privacy.pushNotificationsDeniedHelper'),
@@ -900,7 +961,7 @@ export function ProfileSetupScreen() {
               ) : null}
               <PinPreferenceCard
                 copy={pinCopy}
-                enabled={settings.pinEnabled}
+                enabled={pinEnabled}
                 onRemovePin={() => handleRemovePin()}
                 onSavePin={handleSavePin}
                 testIDPrefix="profile-setup-pin"

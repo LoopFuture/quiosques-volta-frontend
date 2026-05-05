@@ -300,4 +300,28 @@ describe('ProfileScreen', () => {
     ).toHaveLength(1)
     expect(screen.getByText('PT50************4321')).toBeTruthy()
   })
+
+  it('hides biometric profile hub copy when the device has no biometric hardware', () => {
+    mockUseBiometricHardwareAvailability.mockReturnValue(false)
+    mockUseDevicePrivacySettings.mockReturnValue({
+      settings: {
+        biometricsEnabled: true,
+        pinEnabled: false,
+        pushNotificationsEnabled: true,
+      },
+    })
+    mockUseProfileQuery.mockReturnValue({
+      data: readyProfileStateWithPayoutAccount,
+      isError: false,
+      isPending: false,
+      isRefetching: false,
+      refetch: jest.fn(),
+    })
+
+    renderWithProvider(<ProfileScreen />)
+
+    expect(
+      screen.queryByText(i18n.t('tabScreens.profile.hub.rows.biometricsTitle')),
+    ).toBeNull()
+  })
 })

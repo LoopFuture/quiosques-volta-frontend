@@ -119,7 +119,7 @@ export default function ProfileScreen() {
 
   const hubSections = profile
     ? getProfileHubSections(t, {
-        biometricsSupported: hasBiometricHardware !== false,
+        biometricsSupported: hasBiometricHardware === true,
         deviceSettings: settings,
         languageMode,
         profile,
