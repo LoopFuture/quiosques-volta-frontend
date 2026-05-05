@@ -224,6 +224,7 @@ export default function WalletMovementsScreen() {
                       emphasis="outline"
                       fullWidth={false}
                       onPress={() => handleHistoryFilterChange('all')}
+                      style={{ alignSelf: 'center', maxWidth: '100%' }}
                       tone="neutral"
                     >
                       {t(

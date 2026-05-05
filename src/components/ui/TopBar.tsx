@@ -229,10 +229,11 @@ export function TopBar(props: TopBarProps) {
         ) : null}
         <Text
           accessibilityRole="header"
-          fontSize={isCompactWidth ? 22 : 24}
+          ellipsizeMode="tail"
+          fontSize={isCompactWidth ? 20 : 22}
           fontWeight="800"
-          lineHeight={isCompactWidth ? 28 : 30}
-          numberOfLines={prefersExpandedTextLayout ? 2 : undefined}
+          lineHeight={isCompactWidth ? 24 : 27}
+          numberOfLines={2}
           style={{ flexShrink: 1, textAlign: 'center' }}
         >
           {props.title}

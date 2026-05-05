@@ -237,12 +237,7 @@ export default function WalletScreen() {
                         i18n.language,
                       )}
                       amountTone={getWalletTransactionAmountTone(movement)}
-                      badgeLabel={
-                        movement.status === 'pending' ||
-                        movement.status === 'processing'
-                          ? getWalletMovementBadgeLabel(t, movement)
-                          : undefined
-                      }
+                      badgeLabel={getWalletMovementBadgeLabel(t, movement)}
                       badgeTone={getWalletTransactionBadgeTone(movement)}
                       framed={false}
                       icon={<WalletMovementIcon type={movement.type} />}
